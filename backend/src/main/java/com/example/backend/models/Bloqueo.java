@@ -9,12 +9,41 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+import org.springframework.stereotype.Component;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+//@AllArgsConstructor
+//@NoArgsConstructor
+@Getter
+@Setter
+@Component
 public class Bloqueo {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_bloqueo")
     private int id_bloqueo;
+    
+    @Column(name = "fecha_inicio")
     private LocalDateTime fechaInicio;
+    
+    @Column(name = "fecha_fin")
     private LocalDateTime fechaFin;
+    
+    @Column(name = "tramo_afectado")
     private Tramo tramoAfectado;
 
+    public Bloqueo() {
+
+    }
     public Bloqueo(int id_bloqueo, LocalDateTime fechaInicio, LocalDateTime fechaFin, Tramo tramoAfectado) {
         this.id_bloqueo = id_bloqueo;
         this.fechaInicio = fechaInicio;

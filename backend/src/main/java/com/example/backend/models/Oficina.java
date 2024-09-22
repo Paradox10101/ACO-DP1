@@ -6,10 +6,27 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GenerationType;
+
+@Entity
+
 public class Oficina {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_oficina")
     private int id_oficina;
+    
+    @Column(name = "fid_ubicacion")
     private int fid_ubicacion;
+
+    @Column(name = "capacidad_utilizada")
     private int capacidadUtilizada;
+
+    @Column(name = "capacidad_maxima")
     private int capacidadMaxima;
 
     public Oficina(int id_oficina, int fid_ubicacion, int capacidadUtilizada, int capacidadMaxima) {

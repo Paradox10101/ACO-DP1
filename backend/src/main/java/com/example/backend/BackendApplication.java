@@ -30,6 +30,11 @@ public class BackendApplication {
         pedidos = Pedido.cargarPedidosDesdeArchivo("backend/dataset/c.1inf54.ventas202403.txt");
         bloqueos = Bloqueo.cargarBloqueosDesdeArchivo("backend/dataset/c.1inf54.24-2.bloqueo.01.txt");
         mantenimientos = Mantenimiento.cargarMantenimientosDesdeArchivo("backend/dataset/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt");
+
+        /*
+         * Se va intentar realizar la prueba de movilizarse en ciudades cercanas
+         */
+
         System.out.println("Fin Pruebas");
 	}
 	@Bean

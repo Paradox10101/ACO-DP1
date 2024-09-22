@@ -1,6 +1,20 @@
 
 package com.example.backend.models;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 
+@Entity
 public enum EstadoVehiculo {
-    Disponible, EnRuta, EnMantenimiento, Averiado
+    @Enumerated(EnumType.STRING)
+    Disponible,
+    
+    @Enumerated(EnumType.STRING)
+    EnRuta,
+    
+    @Enumerated(EnumType.STRING)
+    EnMantenimiento,
+    
+    @Enumerated(EnumType.STRING)
+    Averiado
 }

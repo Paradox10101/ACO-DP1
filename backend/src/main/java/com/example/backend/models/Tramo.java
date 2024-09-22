@@ -7,19 +7,49 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Entity;
+@Entity
 public class Tramo {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id_ubicacion")
     private int id_tramo;
-    private Ubicacion origen;
-    private Ubicacion destino;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ubicacion_origen", nullable = false)
+    private int fid_ubicacion_origen;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ubicacion_destino", nullable = false)
+    private int fid_ubicacion_destino;
+
+    @Column(name="bloqueado")
     private boolean bloqueado;
+
+    @Column(name="distancia")
     private float distancia;
+
+    @Column(name="velocidad")
     private float velocidad;
 
-    public Tramo(int id_tramo, Ubicacion origen, Ubicacion destino, boolean bloqueado, float distancia,
+    @ManyToOne
+    @JoinColumn(name = "id_ruta")
+    private Ruta ruta;
+
+
+    public Tramo(int id_tramo, 
+            int fid_ubicacion_origen, 
+            int fid_ubicacion_destino, boolean bloqueado, float distancia,
             float velocidad) {
         this.id_tramo = id_tramo;
-        this.origen = origen;
-        this.destino = destino;
+        this.fid_ubicacion_origen = fid_ubicacion_origen;
+        this.fid_ubicacion_destino = fid_ubicacion_destino;
         this.bloqueado = bloqueado;
         this.distancia = distancia;
         this.velocidad = velocidad;
@@ -33,20 +63,20 @@ public class Tramo {
         this.id_tramo = id_tramo;
     }
 
-    public Ubicacion getOrigen() {
-        return origen;
+    public int getOrigen() {
+        return fid_ubicacion_origen;
     }
 
-    public void setOrigen(Ubicacion origen) {
-        this.origen = origen;
+    public void setOrigen(int fid_ubicacion_origen) {
+        this.fid_ubicacion_origen = fid_ubicacion_origen;
     }
 
-    public Ubicacion getDestino() {
-        return destino;
+    public int getDestino() {
+        return fid_ubicacion_destino;
     }
 
-    public void setDestino(Ubicacion destino) {
-        this.destino = destino;
+    public void setDestino(int fid_ubicacion_destino) {
+        this.fid_ubicacion_destino = fid_ubicacion_destino;
     }
 
     public boolean isBloqueado() {

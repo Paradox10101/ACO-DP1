@@ -10,13 +10,19 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
+
+import jakarta.persistence.Entity;
+
 import java.util.ArrayList;
+
+@Entity
 
 public class Mantenimiento {
     private int id_mantenimiento;
     private TipoMantenimiento tipo;
     private LocalDateTime fechaProgramada;
     private Time duracion;
+    
 
     public Mantenimiento(int id_mantenimiento, TipoMantenimiento tipo, LocalDateTime fechaProgramada, Time duracion) {
         this.id_mantenimiento = id_mantenimiento;

@@ -11,14 +11,44 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
+@Entity
 public class Pedido {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_pedido")
     private int id_pedido;
+
+    @ManyToOne
+    @JoinColumn(name = "id_almacen")
     private int fid_almacen;
+
+    @ManyToOne
+    @JoinColumn(name = "id_oficina")
     private int fid_oficinaDest;
+
+    @Column(name = "fechaEntregaReal", columnDefinition = "DATETIME")
     private LocalDateTime fechaEntregaReal;
+
+    @Column(name = "fechaEntregaEstimada", columnDefinition = "DATETIME")
     private LocalDateTime fechaEntregaEstimada;
+
+    @Enumerated(EnumType.STRING)
     private EstadoPedido estado;
+
+    @Column(name = "cantidadPaquetes")
     private int cantidadPaquetes;
+
+    @Column(name = "codigoSeguridad")
     private String codigoSeguridad;
 
     public Pedido(int id_pedido, int fid_almacen, int fid_oficinaDest, LocalDateTime fechaEntregaReal,
@@ -97,7 +127,7 @@ public class Pedido {
         this.codigoSeguridad = codigoSeguridad;
     }
 
-    public static ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo) {
+    public static ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo) { //esto va ir en otra parte <---
         ArrayList<Pedido> pedidos = new ArrayList<>();
 
         try {
