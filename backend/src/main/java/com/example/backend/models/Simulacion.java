@@ -2,7 +2,9 @@
 package com.example.backend.models;
 
 import java.time.LocalDateTime;
+import jakarta.persistence.Table;
 
+@Table(name="Simulacion")
 public class Simulacion {
     private int id_simulacion;
     private TipoSimulacion tipo;

@@ -12,19 +12,26 @@ import java.util.ArrayList;
 import org.springframework.stereotype.Component;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import jakarta.persistence.Table;
+import jakarta.persistence.OneToOne;
 
 //@AllArgsConstructor
 //@NoArgsConstructor
-@Getter
-@Setter
-@Component
+/*@Getter
+@Setter*/
+//@Component
+@Entity
+@Table(name="Bloqueo")
 public class Bloqueo {
 
     @Id
@@ -38,17 +45,18 @@ public class Bloqueo {
     @Column(name = "fecha_fin")
     private LocalDateTime fechaFin;
     
-    @Column(name = "tramo_afectado")
-    private Tramo tramoAfectado;
+    @OneToOne
+    @JoinColumn(name = "id_tramo", nullable = false)
+    private int fid_tramoAfectado;
 
     public Bloqueo() {
 
     }
-    public Bloqueo(int id_bloqueo, LocalDateTime fechaInicio, LocalDateTime fechaFin, Tramo tramoAfectado) {
+    public Bloqueo(int id_bloqueo, LocalDateTime fechaInicio, LocalDateTime fechaFin, int fid_tramoAfectado) {
         this.id_bloqueo = id_bloqueo;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
-        this.tramoAfectado = tramoAfectado;
+        this.fid_tramoAfectado = fid_tramoAfectado;
     }
 
     public int getId_bloqueo() {
@@ -75,12 +83,12 @@ public class Bloqueo {
         this.fechaFin = fechaFin;
     }
 
-    public Tramo getTramoAfectado() {
-        return tramoAfectado;
+    public int getFidTramoAfectado() {
+        return fid_tramoAfectado;
     }
 
-    public void setTramoAfectado(Tramo tramoAfectado) {
-        this.tramoAfectado = tramoAfectado;
+    public void setFidTramoAfectado(int fid_tramoAfectado) {
+        this.fid_tramoAfectado = fid_tramoAfectado;
     }
 
     public static ArrayList<Bloqueo> cargarBloqueosDesdeArchivo(String rutaArchivo) {

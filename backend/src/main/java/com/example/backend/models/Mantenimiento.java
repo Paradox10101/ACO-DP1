@@ -10,14 +10,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
-
 import jakarta.persistence.Entity;
-
 import java.util.ArrayList;
+import jakarta.persistence.Table;
 
 @Entity
-
+@Table(name="Mantenimiento")
 public class Mantenimiento {
+    
     private int id_mantenimiento;
     private TipoMantenimiento tipo;
     private LocalDateTime fechaProgramada;

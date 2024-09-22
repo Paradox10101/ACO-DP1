@@ -7,9 +7,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name="Paquete")
 public class Paquete {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_paquete")

@@ -13,13 +13,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name="Ruta")
 public class Ruta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_ruta")
-    private int id_ruta;
+    private Long id_ruta;
 
     @ManyToOne
     @JoinColumn(name = "id_vehiculo", nullable = false)
@@ -48,7 +50,8 @@ public class Ruta {
     public Ruta() {
     }
 
-    public Ruta(int id_ruta, int fid_vehiculo, float distanciaTotal, 
+    public Ruta(
+            Long id_ruta, int fid_vehiculo, float distanciaTotal, 
             int id_ubicacion_origen, 
             int id_ubicacion_destino,
             LocalDateTime fechaInicio, LocalDateTime fechaFin) {
@@ -61,11 +64,11 @@ public class Ruta {
         this.fechaFin = fechaFin;
     }
 
-    public int getId_ruta() {
+    public Long getId_ruta() {
         return id_ruta;
     }
 
-    public void setId_ruta(int id_ruta) {
+    public void setId_ruta(Long id_ruta) {
         this.id_ruta = id_ruta;
     }
 
@@ -110,5 +113,12 @@ public class Ruta {
         this.fechaInicio = fechaInicio;
     }
 
+    public LocalDateTime getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(LocalDateTime fechaFin) {
+        this.fechaFin = fechaFin;
+    }
 
 }
