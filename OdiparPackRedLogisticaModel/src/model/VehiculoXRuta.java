@@ -2,8 +2,8 @@
 package com.example.backend.models;
 
 public class VehiculoXRuta {
-    private long id_vehiculoXRuta;
-    private long fid_camion;
-    private long fid_ruta;
+    private Long id_vehiculoXRuta;
+    private Long fid_camion;
+    private Long fid_ruta;
     private float distanciaRecorrida;
 }

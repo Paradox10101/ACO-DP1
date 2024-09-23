@@ -37,7 +37,7 @@ public class Bloqueo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_bloqueo")
-    private long id_bloqueo;
+    private Long id_bloqueo;
 
     @Column(name = "fecha_inicio")
     private LocalDateTime fechaInicio;
@@ -47,24 +47,24 @@ public class Bloqueo {
 
     @OneToOne
     @JoinColumn(name = "id_tramo", nullable = false)
-    private long fid_tramoAfectado;
+    private Long fid_tramoAfectado;
 
     public Bloqueo() {
 
     }
 
-    public Bloqueo(long id_bloqueo, LocalDateTime fechaInicio, LocalDateTime fechaFin, long fid_tramoAfectado) {
+    public Bloqueo(Long id_bloqueo, LocalDateTime fechaInicio, LocalDateTime fechaFin, Long fid_tramoAfectado) {
         this.id_bloqueo = id_bloqueo;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.fid_tramoAfectado = fid_tramoAfectado;
     }
 
-    public long getId_bloqueo() {
+    public Long getId_bloqueo() {
         return id_bloqueo;
     }
 
-    public void setId_bloqueo(long id_bloqueo) {
+    public void setId_bloqueo(Long id_bloqueo) {
         this.id_bloqueo = id_bloqueo;
     }
 
@@ -84,11 +84,11 @@ public class Bloqueo {
         this.fechaFin = fechaFin;
     }
 
-    public long getFidTramoAfectado() {
+    public Long getFidTramoAfectado() {
         return fid_tramoAfectado;
     }
 
-    public void setFidTramoAfectado(long fid_tramoAfectado) {
+    public void setFidTramoAfectado(Long fid_tramoAfectado) {
         this.fid_tramoAfectado = fid_tramoAfectado;
     }
 

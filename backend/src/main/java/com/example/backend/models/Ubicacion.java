@@ -17,7 +17,7 @@ public class Ubicacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_ubicacion")
-    private long id_ubicacion;
+    private Long id_ubicacion;
 
     @Column(name = "coordenada")
     private String coordenada;

@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -21,16 +22,16 @@ import jakarta.persistence.Table;
 public class Tramo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_ubicacion")
-    private long id_tramo;
+    @Column(name = "id_tramo")
+    private Long id_tramo;
 
     @ManyToOne
     @JoinColumn(name = "id_ubicacion_origen", nullable = false)
-    private long fid_ubicacion_origen;
+    private Long fid_ubicacion_origen;
 
     @ManyToOne
     @JoinColumn(name = "id_ubicacion_destino", nullable = false)
-    private long fid_ubicacion_destino;
+    private Long fid_ubicacion_destino;
 
     @Column(name = "bloqueado")
     private boolean bloqueado;
@@ -41,13 +42,22 @@ public class Tramo {
     @Column(name = "velocidad")
     private float velocidad;
 
-    @ManyToOne
-    @JoinColumn(name = "id_ruta")
-    private Ruta ruta;
+    @Column(name = "fechaInicio")
+    private LocalDateTime fechaInicio;
 
-    public Tramo(long id_tramo,
-            long fid_ubicacion_origen,
-            long fid_ubicacion_destino, boolean bloqueado, float distancia,
+    @Column(name = "fechaFin")
+    private LocalDateTime fechaFin;
+
+    @Column(name = "capacidadActual")
+    private int capacidadActual;
+
+    @ManyToOne
+    @JoinColumn(name = "id_vehiculoXTramo", nullable = false)
+    private Long fid_vehiculoXTramo;
+
+    public Tramo(Long id_tramo,
+            Long fid_ubicacion_origen,
+            Long fid_ubicacion_destino, boolean bloqueado, float distancia,
             float velocidad) {
         this.id_tramo = id_tramo;
         this.fid_ubicacion_origen = fid_ubicacion_origen;
@@ -57,27 +67,27 @@ public class Tramo {
         this.velocidad = velocidad;
     }
 
-    public long getId_tramo() {
+    public Long getId_tramo() {
         return id_tramo;
     }
 
-    public void setId_tramo(long id_tramo) {
+    public void setId_tramo(Long id_tramo) {
         this.id_tramo = id_tramo;
     }
 
-    public long getOrigen() {
+    public Long getOrigen() {
         return fid_ubicacion_origen;
     }
 
-    public void setOrigen(long fid_ubicacion_origen) {
+    public void setOrigen(Long fid_ubicacion_origen) {
         this.fid_ubicacion_origen = fid_ubicacion_origen;
     }
 
-    public long getDestino() {
+    public Long getDestino() {
         return fid_ubicacion_destino;
     }
 
-    public void setDestino(long fid_ubicacion_destino) {
+    public void setDestino(Long fid_ubicacion_destino) {
         this.fid_ubicacion_destino = fid_ubicacion_destino;
     }
 
@@ -103,6 +113,30 @@ public class Tramo {
 
     public void setVelocidad(float velocidad) {
         this.velocidad = velocidad;
+    }
+
+    public LocalDateTime getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setVelocidad(LocalDateTime fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public LocalDateTime getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(LocalDateTime fechaFin) {
+        this.fechaFin = fechaFin;
+    }
+
+    public int getCapacidadActual() {
+        return capacidadActual;
+    }
+
+    public void setCapacidadActual(int capacidadActual) {
+        this.capacidadActual = capacidadActual;
     }
 
     public static ArrayList<Tramo> cargarTramosDesdeArchivo(String rutaArchivo) {

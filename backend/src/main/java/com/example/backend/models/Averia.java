@@ -14,7 +14,7 @@ public class Averia {
 
     @Id
     @Column(name = "id_almacen")
-    private long id_averia;
+    private Long id_averia;
 
     @Column(name = "tipo")
     private TipoAveria tipo;

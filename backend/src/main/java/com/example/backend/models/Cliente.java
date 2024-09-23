@@ -20,7 +20,7 @@ public class Cliente {
 
     @Id
     @GeneratedValue
-    private long id_cliente;
+    private Long id_cliente;
 
     @Column(nullable = false)
     private String codigo;

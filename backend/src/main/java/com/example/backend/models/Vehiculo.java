@@ -21,10 +21,10 @@ public class Vehiculo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_vehiculo")
-    private long id_vehiculo;
+    private Long id_vehiculo;
 
     @Column(name = "id_plan_transporte")
-    private long id_plan_transporte;
+    private Long id_plan_transporte;
 
     @ManyToOne
     @JoinColumn(name = "id_almacen")
@@ -35,9 +35,6 @@ public class Vehiculo {
 
     @Column(name = "fecha_llegada")
     private LocalDateTime fechaLlegada;
-
-    @Column(name = "capacidad_actual")
-    private int capacidadActual;
 
     @Column(name = "capacidad_maxima")
     private int capacidadMaxima;

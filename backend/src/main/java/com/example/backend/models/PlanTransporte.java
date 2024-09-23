@@ -22,7 +22,11 @@ public class PlanTransporte {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_planTransporte")
-    private long id_planTransporte;
+    private Long id_planTransporte;
+
+    @ManyToOne
+    @JoinColumn(name = "id_pedido")
+    private Long fid_pedido;
 
     @OneToMany(mappedBy = "planTransporte", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ArrayList<Vehiculo> vehiculos;
@@ -35,9 +39,13 @@ public class PlanTransporte {
 
     @ManyToOne
     @JoinColumn(name = "id_ubicacion")
-    private long fid_origen;
+    private Long fid_origen;
 
     @ManyToOne
     @JoinColumn(name = "id_ubicacion")
-    private long fid_destino;
+    private Long fid_destino;
+
+    @OneToMany(mappedBy = "planTransporte", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ArrayList<Tramo> tramos;
+
 }

@@ -26,18 +26,18 @@ public class Ruta {
 
     @ManyToOne
     @JoinColumn(name = "id_vehiculo", nullable = false)
-    private long fid_vehiculo;
+    private Long fid_vehiculo;
 
     @Column(name = "distancia_total")
     private float distanciaTotal;
 
     @ManyToOne
     @JoinColumn(name = "id_ubicacion", nullable = false)
-    private long fid_ubicacion_origen;
+    private Long fid_ubicacion_origen;
 
     @ManyToOne
     @JoinColumn(name = "id_ubicacion", nullable = false)
-    private long fid_ubicacion_destino;
+    private Long fid_ubicacion_destino;
 
     @Column(name = "fechaInicio", columnDefinition = "DATETIME")
     private LocalDateTime fechaInicio;
@@ -52,9 +52,9 @@ public class Ruta {
     }
 
     public Ruta(
-            Long id_ruta, long fid_vehiculo, float distanciaTotal,
-            long id_ubicacion_origen,
-            long id_ubicacion_destino,
+            Long id_ruta, Long fid_vehiculo, float distanciaTotal,
+            Long id_ubicacion_origen,
+            Long id_ubicacion_destino,
             LocalDateTime fechaInicio, LocalDateTime fechaFin) {
         this.id_ruta = id_ruta;
         this.fid_vehiculo = fid_vehiculo;
@@ -73,11 +73,11 @@ public class Ruta {
         this.id_ruta = id_ruta;
     }
 
-    public long getFid_vehiculo() {
+    public Long getFid_vehiculo() {
         return fid_vehiculo;
     }
 
-    public void setFid_vehiculo(long fid_vehiculo) {
+    public void setFid_vehiculo(Long fid_vehiculo) {
         this.fid_vehiculo = fid_vehiculo;
     }
 
@@ -89,19 +89,19 @@ public class Ruta {
         this.distanciaTotal = distanciaTotal;
     }
 
-    public long getOrigen() {
+    public Long getOrigen() {
         return fid_ubicacion_origen;
     }
 
-    public void setOrigen(long fid_ubicacion_origen) {
+    public void setOrigen(Long fid_ubicacion_origen) {
         this.fid_ubicacion_origen = fid_ubicacion_origen;
     }
 
-    public long getDestino() {
+    public Long getDestino() {
         return fid_ubicacion_destino;
     }
 
-    public void setDestino(long fid_ubicacion_destino) {
+    public void setDestino(Long fid_ubicacion_destino) {
         this.fid_ubicacion_destino = fid_ubicacion_destino;
     }
 

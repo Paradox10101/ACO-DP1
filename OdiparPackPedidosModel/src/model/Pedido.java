@@ -4,9 +4,9 @@ package com.example.backend.models;
 import java.time.LocalDateTime;
 
 public class Pedido {
-    private long id_pedido;
-    private long fid_almacen;
-    private long fid_oficinaDest;
+    private Long id_pedido;
+    private Long fid_almacen;
+    private Long fid_oficinaDest;
     private LocalDateTime fechaEntregaReal;
     private LocalDateTime fechaEntregaEstimada;
     private EstadoPedido estado;

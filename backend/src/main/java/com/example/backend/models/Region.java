@@ -15,7 +15,7 @@ public class Region {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_region")
-    private long id_region;
+    private Long id_region;
 
     @Column(name = "nombre")
     private String nombre;

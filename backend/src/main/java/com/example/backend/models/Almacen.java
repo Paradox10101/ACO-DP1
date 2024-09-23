@@ -15,33 +15,33 @@ public class Almacen {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_almacen")
-    private long id_almacen;
+    private Long id_almacen;
 
     @Column(name = "fid_ubicacion")
-    private long fid_ubicacion;
+    private Long fid_ubicacion;
 
     @Column(name = "cantidad_camiones")
     private int cantidadCamiones;
 
-    public Almacen(long id_almacen, long fid_ubicacion, int cantidadCamiones) {
+    public Almacen(Long id_almacen, Long fid_ubicacion, int cantidadCamiones) {
         this.id_almacen = id_almacen;
         this.fid_ubicacion = fid_ubicacion;
         this.cantidadCamiones = cantidadCamiones;
     }
 
-    public long getId_almacen() {
+    public Long getId_almacen() {
         return id_almacen;
     }
 
-    public void setId_almacen(long id_almacen) {
+    public void setId_almacen(Long id_almacen) {
         this.id_almacen = id_almacen;
     }
 
-    public long getFid_ubicacion() {
+    public Long getFid_ubicacion() {
         return fid_ubicacion;
     }
 
-    public void setFid_ubicacion(long fid_ubicacion) {
+    public void setFid_ubicacion(Long fid_ubicacion) {
         this.fid_ubicacion = fid_ubicacion;
     }
 

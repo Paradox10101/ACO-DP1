@@ -21,10 +21,10 @@ public class Oficina {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_oficina")
-    private long id_oficina;
+    private Long id_oficina;
 
     @Column(name = "fid_ubicacion")
-    private long fid_ubicacion;
+    private Long fid_ubicacion;
 
     @Column(name = "capacidad_utilizada")
     private int capacidadUtilizada;
@@ -32,26 +32,26 @@ public class Oficina {
     @Column(name = "capacidad_maxima")
     private int capacidadMaxima;
 
-    public Oficina(long id_oficina, long fid_ubicacion, int capacidadUtilizada, int capacidadMaxima) {
+    public Oficina(Long id_oficina, Long fid_ubicacion, int capacidadUtilizada, int capacidadMaxima) {
         this.id_oficina = id_oficina;
         this.fid_ubicacion = fid_ubicacion;
         this.capacidadUtilizada = capacidadUtilizada;
         this.capacidadMaxima = capacidadMaxima;
     }
 
-    public long getId_oficina() {
+    public Long getId_oficina() {
         return id_oficina;
     }
 
-    public void setId_oficina(long id_oficina) {
+    public void setId_oficina(Long id_oficina) {
         this.id_oficina = id_oficina;
     }
 
-    public long getFid_ubicacion() {
+    public Long getFid_ubicacion() {
         return fid_ubicacion;
     }
 
-    public void setFid_ubicacion(long fid_ubicacion) {
+    public void setFid_ubicacion(Long fid_ubicacion) {
         this.fid_ubicacion = fid_ubicacion;
     }
 
@@ -83,9 +83,9 @@ public class Oficina {
                     String ciudadOrigen = valores[1];
                     String ciudadDestino = valores[2];
                     Float latitud = Float.parseFloat(valores[3]);
-                    Float longitud = Float.parseFloat(valores[4]);
+                    Float Longitud = Float.parseFloat(valores[4]);
                     String region = valores[5];
-                    long id_almacen = Integer.parseInt(valores[6]);
+                    //Long id_almacen = Integer.parseInt(valores[6]);
 
                     System.out.println(linea);
                 }

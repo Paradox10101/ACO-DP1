@@ -4,7 +4,7 @@ package com.example.backend.models;
 import java.time.LocalDateTime;
 
 public class Simulacion {
-    private long id_simulacion;
+    private Long id_simulacion;
     private TipoSimulacion tipo;
     private LocalDateTime fechaInicioRealSimulacion;
     private LocalDateTime fechaInicioSimulacion;

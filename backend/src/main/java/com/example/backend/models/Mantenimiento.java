@@ -18,23 +18,23 @@ import jakarta.persistence.Table;
 @Table(name = "Mantenimiento")
 public class Mantenimiento {
 
-    private long id_mantenimiento;
+    private Long id_mantenimiento;
     private TipoMantenimiento tipo;
     private LocalDateTime fechaProgramada;
     private Time duracion;
 
-    public Mantenimiento(long id_mantenimiento, TipoMantenimiento tipo, LocalDateTime fechaProgramada, Time duracion) {
+    public Mantenimiento(Long id_mantenimiento, TipoMantenimiento tipo, LocalDateTime fechaProgramada, Time duracion) {
         this.id_mantenimiento = id_mantenimiento;
         this.tipo = tipo;
         this.fechaProgramada = fechaProgramada;
         this.duracion = duracion;
     }
 
-    public long getId_mantenimiento() {
+    public Long getId_mantenimiento() {
         return id_mantenimiento;
     }
 
-    public void setId_mantenimiento(long id_mantenimiento) {
+    public void setId_mantenimiento(Long id_mantenimiento) {
         this.id_mantenimiento = id_mantenimiento;
     }
 

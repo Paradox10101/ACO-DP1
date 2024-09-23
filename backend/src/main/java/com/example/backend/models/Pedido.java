@@ -29,15 +29,15 @@ public class Pedido {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_pedido")
-    private long id_pedido;
+    private Long id_pedido;
 
     @ManyToOne
     @JoinColumn(name = "id_almacen")
-    private long fid_almacen;
+    private Long fid_almacen;
 
     @ManyToOne
     @JoinColumn(name = "id_oficina")
-    private long fid_oficinaDest;
+    private Long fid_oficinaDest;
 
     @Column(name = "fechaEntregaReal", columnDefinition = "DATETIME")
     private LocalDateTime fechaEntregaReal;
@@ -54,7 +54,7 @@ public class Pedido {
     @Column(name = "codigoSeguridad")
     private String codigoSeguridad;
 
-    public Pedido(long id_pedido, long fid_almacen, long fid_oficinaDest, LocalDateTime fechaEntregaReal,
+    public Pedido(Long id_pedido, Long fid_almacen, Long fid_oficinaDest, LocalDateTime fechaEntregaReal,
             LocalDateTime fechaEntregaEstimada, EstadoPedido estado, int cantidadPaquetes, String codigoSeguridad) {
         this.id_pedido = id_pedido;
         this.fid_almacen = fid_almacen;
@@ -70,7 +70,7 @@ public class Pedido {
         return id_pedido;
     }
 
-    public void setId_pedido(long id_pedido) {
+    public void setId_pedido(Long id_pedido) {
         this.id_pedido = id_pedido;
     }
 
@@ -78,7 +78,7 @@ public class Pedido {
         return fid_almacen;
     }
 
-    public void setFid_almacen(long fid_almacen) {
+    public void setFid_almacen(Long fid_almacen) {
         this.fid_almacen = fid_almacen;
     }
 
@@ -86,7 +86,7 @@ public class Pedido {
         return fid_oficinaDest;
     }
 
-    public void setFid_oficinaDest(long fid_oficinaDest) {
+    public void setFid_oficinaDest(Long fid_oficinaDest) {
         this.fid_oficinaDest = fid_oficinaDest;
     }
 
