@@ -11,20 +11,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Ubicacion")
+@Table(name = "Ubicacion")
 public class Ubicacion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id_ubicacion")
-    private int id_ubicacion;
+    @Column(name = "id_ubicacion")
+    private long id_ubicacion;
 
-    @Column(name="coordenada")
+    @Column(name = "coordenada")
     private String coordenada;
 
-    @Column(name="ciudad")
+    @Column(name = "ciudad")
     private String ciudad;
 
     @ManyToOne
-    @JoinColumn(name="id_region")
+    @JoinColumn(name = "id_region")
     private Region region;
 }

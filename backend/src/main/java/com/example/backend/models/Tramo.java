@@ -17,38 +17,37 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Tramo")
+@Table(name = "Tramo")
 public class Tramo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id_ubicacion")
-    private int id_tramo;
+    @Column(name = "id_ubicacion")
+    private long id_tramo;
 
     @ManyToOne
     @JoinColumn(name = "id_ubicacion_origen", nullable = false)
-    private int fid_ubicacion_origen;
+    private long fid_ubicacion_origen;
 
     @ManyToOne
     @JoinColumn(name = "id_ubicacion_destino", nullable = false)
-    private int fid_ubicacion_destino;
+    private long fid_ubicacion_destino;
 
-    @Column(name="bloqueado")
+    @Column(name = "bloqueado")
     private boolean bloqueado;
 
-    @Column(name="distancia")
+    @Column(name = "distancia")
     private float distancia;
 
-    @Column(name="velocidad")
+    @Column(name = "velocidad")
     private float velocidad;
 
     @ManyToOne
     @JoinColumn(name = "id_ruta")
     private Ruta ruta;
 
-
-    public Tramo(int id_tramo, 
-            int fid_ubicacion_origen, 
-            int fid_ubicacion_destino, boolean bloqueado, float distancia,
+    public Tramo(long id_tramo,
+            long fid_ubicacion_origen,
+            long fid_ubicacion_destino, boolean bloqueado, float distancia,
             float velocidad) {
         this.id_tramo = id_tramo;
         this.fid_ubicacion_origen = fid_ubicacion_origen;
@@ -58,27 +57,27 @@ public class Tramo {
         this.velocidad = velocidad;
     }
 
-    public int getId_tramo() {
+    public long getId_tramo() {
         return id_tramo;
     }
 
-    public void setId_tramo(int id_tramo) {
+    public void setId_tramo(long id_tramo) {
         this.id_tramo = id_tramo;
     }
 
-    public int getOrigen() {
+    public long getOrigen() {
         return fid_ubicacion_origen;
     }
 
-    public void setOrigen(int fid_ubicacion_origen) {
+    public void setOrigen(long fid_ubicacion_origen) {
         this.fid_ubicacion_origen = fid_ubicacion_origen;
     }
 
-    public int getDestino() {
+    public long getDestino() {
         return fid_ubicacion_destino;
     }
 
-    public void setDestino(int fid_ubicacion_destino) {
+    public void setDestino(long fid_ubicacion_destino) {
         this.fid_ubicacion_destino = fid_ubicacion_destino;
     }
 

@@ -23,21 +23,21 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Pedido")
+@Table(name = "Pedido")
 public class Pedido {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_pedido")
-    private int id_pedido;
+    private long id_pedido;
 
     @ManyToOne
     @JoinColumn(name = "id_almacen")
-    private int fid_almacen;
+    private long fid_almacen;
 
     @ManyToOne
     @JoinColumn(name = "id_oficina")
-    private int fid_oficinaDest;
+    private long fid_oficinaDest;
 
     @Column(name = "fechaEntregaReal", columnDefinition = "DATETIME")
     private LocalDateTime fechaEntregaReal;
@@ -54,7 +54,7 @@ public class Pedido {
     @Column(name = "codigoSeguridad")
     private String codigoSeguridad;
 
-    public Pedido(int id_pedido, int fid_almacen, int fid_oficinaDest, LocalDateTime fechaEntregaReal,
+    public Pedido(long id_pedido, long fid_almacen, long fid_oficinaDest, LocalDateTime fechaEntregaReal,
             LocalDateTime fechaEntregaEstimada, EstadoPedido estado, int cantidadPaquetes, String codigoSeguridad) {
         this.id_pedido = id_pedido;
         this.fid_almacen = fid_almacen;
@@ -66,27 +66,27 @@ public class Pedido {
         this.codigoSeguridad = codigoSeguridad;
     }
 
-    public int getId_pedido() {
+    public Long getId_pedido() {
         return id_pedido;
     }
 
-    public void setId_pedido(int id_pedido) {
+    public void setId_pedido(long id_pedido) {
         this.id_pedido = id_pedido;
     }
 
-    public int getFid_almacen() {
+    public Long getFid_almacen() {
         return fid_almacen;
     }
 
-    public void setFid_almacen(int fid_almacen) {
+    public void setFid_almacen(long fid_almacen) {
         this.fid_almacen = fid_almacen;
     }
 
-    public int getFid_oficinaDest() {
+    public Long getFid_oficinaDest() {
         return fid_oficinaDest;
     }
 
-    public void setFid_oficinaDest(int fid_oficinaDest) {
+    public void setFid_oficinaDest(long fid_oficinaDest) {
         this.fid_oficinaDest = fid_oficinaDest;
     }
 
@@ -130,7 +130,7 @@ public class Pedido {
         this.codigoSeguridad = codigoSeguridad;
     }
 
-    public static ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo) { //esto va ir en otra parte <---
+    public static ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo) { // esto va ir en otra parte <---
         ArrayList<Pedido> pedidos = new ArrayList<>();
 
         try {

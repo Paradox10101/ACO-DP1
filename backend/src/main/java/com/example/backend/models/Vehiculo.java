@@ -15,42 +15,41 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Vehiculo")
+@Table(name = "Vehiculo")
 public class Vehiculo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id_vehiculo")
-    private int id_vehiculo;
+    @Column(name = "id_vehiculo")
+    private long id_vehiculo;
 
-    @Column(name="id_plan_transporte")
-    private int id_plan_transporte;
+    @Column(name = "id_plan_transporte")
+    private long id_plan_transporte;
 
     @ManyToOne
-    @JoinColumn(name="id_almacen")
-    private Almacen almacen;
-    
-    @Column(name="fecha_salida")
+    @JoinColumn(name = "id_almacen")
+    private int fidAlmacen;
+
+    @Column(name = "fecha_salida")
     private LocalDateTime fechaSalida;
 
-    @Column(name="fecha_llegada")
+    @Column(name = "fecha_llegada")
     private LocalDateTime fechaLlegada;
-    
-    @Column(name="capacidad_actual")
+
+    @Column(name = "capacidad_actual")
     private int capacidadActual;
-    
-    @Column(name="capacidad_maxima")
+
+    @Column(name = "capacidad_maxima")
     private int capacidadMaxima;
-    
-    @Column(name="estado")
+
+    @Column(name = "estado")
     private EstadoVehiculo estado;
 
-    
     private ArrayList<Mantenimiento> mantenimientos;
-    
-    
+
     private ArrayList<Averia> averias;
-    
-    @Column(name="distancia_total")
+
+    @Column(name = "distancia_total")
     private float distanciaTotal;
 
 }

@@ -9,39 +9,39 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Almacen")
+@Table(name = "Almacen")
 public class Almacen {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_almacen")
-    private int id_almacen;
+    private long id_almacen;
 
     @Column(name = "fid_ubicacion")
-    private int fid_ubicacion;
+    private long fid_ubicacion;
 
     @Column(name = "cantidad_camiones")
     private int cantidadCamiones;
 
-    public Almacen(int id_almacen, int fid_ubicacion, int cantidadCamiones) {
+    public Almacen(long id_almacen, long fid_ubicacion, int cantidadCamiones) {
         this.id_almacen = id_almacen;
         this.fid_ubicacion = fid_ubicacion;
         this.cantidadCamiones = cantidadCamiones;
     }
 
-    public int getId_almacen() {
+    public long getId_almacen() {
         return id_almacen;
     }
 
-    public void setId_almacen(int id_almacen) {
+    public void setId_almacen(long id_almacen) {
         this.id_almacen = id_almacen;
     }
 
-    public int getFid_ubicacion() {
+    public long getFid_ubicacion() {
         return fid_ubicacion;
     }
 
-    public void setFid_ubicacion(int fid_ubicacion) {
+    public void setFid_ubicacion(long fid_ubicacion) {
         this.fid_ubicacion = fid_ubicacion;
     }
 

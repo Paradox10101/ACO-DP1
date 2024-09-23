@@ -9,12 +9,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Region")
+@Table(name = "Region")
 public class Region {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_region")
-    private int id_region;
+    private long id_region;
 
     @Column(name = "nombre")
     private String nombre;

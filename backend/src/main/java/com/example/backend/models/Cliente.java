@@ -13,14 +13,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-@Entity //estas cosas siempre se debe colocar
-@Table(name="Cliente")
+
+@Entity // estas cosas siempre se debe colocar
+@Table(name = "Cliente")
 public class Cliente {
-    
+
     @Id
     @GeneratedValue
-    private int id_cliente;
-    
+    private long id_cliente;
+
     @Column(nullable = false)
     private String codigo;
     private String nombres;

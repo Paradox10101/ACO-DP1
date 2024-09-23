@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Ruta {
-    private int id_ruta;
-    private int fid_camion;
+    private long id_ruta;
+    private long fid_camion;
     private float distanciaTotal;
     private Ubicacion origen;
     private Ubicacion destino;

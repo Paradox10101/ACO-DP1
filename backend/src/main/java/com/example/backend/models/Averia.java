@@ -9,19 +9,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Averia")
+@Table(name = "Averia")
 public class Averia {
-    
+
     @Id
     @Column(name = "id_almacen")
-    private int id_averia;
-    
+    private long id_averia;
+
     @Column(name = "tipo")
     private TipoAveria tipo;
-    
+
     @Column(name = "fecha_inicio")
     private LocalDateTime fechaInicio;
-    
+
     @Column(name = "fecha_fin")
     private LocalDateTime fechaFin;
 }

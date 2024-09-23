@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Vehiculo {
-    private int id_vehiculo;
-    private int id_plan_transporte;
+    private long id_vehiculo;
+    private long id_plan_transporte;
     private Almacen almacen;
     private LocalDateTime fechaSalida;
     private LocalDateTime fechaLlegada;

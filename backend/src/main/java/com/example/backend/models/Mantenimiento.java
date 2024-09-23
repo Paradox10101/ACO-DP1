@@ -15,27 +15,26 @@ import java.util.ArrayList;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Mantenimiento")
+@Table(name = "Mantenimiento")
 public class Mantenimiento {
-    
-    private int id_mantenimiento;
+
+    private long id_mantenimiento;
     private TipoMantenimiento tipo;
     private LocalDateTime fechaProgramada;
     private Time duracion;
-    
 
-    public Mantenimiento(int id_mantenimiento, TipoMantenimiento tipo, LocalDateTime fechaProgramada, Time duracion) {
+    public Mantenimiento(long id_mantenimiento, TipoMantenimiento tipo, LocalDateTime fechaProgramada, Time duracion) {
         this.id_mantenimiento = id_mantenimiento;
         this.tipo = tipo;
         this.fechaProgramada = fechaProgramada;
         this.duracion = duracion;
     }
 
-    public int getId_mantenimiento() {
+    public long getId_mantenimiento() {
         return id_mantenimiento;
     }
 
-    public void setId_mantenimiento(int id_mantenimiento) {
+    public void setId_mantenimiento(long id_mantenimiento) {
         this.id_mantenimiento = id_mantenimiento;
     }
 

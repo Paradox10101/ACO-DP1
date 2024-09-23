@@ -107,9 +107,9 @@ public class Aco {
     private List<Ruta> construirRuta(Pedido pedido, int simulacion, LocalDateTime fechaMaximaEntrega) {
         List<Ruta> rutasConstruidas = new ArrayList<>();
         Set<Long> ubicacionesVisitadas = new HashSet<>(); // Para evitar ciclos
-        Long idUbicacionActual = pedido.getUbicacionOrigen().getId(); // Reemplazar Aeropuerto por Ubicacion
-        Long idUbicacionDestinoFinal = pedido.getUbicacionDestino().getId(); // Reemplazar Aeropuerto por Ubicacion
-        LocalDateTime[] ultimaFechaHoraLlegada = { pedido.getFechaHoraRecepcion() }; // Ajustar a Pedido
+        Long idUbicacionActual = pedido.getFid_almacen(); // El origen del pedido es el almacén --> siempre
+        Long idUbicacionDestinoFinal = pedido.getFid_oficinaDest(); // Reemplazar Aeropuerto por Ubicacion
+        LocalDateTime[] ultimaFechaHoraLlegada = { pedido.getFechaEntregaEstimada() }; // Ajustar a Pedido <---- Se va trabajar con fechas y horas estimadas porque el "real" solo se calcula al final --> y serviria de indicador de que se ha entregado
 
         // Reemplazar lógica de vuelos con lógica de rutas
         while (!idUbicacionActual.equals(idUbicacionDestinoFinal)) {
@@ -167,6 +167,7 @@ public class Aco {
     }
     
     // Método para calcular la distancia total de la ruta
+    //verificar como se calcula la distancia y tambien el tiempo "estimado" de llegada
     private float calcularDistanciaTotal(List<Tramo> tramos) {
         float distanciaTotal = 0;
         for (Tramo tramo : tramos) {

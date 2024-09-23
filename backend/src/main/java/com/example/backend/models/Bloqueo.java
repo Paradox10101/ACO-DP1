@@ -31,39 +31,40 @@ import jakarta.persistence.OneToOne;
 @Setter*/
 //@Component
 @Entity
-@Table(name="Bloqueo")
+@Table(name = "Bloqueo")
 public class Bloqueo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_bloqueo")
-    private int id_bloqueo;
-    
+    private long id_bloqueo;
+
     @Column(name = "fecha_inicio")
     private LocalDateTime fechaInicio;
-    
+
     @Column(name = "fecha_fin")
     private LocalDateTime fechaFin;
-    
+
     @OneToOne
     @JoinColumn(name = "id_tramo", nullable = false)
-    private int fid_tramoAfectado;
+    private long fid_tramoAfectado;
 
     public Bloqueo() {
 
     }
-    public Bloqueo(int id_bloqueo, LocalDateTime fechaInicio, LocalDateTime fechaFin, int fid_tramoAfectado) {
+
+    public Bloqueo(long id_bloqueo, LocalDateTime fechaInicio, LocalDateTime fechaFin, long fid_tramoAfectado) {
         this.id_bloqueo = id_bloqueo;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.fid_tramoAfectado = fid_tramoAfectado;
     }
 
-    public int getId_bloqueo() {
+    public long getId_bloqueo() {
         return id_bloqueo;
     }
 
-    public void setId_bloqueo(int id_bloqueo) {
+    public void setId_bloqueo(long id_bloqueo) {
         this.id_bloqueo = id_bloqueo;
     }
 
@@ -83,11 +84,11 @@ public class Bloqueo {
         this.fechaFin = fechaFin;
     }
 
-    public int getFidTramoAfectado() {
+    public long getFidTramoAfectado() {
         return fid_tramoAfectado;
     }
 
-    public void setFidTramoAfectado(int fid_tramoAfectado) {
+    public void setFidTramoAfectado(long fid_tramoAfectado) {
         this.fid_tramoAfectado = fid_tramoAfectado;
     }
 

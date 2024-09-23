@@ -1,4 +1,5 @@
 package com.example.backend.models;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,16 +15,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Oficina")
+@Table(name = "Oficina")
 public class Oficina {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_oficina")
-    private int id_oficina;
-    
+    private long id_oficina;
+
     @Column(name = "fid_ubicacion")
-    private int fid_ubicacion;
+    private long fid_ubicacion;
 
     @Column(name = "capacidad_utilizada")
     private int capacidadUtilizada;
@@ -31,26 +32,26 @@ public class Oficina {
     @Column(name = "capacidad_maxima")
     private int capacidadMaxima;
 
-    public Oficina(int id_oficina, int fid_ubicacion, int capacidadUtilizada, int capacidadMaxima) {
+    public Oficina(long id_oficina, long fid_ubicacion, int capacidadUtilizada, int capacidadMaxima) {
         this.id_oficina = id_oficina;
         this.fid_ubicacion = fid_ubicacion;
         this.capacidadUtilizada = capacidadUtilizada;
         this.capacidadMaxima = capacidadMaxima;
     }
 
-    public int getId_oficina() {
+    public long getId_oficina() {
         return id_oficina;
     }
 
-    public void setId_oficina(int id_oficina) {
+    public void setId_oficina(long id_oficina) {
         this.id_oficina = id_oficina;
     }
 
-    public int getFid_ubicacion() {
+    public long getFid_ubicacion() {
         return fid_ubicacion;
     }
 
-    public void setFid_ubicacion(int fid_ubicacion) {
+    public void setFid_ubicacion(long fid_ubicacion) {
         this.fid_ubicacion = fid_ubicacion;
     }
 
@@ -84,7 +85,7 @@ public class Oficina {
                     Float latitud = Float.parseFloat(valores[3]);
                     Float longitud = Float.parseFloat(valores[4]);
                     String region = valores[5];
-                    int id_almacen = Integer.parseInt(valores[6]);
+                    long id_almacen = Integer.parseInt(valores[6]);
 
                     System.out.println(linea);
                 }

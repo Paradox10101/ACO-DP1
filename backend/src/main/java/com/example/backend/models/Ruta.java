@@ -16,8 +16,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="Ruta")
+@Table(name = "Ruta")
 public class Ruta {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_ruta")
@@ -25,25 +26,25 @@ public class Ruta {
 
     @ManyToOne
     @JoinColumn(name = "id_vehiculo", nullable = false)
-    private int fid_vehiculo;
+    private long fid_vehiculo;
 
     @Column(name = "distancia_total")
     private float distanciaTotal;
 
     @ManyToOne
     @JoinColumn(name = "id_ubicacion", nullable = false)
-    private int fid_ubicacion_origen;
+    private long fid_ubicacion_origen;
 
     @ManyToOne
     @JoinColumn(name = "id_ubicacion", nullable = false)
-    private int fid_ubicacion_destino;
-    
+    private long fid_ubicacion_destino;
+
     @Column(name = "fechaInicio", columnDefinition = "DATETIME")
     private LocalDateTime fechaInicio;
 
     @Column(name = "fechaFin", columnDefinition = "DATETIME")
     private LocalDateTime fechaFin;
-    
+
     @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ArrayList<Tramo> tramos;
 
@@ -51,9 +52,9 @@ public class Ruta {
     }
 
     public Ruta(
-            Long id_ruta, int fid_vehiculo, float distanciaTotal, 
-            int id_ubicacion_origen, 
-            int id_ubicacion_destino,
+            Long id_ruta, long fid_vehiculo, float distanciaTotal,
+            long id_ubicacion_origen,
+            long id_ubicacion_destino,
             LocalDateTime fechaInicio, LocalDateTime fechaFin) {
         this.id_ruta = id_ruta;
         this.fid_vehiculo = fid_vehiculo;
@@ -72,11 +73,11 @@ public class Ruta {
         this.id_ruta = id_ruta;
     }
 
-    public int getFid_vehiculo() {
+    public long getFid_vehiculo() {
         return fid_vehiculo;
     }
 
-    public void setFid_vehiculo(int fid_vehiculo) {
+    public void setFid_vehiculo(long fid_vehiculo) {
         this.fid_vehiculo = fid_vehiculo;
     }
 
@@ -88,20 +89,19 @@ public class Ruta {
         this.distanciaTotal = distanciaTotal;
     }
 
-    
-    public int getOrigen() {
+    public long getOrigen() {
         return fid_ubicacion_origen;
     }
 
-    public void setOrigen(int fid_ubicacion_origen) {
+    public void setOrigen(long fid_ubicacion_origen) {
         this.fid_ubicacion_origen = fid_ubicacion_origen;
     }
 
-    public int getDestino() {
+    public long getDestino() {
         return fid_ubicacion_destino;
     }
 
-    public void setDestino(int fid_ubicacion_destino) {
+    public void setDestino(long fid_ubicacion_destino) {
         this.fid_ubicacion_destino = fid_ubicacion_destino;
     }
 

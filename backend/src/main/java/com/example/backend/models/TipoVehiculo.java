@@ -9,19 +9,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="TipoVehiculo")
+@Table(name = "TipoVehiculo")
 public class TipoVehiculo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id_tipoVehiculo")
-    private int id_tipoVehiculo;
-    
-    @Column(name="nombre")
+    @Column(name = "id_tipoVehiculo")
+    private long id_tipoVehiculo;
+
+    @Column(name = "nombre")
     private String nombre;
 
-    @Column(name="velocidad")
+    @Column(name = "velocidad")
     private float velocidad;
 
-    @Column(name="kilometraje_mantenimiento")
+    @Column(name = "kilometraje_mantenimiento")
     private float kilometrajeMantenimiento;
 }

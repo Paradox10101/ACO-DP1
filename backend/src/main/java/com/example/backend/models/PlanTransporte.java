@@ -9,20 +9,35 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Column;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
-@Table(name="PlanTransporte")
+@Table(name = "PlanTransporte")
 public class PlanTransporte {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_planTransporte")
-    private int id_planTransporte;
-    
-    
+    private long id_planTransporte;
+
+    @OneToMany(mappedBy = "planTransporte", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ArrayList<Vehiculo> vehiculos;
+
+    @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
+
+    @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActalizacion;
-    private Ubicacion origen;
-    private Ubicacion destino;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ubicacion")
+    private long fid_origen;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ubicacion")
+    private long fid_destino;
 }
