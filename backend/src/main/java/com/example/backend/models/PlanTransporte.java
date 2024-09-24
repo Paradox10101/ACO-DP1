@@ -9,17 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.backend.algorithm.Aco;
 
-import jakarta.persistence.Table;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Column;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 
 @Entity
@@ -55,6 +57,9 @@ public class PlanTransporte {
     @OneToMany(mappedBy = "planTransporte", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Tramo> tramos;
 
+    @Enumerated(EnumType.STRING)
+    private EstadoPedido estado;
+
     @Autowired
     private Aco aco;
 
@@ -62,36 +67,84 @@ public class PlanTransporte {
 
     }
 
-    //Algo implementado en el service <----
-    public PlanTransporte crearRuta(Pedido pedido){
-        //List<Oficina> aeropuertos = aeropuertoCache.getAeropuertos();  obtener oficinas
-        //List<Tramo> tramos = new ArrayList<>();
-        List<Oficina> oficinas = new ArrayList<>();
-        List<Tramo> tramos = new ArrayList<>();
-        List<Tramo> rutaOptima = new ArrayList<>();
-        PlanTransporte planOptimo =  aco.ejecutar(oficinas, tramos, pedido, 0);
-
-        EstadoPedido estado;
-
-        if(rutaOptima != null){
-            pedido.setEstado(estado.Registrado);
-            planOptimo.setId_pedido(pedido.getId_pedido());
-
-            List<Tramo> tramosRuta = planOptimo.getTramos();
-            actualizarCambiosEnvio(vuelosRuta, envio);
-
-            //planViajeRepository.save(rutaOptima);
-            //rutas.add(rutaOptima);
-        }
-
-        return planOptimo;
+    public EstadoPedido getEstado() {
+        return estado;
     }
 
-    public void actualizarCambiosEnvio(List<Tramo>tramosRuta, Pedido pedido){
-        for (int i=0; i<tramosRuta.size(); i++){
+    public void setEstado(EstadoPedido estado) {
+        this.estado = estado;
+    }
+
+    //Algo implementado en el service <----
+    public PlanTransporte crearRuta(Pedido pedido, List<Almacen> almacenes, List<Oficina> oficinas, List<Tramo> tramos){
+        //List<Oficina> aeropuertos = aeropuertoCache.getAeropuertos();  obtener oficinas
+        //List<Tramo> tramos = new ArrayList<>();
+
+        //List<Almacen> almacenes = new ArrayList<>();
+
+        //List<Oficina> oficinas = new ArrayList<>();
+        //List<Tramo> tramos = new ArrayList<>();
+        //List<Tramo> rutas = new ArrayList<>();
+        PlanTransporte planOptimo =  aco.ejecutar(oficinas, tramos, pedido, 0);
+
+        if(planOptimo != null){
+            pedido.setEstado(EstadoPedido.Registrado);
+            planOptimo.setFid_pedido(pedido.getId_pedido());
+            planOptimo.setEstado(EstadoPedido.Registrado);
+            
+            List<Tramo> tramosRuta = planOptimo.getTramos();
+            actualizarCambiosEnvio(tramosRuta, pedido, oficinas);
+            return planOptimo; // Retorna el plan de transporte encontrado
+            //planViajeRepository.save(rutaOptima);
+            //rutas.add(rutaOptima);
+        }else{
+            PlanTransporte rutaInvalida = new PlanTransporte(); // Crear una nueva instancia de PlanViaje
+            rutaInvalida.setFid_pedido(pedido.getId_pedido()); // Asignar el envío a la nueva instancia
+            //rutas.add(rutaInvalida);
+            System.out.println("No se encontró una ruta válida para el envío: " + pedido.getId_pedido());
+            return null;
+        }
+
+        //return planOptimo;
+    }
+
+    public void actualizarCambiosEnvio(List<Tramo> tramosRuta, Pedido pedido,List<Oficina> oficinas) {
+        // Obtener la oficina de destino
+        Oficina oficinaDestino = buscarOficinaPorId(pedido.getFid_oficinaDest(), oficinas);
+
+        for (int i = 0; i < tramosRuta.size(); i++) {
             Tramo tramo = tramosRuta.get(i);
 
+            // Verificar si estamos en el primer tramo
+            if (i == 0) {
+                // Primer tramo, origen es siempre un almacén
+                System.out.println(
+                        "Almacén de origen: " + pedido.getFid_almacen() + " hasta " + tramo.getFid_ubicacion_destino());
+            } else {
+                // Los tramos siguientes son entre oficinas
+                Tramo tramoAnterior = tramosRuta.get(i - 1);
+                System.out.println(
+                        "De: " + tramoAnterior.getFid_ubicacion_destino() + " a " + tramo.getFid_ubicacion_destino());
+            }
         }
+
+        // Al llegar al último tramo, verificar si se entrega correctamente a la oficina
+        // de destino
+        Tramo ultimoTramo = tramosRuta.get(tramosRuta.size() - 1);
+        if (ultimoTramo.getFid_ubicacion_destino().equals(oficinaDestino.getFid_ubicacion())) {
+            System.out.println("Pedido entregado en la oficina destino " + oficinaDestino.getId_oficina());
+        } else {
+            System.out.println("Error: La entrega no coincide con la oficina destino esperada.");
+        }
+    }
+    
+    private Oficina buscarOficinaPorId(Long idOficina, List<Oficina> oficinas) {
+        for (Oficina oficina : oficinas) {
+            if (oficina.getId_oficina().equals(idOficina)) {
+                return oficina;
+            }
+        }
+        return null; // Devuelve null si no encuentra la oficina
     }
 
 

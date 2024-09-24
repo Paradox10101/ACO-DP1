@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -114,23 +116,37 @@ public class Oficina {
         this.capacidadMaxima = capacidadMaxima;
     }
 
-    public static ArrayList<Oficina> cargarOficinasDesdeArchivo(String rutaArchivo) {
+    public static ArrayList<Oficina> cargarOficinasDesdeArchivo(String rutaArchivo, List<Region> regiones) {
         ArrayList<Oficina> oficinas = new ArrayList<>();
         try {
             Path path = Paths.get(rutaArchivo).toAbsolutePath();
             try (BufferedReader br = Files.newBufferedReader(path)) {
                 String linea;
                 while ((linea = br.readLine()) != null) {
+                    Oficina oficina  = new Oficina();
+                    Ubicacion ubicacion = new Ubicacion();
                     String[] valores = linea.split(",");
                     String ubigeo = valores[0];
                     String ciudadOrigen = valores[1];
                     String ciudadDestino = valores[2];
                     Float latitud = Float.parseFloat(valores[3]);
-                    Float Longitud = Float.parseFloat(valores[4]);
-                    String region = valores[5];
-                    //Long id_almacen = Integer.parseInt(valores[6]);
-
-                    System.out.println(linea);
+                    Float longitud = Float.parseFloat(valores[4]);
+                    String region = valores[5].trim();
+                    int capacidadMaxima = Integer.parseInt(valores[6]);
+                    ubicacion.setUbigeo(ubigeo);
+                    Optional<Region> regionSeleccionada = regiones.stream().filter(regionS -> regionS.getNombre().equals(region)).findFirst();
+                    if(regionSeleccionada.isPresent()){
+                        ubicacion.setFid_Region(regionSeleccionada.get().getIdRegion());
+                    }
+                    else{
+                        continue;
+                    }
+                    oficina.setFid_ubicacion(ubicacion.getIdUbicacion());
+                    oficina.setLatitud(latitud);
+                    oficina.setLongitud(longitud);
+                    oficina.setCapacidadMaxima(capacidadMaxima);
+                    
+                    oficinas.add(oficina);
                 }
             }
 

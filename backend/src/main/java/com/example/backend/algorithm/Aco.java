@@ -62,7 +62,7 @@ public class Aco {
             // Verifica que el tramo esté disponible antes de la fecha máxima de entrega
             if (tramo.getFechaFin().isBefore(fechaMaximaEntregaGMT)
                     || tramo.getFechaFin().isEqual(fechaMaximaEntregaGMT)) {
-                grafoTramos.computeIfAbsent(tramo.getOrigen(), k -> new ArrayList<>()).add(tramo);
+                grafoTramos.computeIfAbsent(tramo.getFid_ubicacion_origen(), k -> new ArrayList<>()).add(tramo);
             }
         }
     }
@@ -91,7 +91,7 @@ public class Aco {
             List<Tramo> tramosPosibles = grafoTramos.getOrDefault(idUbicacionActual, new ArrayList<>());
 
             tramosPosibles = tramosPosibles.stream()
-                    .filter(t -> !ubicacionesVisitadas.contains(t.getDestino()))
+                    .filter(t -> !ubicacionesVisitadas.contains(t.getFid_ubicacion_destino()))
                     .filter(t -> t.getFechaInicio().isAfter(ultimaFechaHoraLlegada[0]))
                     .filter(t -> t.getFechaFin().isBefore(fechaMaximaEntregaGMT)) // llega antes de la fecha máxima de entrega
                     .filter(t -> t.getCapacidadActual() >= pedido.getCantidadPaquetes()) // Que el tramo tenga capacidad para el pedido
@@ -105,7 +105,7 @@ public class Aco {
             // Long idUbicacionDestinoFinalLong = Long.valueOf(idUbicacionDestinoFinal); //
             // Si es un primitivo Long
             Tramo tramoDirecto = tramosPosibles.stream()
-                    .filter(t -> t.getDestino().equals(Long.valueOf(idUbicacionDestinoFinal)))
+                    .filter(t -> t.getFid_ubicacion_destino().equals(Long.valueOf(idUbicacionDestinoFinal)))
                     .min(Comparator.comparing(Tramo::getFechaFin))
                     .orElse(null);
 
@@ -122,7 +122,7 @@ public class Aco {
             }
 
             ruta.add(siguienteTramo);
-            idUbicacionActual = siguienteTramo.getDestino();
+            idUbicacionActual = siguienteTramo.getFid_ubicacion_destino();
             LocalDateTime nuevaFechaHoraLlegada = siguienteTramo.getFechaFin();
 
             ultimaFechaHoraLlegada[0] = nuevaFechaHoraLlegada;
@@ -221,7 +221,7 @@ public class Aco {
 
                     // Devolver la primera ruta válida encontrada
                     for (Tramo tramo : ruta) {
-                        System.out.println("Tramo de " + tramo.getOrigen() + " hacia " + tramo.getDestino()
+                        System.out.println("Tramo de " + tramo.getFid_ubicacion_origen() + " hacia " + tramo.getFid_ubicacion_destino()
                                 + "  ->  " + tramo.getFechaInicio() + " - " + tramo.getFechaFin());
                     }
                     planTransporteFinal = planTransporte;

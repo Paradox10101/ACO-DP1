@@ -75,19 +75,19 @@ public class Tramo {
         this.id_tramo = id_tramo;
     }
 
-    public Long getOrigen() {
+    public Long getFid_ubicacion_origen() {
         return fid_ubicacion_origen;
     }
 
-    public void setOrigen(Long fid_ubicacion_origen) {
+    public void setFid_ubicacion_origen(Long fid_ubicacion_origen) {
         this.fid_ubicacion_origen = fid_ubicacion_origen;
     }
 
-    public Long getDestino() {
+    public Long getFid_ubicacion_destino() {
         return fid_ubicacion_destino;
     }
 
-    public void setDestino(Long fid_ubicacion_destino) {
+    public void setFid_ubicacion_destino(Long fid_ubicacion_destino) {
         this.fid_ubicacion_destino = fid_ubicacion_destino;
     }
 

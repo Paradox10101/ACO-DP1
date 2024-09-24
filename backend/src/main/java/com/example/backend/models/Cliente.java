@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
@@ -19,7 +20,8 @@ import jakarta.persistence.Id;
 public class Cliente {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_cliente")
     private Long id_cliente;
 
     @Column(nullable = false)
@@ -28,4 +30,21 @@ public class Cliente {
     private String apellidos;
     private String telefono;
     private String email;
+
+    public Long getId_cliente() {
+        return id_cliente;
+    }
+
+    public void setId_cliente(Long id_cliente) {
+        this.id_cliente = id_cliente;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
 }

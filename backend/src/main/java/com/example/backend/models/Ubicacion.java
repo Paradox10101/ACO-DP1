@@ -26,6 +26,9 @@ public class Ubicacion {
     @JoinColumn(name = "id_region")
     private Long fid_region;
 
+    public Ubicacion(){
+    }
+
     public Ubicacion(Long id_ubicacion, String ubigeo, String ciudad, Long fid_region){
         this.id_ubicacion = id_ubicacion;
         this.ubigeo = ubigeo;

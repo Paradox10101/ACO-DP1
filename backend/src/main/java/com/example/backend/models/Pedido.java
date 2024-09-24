@@ -10,6 +10,9 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.HashMap;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,6 +42,10 @@ public class Pedido {
     @JoinColumn(name = "id_oficina")
     private Long fid_oficinaDest;
 
+    @ManyToOne
+    @JoinColumn(name = "id_cliente")
+    private Long fid_cliente;
+
     @Column(name = "fechaEntregaReal", columnDefinition = "DATETIME")
     private LocalDateTime fechaEntregaReal;
 
@@ -53,6 +60,12 @@ public class Pedido {
 
     @Column(name = "codigoSeguridad")
     private String codigoSeguridad;
+
+    @Column(name = "fechaRegistro")
+    private LocalDateTime fechaRegistro;
+    
+    public Pedido() {
+    }
 
     public Pedido(Long id_pedido, Long fid_almacen, Long fid_oficinaDest, LocalDateTime fechaEntregaReal,
             LocalDateTime fechaEntregaEstimada, EstadoPedido estado, int cantidadPaquetes, String codigoSeguridad) {
@@ -130,7 +143,27 @@ public class Pedido {
         this.codigoSeguridad = codigoSeguridad;
     }
 
-    public static ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo) { // esto va ir en otra parte <---
+    public Long getFid_cliente() {
+        return fid_cliente;
+    }
+
+    public void setFid_cliente(Long fid_cliente) {
+        this.fid_cliente = fid_cliente;
+        
+    }
+
+    public LocalDateTime getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFechaRegistro(LocalDateTime fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
+        
+    }
+
+    
+
+    public static ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo, List<Oficina> oficinas, HashMap<String, Ubicacion> ubicaciones) { // esto va ir en otra parte <---
         ArrayList<Pedido> pedidos = new ArrayList<>();
 
         try {
@@ -138,6 +171,9 @@ public class Pedido {
             try (BufferedReader br = Files.newBufferedReader(path)) {
                 String linea;
                 while ((linea = br.readLine()) != null) {
+                    Pedido pedido = new Pedido();
+                    Cliente cliente = new Cliente();
+                    //Debe consultarse la lista de clientes previamente
                     String[] valores = linea.split(",");
                     String anhoMesString = (rutaArchivo.substring(rutaArchivo.length() - 10)).split(".txt")[0];
                     String anhoString = anhoMesString.substring(0, 4);
@@ -149,14 +185,31 @@ public class Pedido {
                     LocalDateTime fechaHora = LocalDateTime.parse(fechaHoraString, formatter);
 
                     String tramoString = valores[1].trim();
-                    String ubigeoOrigen = (tramoString.split("=>"))[0].trim();
+                    //String ubigeoOrigen = (tramoString.split("=>"))[0].trim();
                     String ubigeoDestino = (tramoString.split("=>"))[1].trim();
-
                     int cantidadPaquetes = Integer.parseInt(valores[2].trim());
-
                     String codigoCliente = valores[3].trim();
+                    
+                    Ubicacion ubicacionDestinoSeleccionada = ubicaciones.get(ubigeoDestino);
+                    if(ubicacionDestinoSeleccionada!=null){
+                        Optional<Oficina> oficinaSeleccionada = oficinas.stream().filter(
+                        oficinaS -> oficinaS.getFid_ubicacion() == ubicacionDestinoSeleccionada.getIdUbicacion()).findFirst();
+                        if(oficinaSeleccionada != null){
+                            pedido.setFid_oficinaDest(oficinaSeleccionada.get().getId_oficina());
+                        }
+                        else{
+                            continue;
+                        }
+                    }
+                    else{
+                        continue;
+                    }
+                    pedido.setFechaRegistro(fechaHora);
+                    //pedido.setFid_oficinaDest()
+                    pedido.setCantidadPaquetes(cantidadPaquetes);
+                    cliente.setCodigo(codigoCliente);
 
-                    System.out.println(codigoCliente);
+                    pedidos.add(pedido);
                 }
             }
 
