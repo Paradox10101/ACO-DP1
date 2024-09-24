@@ -7,11 +7,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
@@ -26,18 +26,61 @@ public class Oficina {
     @Column(name = "fid_ubicacion")
     private Long fid_ubicacion;
 
+    @Column(name = "latitud")
+    private double latitud;
+
+    @Column(name = "longitud")
+    private double longitud;
+
     @Column(name = "capacidad_utilizada")
     private int capacidadUtilizada;
 
     @Column(name = "capacidad_maxima")
     private int capacidadMaxima;
 
+    //no va tener ni longitud y latitud --> servir como prueba
     public Oficina(Long id_oficina, Long fid_ubicacion, int capacidadUtilizada, int capacidadMaxima) {
         this.id_oficina = id_oficina;
         this.fid_ubicacion = fid_ubicacion;
         this.capacidadUtilizada = capacidadUtilizada;
         this.capacidadMaxima = capacidadMaxima;
     }
+
+    public Oficina(Long id_oficina, Long fid_ubicacion, double latitud, double longitud, int capacidadUtilizada,
+            int capacidadMaxima) {
+        this.id_oficina = id_oficina;
+        this.fid_ubicacion = fid_ubicacion;
+        this.latitud = latitud;
+        this.longitud = longitud;
+        this.capacidadUtilizada = capacidadUtilizada;
+        this.capacidadMaxima = capacidadMaxima;
+    }
+
+    public Oficina() {
+
+    }
+
+    public double getLatitud() {
+        return latitud;
+    }
+
+    public void setLatitud(double latitud) {
+        this.latitud = latitud;
+    }
+
+    public double getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(double longitud) {
+        this.longitud = longitud;
+    }
+
+    public Oficina(Long id_oficina, Long fid_ubicacion) {
+        this.id_oficina = id_oficina;
+        this.fid_ubicacion = fid_ubicacion;
+    }
+    
 
     public Long getId_oficina() {
         return id_oficina;

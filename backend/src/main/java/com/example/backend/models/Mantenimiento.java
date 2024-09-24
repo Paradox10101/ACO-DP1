@@ -81,7 +81,6 @@ public class Mantenimiento {
                     Date fecha = formatter.parse(fechaString);
 
                     System.out.println(fecha);
-                    // System.out.println(placaString);
                 }
             }
 

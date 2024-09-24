@@ -2,7 +2,9 @@ package com.example.backend.algorithm;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +19,9 @@ import org.springframework.stereotype.Service;
 import com.example.backend.models.Oficina;
 import com.example.backend.models.Pedido;
 import com.example.backend.models.PlanTransporte;
+import com.example.backend.models.Region;
 import com.example.backend.models.Tramo;
+import com.example.backend.models.Ubicacion;
 import com.example.backend.models.Vehiculo;
 
 @Service
@@ -173,7 +177,7 @@ public class Aco {
         LocalDateTime fechaHoraSalida = tramo.getFechaInicio();
         LocalDateTime fechaHoraLlegada = tramo.getFechaFin();
         
-        // Calcular el tiempo de espera en minutos entre la llegada del último vuelo y la salida de este vuelo
+        // Calcular el tiempo de espera en minutos entre la llegada del último tramo y la salida de este tramo
         long tiempoEspera = fechaHoraLlegadaAnterior.until(fechaHoraSalida, java.time.temporal.ChronoUnit.MINUTES);
         
         double tiempoEsperaHoras = (double) tiempoEspera/60.0;
@@ -198,6 +202,8 @@ public class Aco {
         inicializarGrafoTramos(fechaMaximaEntrega);
         inicializarFeromonas();
         
+        PlanTransporte planTransporteFinal = null;
+
         System.out.println("El pedido actual es: " + pedidoIngresado.getId_pedido() + " " + pedidoIngresado.getFechaEntregaEstimada() + "  " +
                 pedido.getFid_almacen() + "  ->  " + pedido.getFid_oficinaDest() + "  " + "ciudades ORIGEN - DESTINO");
                 // Asegúrate de ajustar la forma en la que obtienes las ciudades de origen y destino según la lógica de OdiparPack
@@ -209,7 +215,7 @@ public class Aco {
                 
                 if (!ruta.isEmpty()) {
                     PlanTransporte planTransporte = new PlanTransporte();
-                    planTransporte.setPedido(pedido);
+                    planTransporte.setFid_pedido(pedido.getId_pedido());
                     planTransporte.setTramos(ruta);
                     rutasEncontradas.add(planTransporte);
 
@@ -218,6 +224,7 @@ public class Aco {
                         System.out.println("Tramo de " + tramo.getOrigen() + " hacia " + tramo.getDestino()
                                 + "  ->  " + tramo.getFechaInicio() + " - " + tramo.getFechaFin());
                     }
+                    planTransporteFinal = planTransporte;
                     solutionFound = true;
                     break; // Devolver la primera ruta válida y cortar el bucle
                 }
@@ -231,9 +238,146 @@ public class Aco {
                 return null;
             }
         }
-        return planTransporte;
-        
+        return planTransporteFinal;        
     }
 
+    private LocalDateTime calcularFechaMaximaEntregaDestino(Pedido pedido) {
+        // LOGICA ANTIGUA 23:59:59 DEL DIA DE DESTINO
+        /*
+         * LocalDateTime fechaHoraRecepcionEnDestino =
+         * envio.getFechaHoraRecepcion().plusHours(envio.getAeropuertoDestino().
+         * getCiudad().getGmt()); // La hora en el lugar de destino
+         * int diasAdicionales = envio.getTipo() ? 2 : 1; // 2 días si es
+         * intercontinental, 1 día en caso contrario
+         * LocalDateTime fechaMaximaEntregaEnDestino =
+         * fechaHoraRecepcionEnDestino.plusDays(diasAdicionales).with(LocalTime.MAX);
+         * // De nuevo se convierte a GMT
+         * LocalDateTime fechaMaximaEntregaGMT =
+         * fechaMaximaEntregaEnDestino.minusHours(envio.getAeropuertoDestino().getCiudad
+         * ().getGmt());
+         * 
+         * return fechaMaximaEntregaGMT;
+         */
+        // LOGICA NUEVA
+        //Oficina oficinaDestino = oficinaDestino.findbyId(pedido.getFid_oficinaDest());
+        //Region regionDestino = regionDestino.findbyId(oficinaDestino.getFid_ubicacion());
+// Simulación de datos de Oficinas y Regiones (Hard-coded)
 
+        //Long a = 1L,b,c,d;
+        /*List<Oficina> oficinas = Arrays.asList(
+            new Oficina(1L,1L, 101,200), 
+            new Oficina(2L,2L, 102,200),
+            new Oficina(3L, 3L, 103,200)
+        );
+        
+        List<Region> regiones = Arrays.asList(
+            new Region(101L, "Costa", 2), 
+            new Region(102L, "Sierra", 4),
+            new Region(103L, "Selva", 5)
+        );
+
+        // Buscar la oficina de destino usando el ID proporcionado en el pedido
+        Oficina oficinaDestino = oficinas.stream()
+                .filter(oficina -> oficina.getId_oficina().equals(pedido.getFid_oficinaDest()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Oficina no encontrada"));
+        
+        // Buscar la región asociada a la oficina de destino
+        Region regionDestino = regiones.stream()
+                .filter(region -> region.getIdRegion().equals(oficinaDestino.getFid_ubicacion()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Región no encontrada"));
+
+
+
+        LocalDateTime fechaMaximaEntregaGMT = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite()).with(LocalTime.MAX);
+        */
+
+        /*if(regionDestino.getNombre() == "Costa"){
+            return pedido.getFechaEntregaEstimada().plusDays(1).with(LocalTime.MAX);
+        }
+        else{
+            if(regionDestino.getNombre() == "Selva"){
+                return pedido.getFechaEntregaEstimada().plusDays(3).with(LocalTime.MAX);
+            }
+            else{
+                //sierra
+                return pedido.getFechaEntregaEstimada().plusDays(2).with(LocalTime.MAX);
+            }
+            
+
+        }*/
+
+        /*LocalDateTime fechaHoraRecepcionEnOrigen = pedido.getFechaEntregaEstimada()
+                .plusHours(.getGmt()); // La hora en el lugar de origen
+        int diasAdicionales = pedido.getTipo(); // 2 días si es intercontinental, 1 día en caso contrario
+        LocalDateTime fechaMaximaEntregaEnDestino = fechaHoraRecepcionEnOrigen.plusDays(diasAdicionales);
+        // De nuevo se convierte a GMT
+        LocalDateTime fechaMaximaEntregaGMT = fechaMaximaEntregaEnDestino
+                .minusHours(pedido.getAeropuertoDestino().getCiudad().getGmt());*/
+
+        // Aquí simulas la búsqueda de la oficina y la región sin usar una BD real
+        Oficina oficinaDestino = obtenerOficinaPorId(pedido.getFid_oficinaDest()); // Simulación de búsqueda de oficina
+        Ubicacion ubicacionDestino = obtenerUbicacionPorId(oficinaDestino.getFid_ubicacion()); // Simulación de búsqueda
+                                                                                               // de ubicación
+        Region regionDestino = obtenerRegionPorId(ubicacionDestino.getFid_Region());
+
+        LocalDateTime fechaMaximaEntregaGMT = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite())
+                .with(LocalTime.MAX);
+        return fechaMaximaEntregaGMT;
+    }
+
+    // Métodos simulados para obtener la oficina y la ubicación (para pruebas):
+    private Oficina obtenerOficinaPorId(Long idOficina) {
+        // Simula la obtención de la oficina según su ID (puedes reemplazarlo con un mapa o lista de datos duros)
+        return new Oficina(idOficina, 1L); // 1L es el ID de la ubicación, cambia según tus datos de prueba
+    }
+
+    private Ubicacion obtenerUbicacionPorId(Long idUbicacion) {
+        // Simula la obtención de la ubicación según su ID
+        return new Ubicacion(idUbicacion, "Ubigeo 001", "Ciudad Prueba", 1L); // 1L es el ID de la región, cambia según tus datos
+    }
+
+    private Region obtenerRegionPorId(Long idRegion) {
+        // Simulación de búsqueda de región
+        return new Region(idRegion, "COSTA", 1); // 3 es el número de días límite, cámbialo según tu caso de prueba
+    }
+
+    private void actualizarFeromonasRuta(List<PlanTransporte> rutasEncontradas) {
+        evaporarFeromonas();
+
+        for (PlanTransporte plan : rutasEncontradas) {
+            double costoTotal = 0.0;
+
+            for (Tramo tramo : plan.getTramos()) {
+                costoTotal += calcularDuracionTramo(tramo); // Calcula solo la duración de los tramos
+            }
+
+            for (Tramo tramo : plan.getTramos()) {
+                Long key = tramo.getId_tramo();
+                feromonas.put(key, feromonas.get(key) + (1 / costoTotal));
+            }
+        }
+    }
+
+    private double calcularDuracionTramo(Tramo tramo) {
+        LocalDateTime fechaHoraSalida = tramo.getFechaInicio();
+        LocalDateTime fechaHoraLlegada = tramo.getFechaFin();
+
+        // Calcular la duración del tramo en minutos
+        long duracionEnMinutos = fechaHoraSalida.until(fechaHoraLlegada, java.time.temporal.ChronoUnit.MINUTES);
+
+        // Convertir la duración a horas
+        double duracionEnHoras = (double) duracionEnMinutos / 60.0;
+
+        return duracionEnHoras;
+    }
+
+    private void evaporarFeromonas() {
+        for (Map.Entry<Long, Double> entry : feromonas.entrySet()) {
+            Long key = entry.getKey();
+            Double value = entry.getValue();
+            feromonas.put(key, (1 - tasaEvaporacion) * value);
+        }
+    }
 }
