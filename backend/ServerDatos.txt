@@ -1,5 +1,8 @@
-Nombre DNS : inf226-981-1a.inf.pucp.edu.pe
-IP : 200.16.7.171
-Usuario en ubuntu: inf226.981.1a
-Contraseña o Password: ZCHU2QDSRKF5
-IP del Servidor : 200.16.7.171
+Nombre DNS : inf226-981-1a.inf.pucp.edu.pe -> antiguo
+IP : 200.16.7.171 -> antiguo
+Usuario en ubuntu: inf226.981.1a -> antiguo
+
+EndPoint: dbodirpack.ccncqbdf3uui.us-east-1.rds.amazonaws.com
+Contraseña o Password: pOCEhJw3dgGwMGv4BK9K
+
+IP del Servidor : 200.16.7.171 -> antiguo

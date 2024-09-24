@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -194,11 +193,11 @@ public class Aco {
         return (ponderacionTiempoEspera * factorTiempoEspera);
     }
 
-    public PlanTransporte ejecutar(List<Oficina> oficinas, List<Tramo> tramos, Pedido pedidoIngresado, int simulacion) {
+    public PlanTransporte ejecutar(List<Oficina> oficinas, List<Tramo> tramos, Pedido pedidoIngresado, int simulacion, List<Region> regiones) {
         this.tramos = tramos;
         this.pedido = pedidoIngresado;
         boolean solutionFound = false;
-        LocalDateTime fechaMaximaEntrega = calcularFechaMaximaEntregaDestino(pedidoIngresado); // Calcula la fecha máxima de entrega en destino
+        LocalDateTime fechaMaximaEntrega = calcularFechaMaximaEntregaDestino(pedidoIngresado, oficinas,regiones); // Calcula la fecha máxima de entrega en destino
         inicializarGrafoTramos(fechaMaximaEntrega);
         inicializarFeromonas();
         
@@ -241,7 +240,7 @@ public class Aco {
         return planTransporteFinal;        
     }
 
-    private LocalDateTime calcularFechaMaximaEntregaDestino(Pedido pedido) {
+    private LocalDateTime calcularFechaMaximaEntregaDestino(Pedido pedido,List<Oficina> oficinas,List<Region> regiones) {
         // LOGICA ANTIGUA 23:59:59 DEL DIA DE DESTINO
         /*
          * LocalDateTime fechaHoraRecepcionEnDestino =
@@ -317,10 +316,10 @@ public class Aco {
                 .minusHours(pedido.getAeropuertoDestino().getCiudad().getGmt());*/
 
         // Aquí simulas la búsqueda de la oficina y la región sin usar una BD real
-        Oficina oficinaDestino = obtenerOficinaPorId(pedido.getFid_oficinaDest()); // Simulación de búsqueda de oficina
+        Oficina oficinaDestino = obtenerOficinaPorId(pedido.getFid_oficinaDest(), oficinas); // Simulación de búsqueda de oficina
         Ubicacion ubicacionDestino = obtenerUbicacionPorId(oficinaDestino.getFid_ubicacion()); // Simulación de búsqueda
                                                                                                // de ubicación
-        Region regionDestino = obtenerRegionPorId(ubicacionDestino.getFid_Region());
+        Region regionDestino = obtenerRegionPorId(ubicacionDestino.getFid_Region(), regiones);
 
         LocalDateTime fechaMaximaEntregaGMT = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite())
                 .with(LocalTime.MAX);
@@ -328,19 +327,28 @@ public class Aco {
     }
 
     // Métodos simulados para obtener la oficina y la ubicación (para pruebas):
-    private Oficina obtenerOficinaPorId(Long idOficina) {
-        // Simula la obtención de la oficina según su ID (puedes reemplazarlo con un mapa o lista de datos duros)
-        return new Oficina(idOficina, 1L); // 1L es el ID de la ubicación, cambia según tus datos de prueba
+    private Oficina obtenerOficinaPorId(Long idOficina, List<Oficina> oficinas) {
+        for (Oficina oficina : oficinas) {
+            if (oficina.getId_oficina().equals(idOficina)) {
+                return oficina;
+            }
+        }
+        return null; // Devuelve null si no encuentra la oficina
     }
 
+        ///ESTE ES EL UNICO QUE SE  ESTA CREANDO ASI POR PRUEBAS <------- REVISAR SI SE NECESITA
     private Ubicacion obtenerUbicacionPorId(Long idUbicacion) {
         // Simula la obtención de la ubicación según su ID
         return new Ubicacion(idUbicacion, "Ubigeo 001", "Ciudad Prueba", 1L); // 1L es el ID de la región, cambia según tus datos
     }
 
-    private Region obtenerRegionPorId(Long idRegion) {
-        // Simulación de búsqueda de región
-        return new Region(idRegion, "COSTA", 1); // 3 es el número de días límite, cámbialo según tu caso de prueba
+    private Region obtenerRegionPorId(Long idRegion, List<Region> regiones) {
+        for (Region region : regiones) {
+            if (region.getIdRegion().equals(idRegion)) {
+                return region;
+            }
+        }
+        return null; // Devuelve null si no encuentra la oficina
     }
 
     private void actualizarFeromonasRuta(List<PlanTransporte> rutasEncontradas) {

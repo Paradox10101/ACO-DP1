@@ -76,7 +76,8 @@ public class PlanTransporte {
     }
 
     //Algo implementado en el service <----
-    public PlanTransporte crearRuta(Pedido pedido, List<Almacen> almacenes, List<Oficina> oficinas, List<Tramo> tramos){
+    public PlanTransporte crearRuta(Pedido pedido, List<Almacen> almacenes, List<Oficina> oficinas, List<Tramo> tramos, 
+            List<Region> regiones){
         //List<Oficina> aeropuertos = aeropuertoCache.getAeropuertos();  obtener oficinas
         //List<Tramo> tramos = new ArrayList<>();
 
@@ -85,7 +86,7 @@ public class PlanTransporte {
         //List<Oficina> oficinas = new ArrayList<>();
         //List<Tramo> tramos = new ArrayList<>();
         //List<Tramo> rutas = new ArrayList<>();
-        PlanTransporte planOptimo =  aco.ejecutar(oficinas, tramos, pedido, 0);
+        PlanTransporte planOptimo =  aco.ejecutar(oficinas, tramos, pedido, 0, regiones);
 
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);
@@ -137,7 +138,7 @@ public class PlanTransporte {
             System.out.println("Error: La entrega no coincide con la oficina destino esperada.");
         }
     }
-    
+
     private Oficina buscarOficinaPorId(Long idOficina, List<Oficina> oficinas) {
         for (Oficina oficina : oficinas) {
             if (oficina.getId_oficina().equals(idOficina)) {

@@ -8,9 +8,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.util.ArrayList;
+
 @Entity
 @Table(name = "Region")
 public class Region {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +25,27 @@ public class Region {
 
     @Column(name = "dias_limite")
     private int diasLimite;
+
+    @Column(name = "velocidad")
+    private float velocidad=0;
+    
+    private ArrayList<Region>relacionRegiones;
+
+
+    public Region() {
+
+    }
+
+    public Region(String nombre, int diasLimite) {
+        this.nombre = nombre;
+        this.diasLimite = diasLimite;
+    }
+
+    public Region(Long id_region, String nombre, int diasLimite) {
+        this.id_region = id_region;
+        this.nombre = nombre;
+        this.diasLimite = diasLimite;
+    }
 
     public Long getIdRegion() {
         return id_region;
@@ -47,14 +71,24 @@ public class Region {
         this.diasLimite = diasLimite;
     }
 
-    public Region() {
-
+    public float getVelocidad() {
+        return velocidad;
     }
 
-    public Region(Long id_region, String nombre, int diasLimite) {
-        this.id_region = id_region;
-        this.nombre = nombre;
-        this.diasLimite = diasLimite;
+    public void setVelocidad(float velocidad) {
+        
+        this.velocidad = velocidad;
     }
+
+    public ArrayList<Region> getRelacionRegiones() {
+        return relacionRegiones;
+    }
+
+    public void setRelacionRegionVelocidad(Region region, float velocidad) {
+        region.setVelocidad(velocidad);
+        this.relacionRegiones.add(region);
+    }
+
+    
     
 }
