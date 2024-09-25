@@ -7,7 +7,7 @@ import com.example.backend.models.Almacen;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AlmacenRepository extends JpaRepository<Almacen, Integer> {
+public interface AlmacenRepository extends JpaRepository<Almacen, Long> {
 
     Optional<Almacen> findByCodigo(String codigo);
 }

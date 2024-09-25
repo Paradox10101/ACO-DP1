@@ -2,19 +2,13 @@
 package com.example.backend.models;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.HashMap;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,6 +19,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -37,16 +32,16 @@ public class Pedido {
     private Long id_pedido;
 
     @ManyToOne
-    @JoinColumn(name = "id_almacen")
-    private Long fid_almacen;
+    @JoinColumn(name = "fid_almacen")
+    private Almacen almacen;
 
-    @ManyToOne
-    @JoinColumn(name = "id_oficina")
-    private Long fid_oficinaDest;
+    @OneToOne
+    @JoinColumn(name = "fid_oficina_destino")
+    private Oficina oficinaDestino;
 
-    @ManyToOne
-    @JoinColumn(name = "id_cliente")
-    private Long fid_cliente;
+    @OneToOne
+    @JoinColumn(name = "fid_cliente")
+    private Cliente cliente;
 
     @Column(name = "fechaEntregaReal", columnDefinition = "DATETIME")
     private LocalDateTime fechaEntregaReal;
@@ -66,20 +61,16 @@ public class Pedido {
     @Column(name = "fechaRegistro")
     private LocalDateTime fechaRegistro;
     
-    // Variable estática para manejar el autoincremento de IDs
-    private static Long idCounter = 1L;
 
     public Pedido() {
-        this.id_pedido = idCounter++;
+        
     }
 
 
-
-    public Pedido(Long id_pedido, Long fid_almacen, Long fid_oficinaDest, LocalDateTime fechaEntregaReal,
+    public Pedido(Long id_pedido, Almacen almacen, Oficina oficinaDestino, LocalDateTime fechaEntregaReal,
             LocalDateTime fechaEntregaEstimada, EstadoPedido estado, int cantidadPaquetes, String codigoSeguridad) {
-        this.id_pedido = idCounter++;
-        this.fid_almacen = fid_almacen;
-        this.fid_oficinaDest = fid_oficinaDest;
+        this.almacen = almacen;
+        this.oficinaDestino = oficinaDestino;
         this.fechaEntregaReal = fechaEntregaReal;
         this.fechaEntregaEstimada = fechaEntregaEstimada;
         this.estado = estado;
@@ -95,20 +86,20 @@ public class Pedido {
         this.id_pedido = id_pedido;
     }
 
-    public Long getFid_almacen() {
-        return fid_almacen;
+    public Almacen getAlmacen() {
+        return almacen;
     }
 
-    public void setFid_almacen(Long fid_almacen) {
-        this.fid_almacen = fid_almacen;
+    public void setAlmacen(Almacen almacen) {
+        this.almacen = almacen;
     }
 
-    public Long getFid_oficinaDest() {
-        return fid_oficinaDest;
+    public Oficina getOficinaDestino() {
+        return oficinaDestino;
     }
 
-    public void setFid_oficinaDest(Long fid_oficinaDest) {
-        this.fid_oficinaDest = fid_oficinaDest;
+    public void setOficinaDestino(Oficina oficinaDestino) {
+        this.oficinaDestino = oficinaDestino;
     }
 
     public LocalDateTime getFechaEntregaReal() {
@@ -151,12 +142,12 @@ public class Pedido {
         this.codigoSeguridad = codigoSeguridad;
     }
 
-    public Long getFid_cliente() {
-        return fid_cliente;
+    public Cliente getCliente() {
+        return cliente;
     }
 
-    public void setFid_cliente(Long fid_cliente) {
-        this.fid_cliente = fid_cliente;
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
         
     }
 
@@ -202,9 +193,9 @@ public class Pedido {
                             ubicacionS -> ubicacionS.getUbigeo().equals(ubigeoDestino)).findFirst();
                     if(ubicacionDestinoSeleccionada.isPresent()){
                         Optional<Oficina> oficinaSeleccionada = oficinas.stream().filter(
-                        oficinaS -> oficinaS.getFid_ubicacion() == ubicacionDestinoSeleccionada.get().getIdUbicacion()).findFirst();
+                        oficinaS -> oficinaS.getUbicacion().getIdUbicacion() == ubicacionDestinoSeleccionada.get().getIdUbicacion()).findFirst();
                         if(oficinaSeleccionada.isPresent()){
-                            pedido.setFid_oficinaDest(oficinaSeleccionada.get().getId_oficina());
+                            pedido.setOficinaDestino(oficinaSeleccionada.get());
                             pedido.setFechaRegistro(fechaHora);
                             pedido.setFechaEntregaEstimada(LocalDateTime.now());//solo para prueba
                             pedido.setCantidadPaquetes(cantidadPaquetes);

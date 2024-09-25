@@ -12,12 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 import jakarta.persistence.*;
-import org.springframework.stereotype.Component;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 //@AllArgsConstructor
 //@NoArgsConstructor
@@ -41,25 +35,25 @@ public class Bloqueo {
 
     @OneToOne
     @JoinColumn(name = "fid_tramoAfectado")
-    private Long fid_tramoAfectado;
+    private Tramo tramoAfectado;
 
     @ManyToOne
     @JoinColumn(name = "fid_ubicacionOrigen", nullable = false)
-    private Long fid_ubicacionOrigen;
+    private Ubicacion ubicacionOrigen;
 
     @ManyToOne
     @JoinColumn(name = "fid_ubicacionDestino", nullable = false)
-    private Long fid_ubicacionDestino;
+    private Ubicacion ubicacionDestino;
 
     public Bloqueo() {
 
     }
 
-    public Bloqueo(Long id_bloqueo, LocalDateTime fechaInicio, LocalDateTime fechaFin, Long fid_tramoAfectado) {
+    public Bloqueo(Long id_bloqueo, LocalDateTime fechaInicio, LocalDateTime fechaFin, Tramo tramoAfectado) {
         this.id_bloqueo = id_bloqueo;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
-        this.fid_tramoAfectado = fid_tramoAfectado;
+        this.tramoAfectado = tramoAfectado;
     }
 
     public Long getId_bloqueo() {
@@ -86,12 +80,12 @@ public class Bloqueo {
         this.fechaFin = fechaFin;
     }
 
-    public Long getFidTramoAfectado() {
-        return fid_tramoAfectado;
+    public Tramo getTramoAfectado() {
+        return tramoAfectado;
     }
 
-    public void setFidTramoAfectado(Long fid_tramoAfectado) {
-        this.fid_tramoAfectado = fid_tramoAfectado;
+    public void setTramoAfectado(Tramo tramoAfectado) {
+        this.tramoAfectado = tramoAfectado;
     }
 
     public static ArrayList<Bloqueo> cargarBloqueosDesdeArchivo(String rutaArchivo, List<Ubicacion> ubicaciones){
@@ -135,8 +129,10 @@ public class Bloqueo {
                     if(ubicacionOrigenSeleccionada.isPresent() && ubicacionDestinoSeleccionada.isPresent()){
                         bloqueo.setFechaInicio(fechaHoraInicio);
                         bloqueo.setFechaInicio(fechaHoraFin);
-                        bloqueo.setFid_ubicacionOrigen(ubicacionOrigenSeleccionada.get().getId_ubicacion());
-                        bloqueo.setFid_ubicacionOrigen(ubicacionDestinoSeleccionada.get().getId_ubicacion());
+                        bloqueo.setUbicacionOrigen(ubicacionOrigenSeleccionada.get());
+                        bloqueo.setUbicacionOrigen(ubicacionDestinoSeleccionada.get());
+                        //bloqueo.setFid_ubicacionOrigen(ubicacionOrigenSeleccionada.get().getId_ubicacion());
+                        //bloqueo.setFid_ubicacionOrigen(ubicacionDestinoSeleccionada.get().getId_ubicacion());
                         bloqueos.add(bloqueo);
                     }
                 }
@@ -148,19 +144,19 @@ public class Bloqueo {
         return bloqueos;
     }
 
-    public Long getFid_ubicacionOrigen() {
-        return fid_ubicacionOrigen;
+    public Ubicacion getUbicacionOrigen() {
+        return ubicacionOrigen;
     }
 
-    public void setFid_ubicacionOrigen(Long fid_ubicacionOrigen) {
-        this.fid_ubicacionOrigen = fid_ubicacionOrigen;
+    public void setUbicacionOrigen(Ubicacion ubicacionOrigen) {
+        this.ubicacionOrigen = ubicacionOrigen;
     }
 
-    public Long getFid_ubicacionDestino() {
-        return fid_ubicacionDestino;
+    public Ubicacion getUbicacionDestino() {
+        return ubicacionDestino;
     }
 
-    public void setFid_ubicacionDestino(Long fid_ubicacionDestino) {
-        this.fid_ubicacionDestino = fid_ubicacionDestino;
+    public void setUbicacionDestino(Ubicacion ubicacionDestino) {
+        this.ubicacionDestino = ubicacionDestino;
     }
 }

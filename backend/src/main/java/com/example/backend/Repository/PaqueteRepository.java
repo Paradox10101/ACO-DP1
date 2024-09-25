@@ -7,7 +7,7 @@ import com.example.backend.models.Paquete;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PaqueteRepository extends JpaRepository<Paquete, Integer> {
+public interface PaqueteRepository extends JpaRepository<Paquete, Long> {
 
     Optional<Paquete> findByCodigo(String codigo);
 }

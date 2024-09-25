@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import jakarta.persistence.*;
@@ -25,9 +24,19 @@ public class Mantenimiento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_mantenimiento")
     private Long id_mantenimiento;
+    
+    @Column(name = "tipo")
     private TipoMantenimiento tipo;
+
+    @Column(name = "fechaProgramada")
     private Date fechaProgramada;
+
+    @Column(name = "duracion")
     private Time duracion;
+
+    @ManyToOne
+    @JoinColumn(name = "fid_vehiculo")
+    private Vehiculo vehiculo;
 
     public Mantenimiento() {
     }

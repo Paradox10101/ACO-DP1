@@ -1,6 +1,5 @@
 
 package com.example.backend.models;
-import jakarta.persistence.Table;
 
 public enum VelocidadSimulacion {
     x1, 

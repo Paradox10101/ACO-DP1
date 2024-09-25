@@ -1,13 +1,5 @@
 package com.example.backend.models;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,11 +16,19 @@ public class Cliente {
     @Column(name = "id_cliente")
     private Long id_cliente;
 
-    @Column(nullable = false)
+    @Column(name="codigo", nullable = false)
     private String codigo;
+    
+    @Column(name = "nombres", nullable = false)
     private String nombres;
+    
+    @Column(name = "apellidos", nullable = false)
     private String apellidos;
+    
+    @Column(name = "telefono")
     private String telefono;
+
+    @Column(name = "email")
     private String email;
 
     public Long getId_cliente() {
@@ -46,5 +46,36 @@ public class Cliente {
     public void setCodigo(String codigo) {
         this.codigo = codigo;
     }
+    
+    public String getNombres() {
+        return nombres;
+    }
 
+    public void setNombres(String nombres) {
+        this.nombres = nombres;
+    }
+
+    public String getApellidos() {
+        return apellidos;
+    }
+
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

@@ -7,6 +7,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumn;
 
 @Entity
 @Table(name = "Almacen")
@@ -17,22 +19,21 @@ public class Almacen {
     @Column(name = "id_almacen")
     private Long id_almacen;
 
-    @Column(name = "fid_ubicacion")
-    private Long fid_ubicacion;
+    @OneToOne
+    @JoinColumn(name = "fid_ubicacion", nullable=false)
+    private Ubicacion ubicacion;
 
-    @Column(name = "cantidad_camiones")
+    @Column(name = "cantidad_vehiculos")
     private int cantidadVehiculos;
 
-    // Variable estática para manejar el autoincremento de IDs
-    private static Long idCounter = 1L;
 
     public Almacen(){
-        this.id_almacen = idCounter++;
+       
     }
 
-    public Almacen(Long id_almacen, Long fid_ubicacion, int cantidadVehiculos) {
-        this.id_almacen = idCounter++;
-        this.fid_ubicacion = fid_ubicacion;
+    public Almacen(Long id_almacen, Ubicacion ubicacion, int cantidadVehiculos) {
+        this.id_almacen = id_almacen;
+        this.ubicacion = ubicacion;
         this.cantidadVehiculos = cantidadVehiculos;
     }
 
@@ -44,12 +45,12 @@ public class Almacen {
         this.id_almacen = id_almacen;
     }
 
-    public Long getFid_ubicacion() {
-        return fid_ubicacion;
+    public Ubicacion getUbicacion() {
+        return ubicacion;
     }
 
-    public void setFid_ubicacion(Long fid_ubicacion) {
-        this.fid_ubicacion = fid_ubicacion;
+    public void setUbicacion(Ubicacion ubicacion) {
+        this.ubicacion = ubicacion;
     }
 
     public int getCantidadVehiculos() {

@@ -1,12 +1,8 @@
 package com.example.backend.models;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +14,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 @Table(name = "Oficina")
@@ -28,13 +26,14 @@ public class Oficina {
     @Column(name = "id_oficina")
     private Long id_oficina;
 
-    @Column(name = "fid_ubicacion")
-    private Long fid_ubicacion;
+    @ManyToOne
+    @JoinColumn(name = "fid_ubicacion", nullable=false)
+    private Ubicacion ubicacion;
 
-    @Column(name = "capacidad_utilizada")
+    @Column(name = "capacidadUtilizada")
     private int capacidadUtilizada;
 
-    @Column(name = "capacidad_maxima")
+    @Column(name = "capacidadMaxima")
     private int capacidadMaxima;
 
 
@@ -42,17 +41,17 @@ public class Oficina {
     private static Long idCounter = 1L;
 
     //no va tener ni longitud y latitud --> servir como prueba
-    public Oficina(Long id_oficina, Long fid_ubicacion, int capacidadUtilizada, int capacidadMaxima) {
+    public Oficina(Long id_oficina, Ubicacion ubicacion, int capacidadUtilizada, int capacidadMaxima) {
         this.id_oficina = idCounter++;
-        this.fid_ubicacion = fid_ubicacion;
+        this.ubicacion = ubicacion;
         this.capacidadUtilizada = capacidadUtilizada;
         this.capacidadMaxima = capacidadMaxima;
     }
 
-    public Oficina(Long id_oficina, Long fid_ubicacion, double latitud, double longitud, int capacidadUtilizada,
+    public Oficina(Long id_oficina, Ubicacion ubicacion, double latitud, double longitud, int capacidadUtilizada,
             int capacidadMaxima) {
         this.id_oficina = idCounter++;
-        this.fid_ubicacion = fid_ubicacion;
+        this.ubicacion = ubicacion;
         this.capacidadUtilizada = capacidadUtilizada;
         this.capacidadMaxima = capacidadMaxima;
     }
@@ -62,9 +61,9 @@ public class Oficina {
     }
 
 
-    public Oficina(Long id_oficina, Long fid_ubicacion) {
+    public Oficina(Long id_oficina, Ubicacion ubicacion) {
         this.id_oficina = id_oficina;
-        this.fid_ubicacion = fid_ubicacion;
+        this.ubicacion = ubicacion;
     }
     
 
@@ -76,12 +75,12 @@ public class Oficina {
         this.id_oficina = id_oficina;
     }
 
-    public Long getFid_ubicacion() {
-        return fid_ubicacion;
+    public Ubicacion getUbicacion() {
+        return ubicacion;
     }
 
-    public void setFid_ubicacion(Long fid_ubicacion) {
-        this.fid_ubicacion = fid_ubicacion;
+    public void setUbicacion(Ubicacion ubicacion) {
+        this.ubicacion = ubicacion;
     }
 
     public int getCapacidadUtilizada() {
@@ -125,7 +124,7 @@ public class Oficina {
                     ubicacion.setLongitud(longitud);
                     Optional<Region> regionSeleccionada = regiones.stream().filter(regionS -> regionS.getNombre().equals(region)).findFirst();
                     if(regionSeleccionada.isPresent()){
-                        ubicacion.setFid_Region(regionSeleccionada.get().getIdRegion());
+                        ubicacion.setRegion(regionSeleccionada.get());
                         if(!caminos.containsKey(ubigeo)){
                             ubicaciones.add(ubicacion);
                         }
@@ -133,7 +132,7 @@ public class Oficina {
                     else{
                         continue;
                     }
-                    oficina.setFid_ubicacion(ubicacion.getIdUbicacion());
+                    oficina.setUbicacion(ubicacion);
                     oficina.setCapacidadMaxima(capacidadMaxima);
                     caminos.put(ubigeo,new ArrayList<Ubicacion>());
                     oficinas.add(oficina);

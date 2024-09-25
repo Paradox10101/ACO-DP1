@@ -1,12 +1,8 @@
 package com.example.backend.models;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -16,7 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
@@ -28,13 +24,17 @@ public class Tramo {
     @Column(name = "id_tramo")
     private Long id_tramo;
 
-    @ManyToOne
-    @JoinColumn(name = "id_ubicacion_origen", nullable = false)
-    private Long fid_ubicacion_origen;
+    @OneToOne
+    @JoinColumn(name = "fid_ubicacion_origen", nullable = false)
+    private Ubicacion ubicacionOrigen;
 
-    @ManyToOne
-    @JoinColumn(name = "id_ubicacion_destino", nullable = false)
-    private Long fid_ubicacion_destino;
+    @OneToOne
+    @JoinColumn(name = "fid_ubicacion_destino", nullable = false)
+    private Ubicacion ubicacionDestino;
+
+    @OneToOne
+    @JoinColumn(name = "fid_plan_transporte", nullable = false)
+    private PlanTransporte planTransporte;
 
     @Column(name = "bloqueado")
     private boolean bloqueado;
@@ -54,20 +54,18 @@ public class Tramo {
     @Column(name = "capacidadActual")
     private int capacidadActual;
 
-    @ManyToOne
-    @JoinColumn(name = "id_vehiculoXTramo", nullable = false)
-    private Long fid_vehiculoXTramo;
 
     public Tramo(Long id_tramo,
-            Long fid_ubicacion_origen,
-            Long fid_ubicacion_destino, boolean bloqueado, float distancia,
-            float velocidad) {
+            Ubicacion ubicacionOrigen,
+            Ubicacion ubicacionDestino, boolean bloqueado, float distancia,
+            float velocidad, PlanTransporte planTransporte) {
         this.id_tramo = id_tramo;
-        this.fid_ubicacion_origen = fid_ubicacion_origen;
-        this.fid_ubicacion_destino = fid_ubicacion_destino;
+        this.ubicacionOrigen = ubicacionOrigen;
+        this.ubicacionDestino = ubicacionDestino;
         this.bloqueado = bloqueado;
         this.distancia = distancia;
         this.velocidad = velocidad;
+        this.planTransporte = planTransporte;
     }
 
     public Long getId_tramo() {
@@ -78,20 +76,20 @@ public class Tramo {
         this.id_tramo = id_tramo;
     }
 
-    public Long getFid_ubicacion_origen() {
-        return fid_ubicacion_origen;
+    public Ubicacion getubicacionOrigen() {
+        return ubicacionOrigen;
     }
 
-    public void setFid_ubicacion_origen(Long fid_ubicacion_origen) {
-        this.fid_ubicacion_origen = fid_ubicacion_origen;
+    public void setubicacionOrigen(Ubicacion ubicacionOrigen) {
+        this.ubicacionOrigen = ubicacionOrigen;
     }
 
-    public Long getFid_ubicacion_destino() {
-        return fid_ubicacion_destino;
+    public Ubicacion getubicacionDestino() {
+        return ubicacionDestino;
     }
 
-    public void setFid_ubicacion_destino(Long fid_ubicacion_destino) {
-        this.fid_ubicacion_destino = fid_ubicacion_destino;
+    public void setubicacionDestino(Ubicacion ubicacionDestino) {
+        this.ubicacionDestino = ubicacionDestino;
     }
 
     public boolean isBloqueado() {

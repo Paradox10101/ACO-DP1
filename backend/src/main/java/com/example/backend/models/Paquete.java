@@ -9,6 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 
 @Entity
 @Table(name = "Paquete")
@@ -19,31 +21,63 @@ public class Paquete {
     @Column(name = "id_paquete")
     private Long id_paquete;
 
-    @Column(name = "fid_almacen")
-    private Long fid_almacen;
+    @ManyToOne
+    @JoinColumn(name = "fid_almacen")
+    private Almacen almacen;
 
-    @Column(name = "fid_pedido")
-    private Long fid_pedido;
+    @ManyToOne
+    @JoinColumn(name = "fid_pedido")
+    private Pedido pedido;
 
-    @Column(name = "fid_tramoActual")
-    private Long fid_tramoActual;
+    @ManyToOne
+    @JoinColumn(name = "fid_tramoActual")
+    private Tramo tramoActual;
 
     @Enumerated(EnumType.STRING)
     private EstadoPaquete estado;
+    
 
-    // Variable estática para manejar el autoincremento de IDs
-    private static Long idCounter = 1L;
-
-    public Paquete(Long id_paquete, Long fid_almacen, Long fid_pedido, Long fid_tramoActual, EstadoPaquete estado) {
-        this.id_paquete = idCounter++;
-        this.fid_almacen = fid_almacen;
-        this.fid_pedido = fid_pedido;
-        this.fid_tramoActual = fid_tramoActual;
+    public Paquete(Long id_paquete, Almacen almacen, Pedido pedido, Tramo tramoActual, EstadoPaquete estado) {
+        this.almacen = almacen;
+        this.pedido = pedido;
+        this.tramoActual = tramoActual;
         this.estado = estado;
     }
 
     public Paquete()
     {
-        this.id_paquete = idCounter++;
     }
+    
+    public Almacen getAlmacen() {
+        return almacen;
+    }
+
+    public void setAlmacen(Almacen almacen) {
+        this.almacen = almacen;
+    }
+
+    public Pedido getPedido() {
+        return pedido;
+    }
+
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
+    }
+
+    public Tramo getTramoActual() {
+        return tramoActual;
+    }
+
+    public void setTramoActual(Tramo tramoActual) {
+        this.tramoActual = tramoActual;
+    }
+
+    public EstadoPaquete getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoPaquete estado) {
+        this.estado = estado;
+    }
+
 }

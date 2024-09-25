@@ -3,15 +3,36 @@ package com.example.backend.models;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
 
 @Table(name = "Simulacion")
 public class Simulacion {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_simulacion")
     private Long id_simulacion;
+
+    @Enumerated(EnumType.STRING)
     private TipoSimulacion tipo;
+
+    @Column(name = "fechaInicioRealSimulacion")
     private LocalDateTime fechaInicioRealSimulacion;
+
+    @Column(name = "fechaInicioSimulacion")
     private LocalDateTime fechaInicioSimulacion;
+    
+    @Column(name = "fechaFinSimulacion")
     private LocalDateTime fechaFinSimulacion;
+    
+    @Enumerated(EnumType.STRING)
     private EstadoSimulacion estado;
+
+    @Column(name = "velocidad")
     private VelocidadSimulacion velocidad;
 
 

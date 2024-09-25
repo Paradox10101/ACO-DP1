@@ -7,6 +7,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 
 @Entity
 @Table(name = "Averia")
@@ -24,4 +26,8 @@ public class Averia {
 
     @Column(name = "fecha_fin")
     private LocalDateTime fechaFin;
+
+    @OneToOne
+    @JoinColumn(name = "fid_vehiculo")
+    private Vehiculo vehiculo;
 }

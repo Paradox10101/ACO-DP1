@@ -20,6 +20,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -34,11 +35,8 @@ public class PlanTransporte {
     private Long id_planTransporte;
 
     @ManyToOne
-    @JoinColumn(name = "id_pedido")
-    private Long fid_pedido;
-
-    @OneToMany(mappedBy = "planTransporte", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Vehiculo> vehiculos;
+    @JoinColumn(name = "fid_pedido")
+    private Pedido pedido;
 
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
@@ -46,16 +44,14 @@ public class PlanTransporte {
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActalizacion;
 
-    @ManyToOne
-    @JoinColumn(name = "id_ubicacion")
-    private Long fid_origen;
+    @OneToOne
+    @JoinColumn(name = "fid_ubicacion_origen")
+    private Ubicacion ubicacionOrigen;
 
-    @ManyToOne
-    @JoinColumn(name = "id_ubicacion")
-    private Long fid_destino;
+    @OneToOne
+    @JoinColumn(name = "fid_ubicacion_destino")
+    private Ubicacion ubicacionDestino;
 
-    @OneToMany(mappedBy = "planTransporte", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Tramo> tramos;
 
     @Enumerated(EnumType.STRING)
     private EstadoPedido estado;
@@ -65,6 +61,49 @@ public class PlanTransporte {
 
     public PlanTransporte() {
 
+    }
+
+    public PlanTransporte(Long id_planTransporte, Pedido pedido, LocalDateTime fechaCreacion,
+            LocalDateTime fechaActalizacion, Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino) {
+        this.id_planTransporte = id_planTransporte;
+        this.pedido = pedido;
+        this.fechaCreacion = fechaCreacion;
+        this.fechaActalizacion = fechaActalizacion;
+        this.ubicacionOrigen = ubicacionOrigen;
+        this.ubicacionDestino = ubicacionDestino;
+    }
+
+    public Long getId_planTransporte() {
+        return id_planTransporte;
+    }
+
+    public void setId_planTransporte(Long id_planTransporte) {
+        this.id_planTransporte = id_planTransporte;
+    }
+
+    public Pedido getPedido() {
+        return pedido;
+    }
+
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
+    }
+
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public LocalDateTime getFechaActalizacion() {
+        return fechaActalizacion;
+    }
+
+    public void setFechaActalizacion(LocalDateTime fechaActalizacion) {
+        this.fechaActalizacion = fechaActalizacion;
     }
 
     public EstadoPedido getEstado() {
@@ -90,17 +129,18 @@ public class PlanTransporte {
 
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);
-            planOptimo.setFid_pedido(pedido.getId_pedido());
+            planOptimo.setPedido(pedido);
             planOptimo.setEstado(EstadoPedido.Registrado);
             
-            List<Tramo> tramosRuta = planOptimo.getTramos();
-            actualizarCambiosEnvio(tramosRuta, pedido, oficinas);
+            //Falta hallar tramos por plan de transporte
+            //List<Tramo> tramosRuta = planOptimo.getTra();
+            //actualizarCambiosEnvio(tramosRuta, pedido, oficinas);
             return planOptimo; // Retorna el plan de transporte encontrado
             //planViajeRepository.save(rutaOptima);
             //rutas.add(rutaOptima);
         }else{
             PlanTransporte rutaInvalida = new PlanTransporte(); // Crear una nueva instancia de PlanViaje
-            rutaInvalida.setFid_pedido(pedido.getId_pedido()); // Asignar el envío a la nueva instancia
+            rutaInvalida.setPedido(pedido); // Asignar el envío a la nueva instancia
             //rutas.add(rutaInvalida);
             System.out.println("No se encontró una ruta válida para el envío: " + pedido.getId_pedido());
             return null;
@@ -111,7 +151,7 @@ public class PlanTransporte {
 
     public void actualizarCambiosEnvio(List<Tramo> tramosRuta, Pedido pedido,List<Oficina> oficinas) {
         // Obtener la oficina de destino
-        Oficina oficinaDestino = buscarOficinaPorId(pedido.getFid_oficinaDest(), oficinas);
+        Oficina oficinaDestino = buscarOficinaPorId(pedido.getOficinaDestino().getId_oficina(), oficinas);
 
         for (int i = 0; i < tramosRuta.size(); i++) {
             Tramo tramo = tramosRuta.get(i);
@@ -120,19 +160,19 @@ public class PlanTransporte {
             if (i == 0) {
                 // Primer tramo, origen es siempre un almacén
                 System.out.println(
-                        "Almacén de origen: " + pedido.getFid_almacen() + " hasta " + tramo.getFid_ubicacion_destino());
+                        "Almacén de origen: " + pedido.getAlmacen().getId_almacen() + " hasta " + tramo.getubicacionDestino().getIdUbicacion());
             } else {
                 // Los tramos siguientes son entre oficinas
                 Tramo tramoAnterior = tramosRuta.get(i - 1);
                 System.out.println(
-                        "De: " + tramoAnterior.getFid_ubicacion_destino() + " a " + tramo.getFid_ubicacion_destino());
+                        "De: " + tramoAnterior.getubicacionOrigen().getIdUbicacion() + " a " + tramo.getubicacionDestino().getIdUbicacion());
             }
         }
 
         // Al llegar al último tramo, verificar si se entrega correctamente a la oficina
         // de destino
         Tramo ultimoTramo = tramosRuta.get(tramosRuta.size() - 1);
-        if (ultimoTramo.getFid_ubicacion_destino().equals(oficinaDestino.getFid_ubicacion())) {
+        if (ultimoTramo.getubicacionOrigen().getIdUbicacion().equals(oficinaDestino.getUbicacion().getIdUbicacion())) {
             System.out.println("Pedido entregado en la oficina destino " + oficinaDestino.getId_oficina());
         } else {
             System.out.println("Error: La entrega no coincide con la oficina destino esperada.");
@@ -149,80 +189,5 @@ public class PlanTransporte {
     }
 
 
-    public PlanTransporte(Long id_planTransporte, Long fid_pedido, ArrayList<Vehiculo> vehiculos, LocalDateTime fechaCreacion,
-            LocalDateTime fechaActalizacion, Long fid_origen, Long fid_destino, ArrayList<Tramo> tramos) {
-        this.id_planTransporte = id_planTransporte;
-        this.fid_pedido = fid_pedido;
-        this.vehiculos = vehiculos;
-        this.fechaCreacion = fechaCreacion;
-        this.fechaActalizacion = fechaActalizacion;
-        this.fid_origen = fid_origen;
-        this.fid_destino = fid_destino;
-        this.tramos = tramos;
-    }
-
-    public Long getId_planTransporte() {
-        return id_planTransporte;
-    }
-
-    public void setId_planTransporte(Long id_planTransporte) {
-        this.id_planTransporte = id_planTransporte;
-    }
-
-    public Long getFid_pedido() {
-        return fid_pedido;
-    }
-
-    public void setFid_pedido(Long fid_pedido) {
-        this.fid_pedido = fid_pedido;
-    }
-
-    public List<Vehiculo> getVehiculos() {
-        return vehiculos;
-    }
-
-    public void setVehiculos(ArrayList<Vehiculo> vehiculos) {
-        this.vehiculos = vehiculos;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public LocalDateTime getFechaActalizacion() {
-        return fechaActalizacion;
-    }
-
-    public void setFechaActalizacion(LocalDateTime fechaActalizacion) {
-        this.fechaActalizacion = fechaActalizacion;
-    }
-
-    public Long getFid_origen() {
-        return fid_origen;
-    }
-
-    public void setFid_origen(Long fid_origen) {
-        this.fid_origen = fid_origen;
-    }
-
-    public Long getFid_destino() {
-        return fid_destino;
-    }
-
-    public void setFid_destino(Long fid_destino) {
-        this.fid_destino = fid_destino;
-    }
-
-    public List<Tramo> getTramos() {
-        return tramos;
-    }
-
-    public void setTramos(List<Tramo> tramos) {
-        this.tramos = tramos;
-    }
 
 }

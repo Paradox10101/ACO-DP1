@@ -24,8 +24,6 @@ public class Region {
     @Column(name = "velocidad")
     private float velocidad=0;
 
-    @Transient
-    private ArrayList<Region>relacionRegiones = new ArrayList<>();
 
     // Variable estática para manejar el autoincremento de IDs
     private static Long idCounter = 1L;
@@ -78,16 +76,5 @@ public class Region {
         
         this.velocidad = velocidad;
     }
-
-    public ArrayList<Region> getRelacionRegiones() {
-        return relacionRegiones;
-    }
-
-    public void setRelacionRegionVelocidad(Region region, float velocidad) {
-        region.setVelocidad(velocidad);
-        this.relacionRegiones.add(region);
-    }
-
-    
     
 }

@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,21 +20,24 @@ public class Vehiculo {
     @Column(name = "id_vehiculo")
     private Long id_vehiculo;
 
+    @Column(name = "codigo")
+    private String codigo;
+
     @ManyToOne
-    @JoinColumn(name = "id_plan_transporte")
-    private Long fid_plan_transporte;
+    @JoinColumn(name = "fid_plan_transporte")
+    private PlanTransporte planTransporte;
 
     @OneToOne
     @JoinColumn(name = "fid_almacen")
-    private Long fid_Almacen;
+    private Almacen almacen;
 
     @ManyToOne
-    @JoinColumn(name = "id_almacen")
-    private Long fid_ubicacionActual;
+    @JoinColumn(name = "fid_ubicacion")
+    private Ubicacion ubicacionActual;
 
-    @ManyToOne
-    @JoinColumn(name = "fid_tipoVehiculo")
-    private Long fid_tipoVehiculo;
+    @OneToOne
+    @JoinColumn(name = "fid_tipoVehiculo", nullable=false)
+    private TipoVehiculo tipoVehiculo;
 
     @Column(name = "fecha_salida")
     private LocalDateTime fechaSalida;
@@ -43,30 +45,21 @@ public class Vehiculo {
     @Column(name = "fecha_llegada")
     private LocalDateTime fechaLlegada;
 
-    @Column(name = "capacidad_maxima")
+    @Column(name = "capacidad_maxima", nullable=false)
     private int capacidadMaxima;
 
-    @Column(name = "codigo")
-    private String codigo;
-
-    //@Column(name = "estado")
-    @Transient
+    @Enumerated(EnumType.STRING)
     private EstadoVehiculo estado;
-
-    @Transient
-    private ArrayList<Mantenimiento> mantenimientos;
-
-    @Transient
-    private ArrayList<Averia> averias;
+    
 
     @Column(name = "distancia_total")
     private float distanciaTotal;
 
-    public Vehiculo(Long id_vehiculo, Long fid_plan_transporte, Long fidAlmacen, LocalDateTime fechaSalida,
+    public Vehiculo(Long id_vehiculo, PlanTransporte planTransporte, Almacen almacen, LocalDateTime fechaSalida,
             LocalDateTime fechaLlegada, int capacidadMaxima, EstadoVehiculo estado, float distanciaTotal) {
         this.id_vehiculo = id_vehiculo;
-        this.fid_plan_transporte = fid_plan_transporte;
-        this.fid_Almacen = fidAlmacen;
+        this.planTransporte = planTransporte;
+        this.almacen = almacen;
         this.fechaSalida = fechaSalida;
         this.fechaLlegada = fechaLlegada;
         this.capacidadMaxima = capacidadMaxima;
@@ -86,12 +79,12 @@ public class Vehiculo {
         this.id_vehiculo = id_vehiculo;
     }
 
-    public Long getFid_plan_transporte() {
-        return fid_plan_transporte;
+    public PlanTransporte getPlanTransporte() {
+        return planTransporte;
     }
 
-    public void setFid_plan_transporte(Long id_plan_transporte) {
-        this.fid_plan_transporte = id_plan_transporte;
+    public void setPlanTransporte(PlanTransporte planTransporte) {
+        this.planTransporte = planTransporte;
     }
 
     public LocalDateTime getFechaSalida() {
@@ -126,22 +119,6 @@ public class Vehiculo {
         this.estado = estado;
     }
 
-    public ArrayList<Mantenimiento> getMantenimientos() {
-        return mantenimientos;
-    }
-
-    public void setMantenimientos(ArrayList<Mantenimiento> mantenimientos) {
-        this.mantenimientos = mantenimientos;
-    }
-
-    public ArrayList<Averia> getAverias() {
-        return averias;
-    }
-
-    public void setAverias(ArrayList<Averia> averias) {
-        this.averias = averias;
-    }
-
     public float getDistanciaTotal() {
         return distanciaTotal;
     }
@@ -173,7 +150,7 @@ public class Vehiculo {
                     Optional<Ubicacion> ubicacionSeleccionada = ubicaciones.stream().filter(ubicacionS -> ubicacionS.getProvincia().equals(provinciaSel)).findFirst();
                     if(ubicacionSeleccionada.isPresent()){
                         Long id_ubicacion = ubicacionSeleccionada.get().getId_ubicacion();
-                        almacen.setFid_ubicacion(id_ubicacion);
+                        almacen.setUbicacion(ubicacion);
                         linea = lector.readLine();
                         String[] codigosVehiculos = linea.split(",");
                         almacen.setCantidadVehiculos(codigosVehiculos.length);
@@ -184,7 +161,7 @@ public class Vehiculo {
 
                             for(TipoVehiculo tipoVehiculo : tiposVehiculo){
                                 if(tipoVehiculo.getNombre().equals(String.valueOf(codigoCorregido.charAt(0)))){
-                                    vehiculo.setFid_tipoVehiculo(tipoVehiculo.getId_tipoVehiculo());
+                                    vehiculo.setTipoVehiculo(tipoVehiculo);
                                     vehiculo.setDistanciaTotal(0);
                                     vehiculo.setCodigo(codigoCorregido);
                                     vehiculos.add(vehiculo);
@@ -204,28 +181,28 @@ public class Vehiculo {
         return vehiculos;
     }
 
-    public Long getFid_Almacen() {
-        return fid_Almacen;
+    public Almacen getAlmacen() {
+        return almacen;
     }
 
-    public void setFid_Almacen(Long fid_Almacen) {
-        this.fid_Almacen = fid_Almacen;
+    public void setAlmacen(Almacen almacen) {
+        this.almacen = almacen;
     }
 
-    public Long getFid_ubicacionActual() {
-        return fid_ubicacionActual;
+    public Ubicacion getUbicacionActual() {
+        return ubicacionActual;
     }
 
-    public void setFid_ubicacionActual(Long fid_ubicacionActual) {
-        this.fid_ubicacionActual = fid_ubicacionActual;
+    public void setFid_ubicacionActual(Ubicacion ubicacionActual) {
+        this.ubicacionActual = ubicacionActual;
     }
 
-    public Long getFid_tipoVehiculo() {
-        return fid_tipoVehiculo;
+    public TipoVehiculo getTipoVehiculo() {
+        return tipoVehiculo;
     }
 
-    public void setFid_tipoVehiculo(Long fid_tipoVehiculo) {
-        this.fid_tipoVehiculo = fid_tipoVehiculo;
+    public void setTipoVehiculo(TipoVehiculo tipoVehiculo) {
+        this.tipoVehiculo = tipoVehiculo;
     }
 
     public String getCodigo() {

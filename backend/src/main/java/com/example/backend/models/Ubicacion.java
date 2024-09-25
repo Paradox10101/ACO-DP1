@@ -24,7 +24,7 @@ public class Ubicacion {
 
     @ManyToOne
     @JoinColumn(name = "id_region")
-    private Long fid_region;
+    private Region region;
 
     @Column(name = "latitud")
     private float latitud;
@@ -61,19 +61,19 @@ public class Ubicacion {
         this.id_ubicacion = idCounter++;
     }
 
-    public Ubicacion(Long id_ubicacion, String ubigeo, String ciudad, Long fid_region){
+    public Ubicacion(Long id_ubicacion, String ubigeo, String ciudad, Region region){
         this.id_ubicacion = idCounter++;
         this.ubigeo = ubigeo;
-        this.fid_region = fid_region;
+        this.region = region;
     }
 
 
-    public Long getFid_region() {
-        return fid_region;
+    public Region getRegion() {
+        return region;
     }
 
-    public void setFid_region(Long fid_region) {
-        this.fid_region = fid_region;
+    public void setRegion(Region region) {
+        this.region = region;
     }
 
     public Long getId_ubicacion() {
@@ -114,16 +114,5 @@ public class Ubicacion {
 
     public void setUbigeo(String ubigeo){
         this.ubigeo = ubigeo;
-    }
-
-    public Long getFid_Region(){
-        return fid_region;
-    }
-    
-    public void setFid_Region(Long fid_region){
-        this.fid_region = fid_region;
-    }
-    
-    
-
+    }    
 }
