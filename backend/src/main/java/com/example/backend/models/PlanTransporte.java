@@ -19,6 +19,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 @Entity
@@ -52,7 +53,7 @@ public class PlanTransporte {
     @Enumerated(EnumType.STRING)
     private EstadoPedido estado;
 
-    @Autowired
+    @Transient
     private Aco aco = new Aco();
 
     public PlanTransporte() {

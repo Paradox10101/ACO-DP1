@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PaqueteRepository extends JpaRepository<Paquete, Long> {
 
-    Optional<Paquete> findByCodigo(String codigo);
+    //Optional<Paquete> findByCodigo(String codigo);
 }

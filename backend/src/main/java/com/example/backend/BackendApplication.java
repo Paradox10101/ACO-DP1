@@ -30,7 +30,7 @@ public class BackendApplication {
 		SpringApplication.run(BackendApplication.class, args);
 
         
-        ArrayList<Oficina> oficinas;
+        /*ArrayList<Oficina> oficinas;
         ArrayList<Tramo> tramos;
         ArrayList<Pedido> pedidos;
         ArrayList<Bloqueo> bloqueos;
@@ -41,6 +41,8 @@ public class BackendApplication {
         ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
         ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
         HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
+        
+        
         regiones.add(new Region("COSTA", 1));
         regiones.add(new Region("SIERRA", 2));
         regiones.add(new Region("SELVA", 3));
@@ -63,6 +65,7 @@ public class BackendApplication {
             System.out.println("Capacidad Máxima: " + oficina.getCapacidadMaxima());
             System.out.println("--------------------------------------------------");
         }
+        */
         
         /*ArrayList<Tramo> tramos;
         ArrayList<Pedido> pedidos;
@@ -141,9 +144,7 @@ public class BackendApplication {
         System.out.println("Fin Pruebas");
 
 	}
-
-
-    /*
+    
 	@Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -155,6 +156,6 @@ public class BackendApplication {
             }
         };
     }
-    */
+    
 
 }
