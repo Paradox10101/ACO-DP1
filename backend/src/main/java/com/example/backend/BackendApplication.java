@@ -3,6 +3,7 @@ package com.example.backend;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -25,7 +26,9 @@ import com.example.backend.models.Vehiculo;
 public class BackendApplication {
 
 	public static void main(String[] args) {
-		//SpringApplication.run(BackendApplication.class, args);
+		SpringApplication.run(BackendApplication.class, args);
+
+        /*
         ArrayList<Oficina> oficinas;
         ArrayList<Tramo> tramos;
         ArrayList<Pedido> pedidos;
@@ -61,7 +64,7 @@ public class BackendApplication {
             System.out.println("--------------------------------------------------");
         }*/
 
-        boolean test = true;
+        /*
         // Crea una instancia del algoritmo ACO
         Aco aco = new Aco();
 
@@ -109,10 +112,11 @@ public class BackendApplication {
 
 
         System.out.println("Fin Pruebas");
+
 	}
 
 
-
+    /*
 	@Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -124,4 +128,6 @@ public class BackendApplication {
             }
         };
     }
+    */
+
 }

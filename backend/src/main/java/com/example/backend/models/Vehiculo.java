@@ -21,8 +21,8 @@ public class Vehiculo {
     @Column(name = "id_vehiculo")
     private Long id_vehiculo;
 
-    @ManyToMany
-    @Column(name = "id_plan_transporte")
+    @ManyToOne
+    @JoinColumn(name = "id_plan_transporte")
     private Long fid_plan_transporte;
 
     @OneToOne
@@ -34,7 +34,7 @@ public class Vehiculo {
     private Long fid_ubicacionActual;
 
     @ManyToOne
-    @Column(name = "fid_tipoVehiculo")
+    @JoinColumn(name = "fid_tipoVehiculo")
     private Long fid_tipoVehiculo;
 
     @Column(name = "fecha_salida")

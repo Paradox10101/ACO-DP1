@@ -10,17 +10,20 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
-import jakarta.persistence.Entity;
+
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Mantenimiento")
 public class Mantenimiento {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_mantenimiento")
     private Long id_mantenimiento;
     private TipoMantenimiento tipo;
     private Date fechaProgramada;

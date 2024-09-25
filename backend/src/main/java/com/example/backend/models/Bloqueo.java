@@ -40,15 +40,15 @@ public class Bloqueo {
     private LocalDateTime fechaFin;
 
     @OneToOne
-    @JoinColumn(name = "id_tramo", nullable = false)
+    @JoinColumn(name = "fid_tramoAfectado")
     private Long fid_tramoAfectado;
 
-    @OneToMany
+    @ManyToOne
     @JoinColumn(name = "fid_ubicacionOrigen", nullable = false)
     private Long fid_ubicacionOrigen;
 
-    @OneToMany
-    @JoinColumn(name = "fid_ubicacionOrigen", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "fid_ubicacionDestino", nullable = false)
     private Long fid_ubicacionDestino;
 
     public Bloqueo() {
