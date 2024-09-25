@@ -47,7 +47,7 @@ public class BackendApplication {
         regiones.get(2).setRelacionRegionVelocidad(regiones.get(2),65);
 
         oficinas = Oficina.cargarOficinasDesdeArchivo("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, caminos, ubicaciones);
-        Vehiculo.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, oficinas,ubicaciones, tiposVehiculo);
+        vehiculos = Vehiculo.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, oficinas,ubicaciones, tiposVehiculo);
         tramos = Tramo.cargarTramosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", caminos);
         pedidos = Pedido.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202403.txt", oficinas, ubicaciones);
         bloqueos = Bloqueo.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
