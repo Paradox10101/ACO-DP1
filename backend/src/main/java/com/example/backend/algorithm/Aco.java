@@ -13,6 +13,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.Transient;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.models.Oficina;

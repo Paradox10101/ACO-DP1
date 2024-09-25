@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    Optional<Cliente> findByCodigo(String codigo);//SE TIENE QUE IMPLEMENTAR ESTE METODO --> AUN FALTA
+    //Optional<Cliente> findByCodigo(String codigo);//SE TIENE QUE IMPLEMENTAR ESTE METODO --> AUN FALTA
 }

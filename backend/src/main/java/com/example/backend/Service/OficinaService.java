@@ -104,11 +104,6 @@ public class OficinaService {
             Map<String, ArrayList<Ubicacion>> caminos, ArrayList<Ubicacion> ubicaciones) {
         // Leer las oficinas desde el archivo
         ArrayList<Oficina> oficinas = leerOficinasDesdeArchivo(rutaArchivo);
-        //List<Ubicacion> ubicaciones = new ArrayList<>();
-        //Map<String, List<Ubicacion>> caminos = new HashMap<>();
-
-        // Obtén todas las oficinas de la base de datos
-        //oficinas = oficinaRepository.findAll();
 
         // Recorrer cada oficina y establecer las ubicaciones y regiones correspondientes
         for (Oficina oficina : oficinas) {

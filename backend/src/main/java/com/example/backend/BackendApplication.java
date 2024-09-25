@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -27,9 +28,8 @@ import com.example.backend.models.Vehiculo;
 public class BackendApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BackendApplication.class, args);
+        ApplicationContext context = SpringApplication.run(BackendApplication.class, args);
 
-        
         ArrayList<Oficina> oficinas;
         ArrayList<Tramo> tramos;
         ArrayList<Pedido> pedidos;
@@ -41,6 +41,8 @@ public class BackendApplication {
         ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
         ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
         HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
+
+        /*
         regiones.add(new Region("COSTA", 1));
         regiones.add(new Region("SIERRA", 2));
         regiones.add(new Region("SELVA", 3));
@@ -49,11 +51,12 @@ public class BackendApplication {
         regiones.get(1).setVelocidad( 60);
         regiones.get(1).setVelocidad( 55);
         regiones.get(2).setVelocidad( 65);
-        OficinaService oficinaService = new OficinaService();
-        oficinas = oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones,
-                caminos, ubicaciones);
 
-        
+        */
+        OficinaService oficinaService = context.getBean(OficinaService.class);
+        oficinas = oficinaService.leerOficinasDesdeArchivo("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt");
+
+        /*
         System.out.println("Listado de Oficinas:");
         System.out.println("--------------------------------------------------");
         for (Oficina oficina : oficinas) {
@@ -63,6 +66,7 @@ public class BackendApplication {
             System.out.println("Capacidad Máxima: " + oficina.getCapacidadMaxima());
             System.out.println("--------------------------------------------------");
         }
+
         
         /*ArrayList<Tramo> tramos;
         ArrayList<Pedido> pedidos;
@@ -141,9 +145,7 @@ public class BackendApplication {
         System.out.println("Fin Pruebas");
 
 	}
-
-
-    /*
+    
 	@Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -155,6 +157,6 @@ public class BackendApplication {
             }
         };
     }
-    */
+    
 
 }
