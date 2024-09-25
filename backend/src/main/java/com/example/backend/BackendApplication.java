@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.example.backend.Service.OficinaService;
 import com.example.backend.algorithm.Aco;
 import com.example.backend.models.Almacen;
 import com.example.backend.models.Bloqueo;
@@ -28,9 +29,42 @@ public class BackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BackendApplication.class, args);
 
-        /*
+        
         ArrayList<Oficina> oficinas;
         ArrayList<Tramo> tramos;
+        ArrayList<Pedido> pedidos;
+        ArrayList<Bloqueo> bloqueos;
+        ArrayList<Mantenimiento> mantenimientos;
+        ArrayList<Ubicacion> ubicaciones = new ArrayList<>();
+        ArrayList<Region> regiones = new ArrayList<Region>(); // Es hardcodeado
+        ArrayList<Vehiculo> vehiculos = new ArrayList<Vehiculo>(); // Es hardcodeado
+        ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
+        ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
+        HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
+        regiones.add(new Region("COSTA", 1));
+        regiones.add(new Region("SIERRA", 2));
+        regiones.add(new Region("SELVA", 3));
+        regiones.get(0).setVelocidad(70);
+        regiones.get(0).setVelocidad( 50);
+        regiones.get(1).setVelocidad( 60);
+        regiones.get(1).setVelocidad( 55);
+        regiones.get(2).setVelocidad( 65);
+        OficinaService oficinaService = new OficinaService();
+        oficinas = oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones,
+                caminos, ubicaciones);
+
+        
+        System.out.println("Listado de Oficinas:");
+        System.out.println("--------------------------------------------------");
+        for (Oficina oficina : oficinas) {
+            System.out.println("ID Oficina: " + oficina.getId_oficina());
+            System.out.println("Capacidad Utilizada: " +
+            oficina.getCapacidadUtilizada());
+            System.out.println("Capacidad Máxima: " + oficina.getCapacidadMaxima());
+            System.out.println("--------------------------------------------------");
+        }
+        
+        /*ArrayList<Tramo> tramos;
         ArrayList<Pedido> pedidos;
         ArrayList<Bloqueo> bloqueos;
         ArrayList<Mantenimiento> mantenimientos;
@@ -55,14 +89,7 @@ public class BackendApplication {
         pedidos = Pedido.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202403.txt", oficinas, ubicaciones);
         bloqueos = Bloqueo.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
         mantenimientos = Mantenimiento.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
-        /*System.out.println("Listado de Oficinas:");
-        System.out.println("--------------------------------------------------");
-        for (Oficina oficina : oficinas) {
-            System.out.println("ID Oficina: " + oficina.getId_oficina());
-            System.out.println("Capacidad Utilizada: " + oficina.getCapacidadUtilizada());
-            System.out.println("Capacidad Máxima: " + oficina.getCapacidadMaxima());
-            System.out.println("--------------------------------------------------");
-        }*/
+        
 
         /*
         // Crea una instancia del algoritmo ACO

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/regiones")
@@ -21,9 +22,8 @@ public class RegionController {
     }
 
     @GetMapping("/{id}")
-    public Region obtenerPorId(@PathVariable Long id) {
-        Region region = regionService.obtenerPorId(id);
-        return region;
+    public Optional<Region> obtenerPorId(@PathVariable Long id) {
+        return regionService.obtenerPorId(id);
     }
 
     @PostMapping

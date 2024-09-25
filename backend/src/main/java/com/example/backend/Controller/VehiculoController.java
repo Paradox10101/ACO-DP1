@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/vehiculos")
@@ -21,7 +22,7 @@ public class VehiculoController {
     }
 
     @GetMapping("/{id}")
-    public Vehiculo obtenerPorId(@PathVariable Long id) {
+    public Optional<Vehiculo> obtenerPorId(@PathVariable Long id) {
         return vehiculoService.obtenerPorId(id);
     }
 

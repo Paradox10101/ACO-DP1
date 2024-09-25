@@ -18,8 +18,8 @@ public class TramoService {
         return tramoRepository.findAll();
     }
 
-    public Tramo obtenerPorId(Long id) {
-        return tramoRepository.findById(id).orElse(null);
+    public Optional<Tramo> obtenerPorId(Long id) {
+        return tramoRepository.findById(id);
     }
 
     public Tramo guardar(Tramo tramo) {

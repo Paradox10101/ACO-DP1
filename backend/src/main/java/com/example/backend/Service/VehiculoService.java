@@ -18,8 +18,8 @@ public class VehiculoService {
         return vehiculoRepository.findAll();
     }
 
-    public Vehiculo obtenerPorId(Long id) {
-        return vehiculoRepository.findById(id).orElse(null);
+    public Optional<Vehiculo> obtenerPorId(Long id) {
+        return vehiculoRepository.findById(id);
     }
 
     public Vehiculo guardar(Vehiculo vehiculo) {

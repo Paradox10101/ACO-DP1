@@ -18,8 +18,8 @@ public class BloqueoService {
         return bloqueoRepository.findAll();
     }
 
-    public Bloqueo obtenerPorId(Long id) {
-        return bloqueoRepository.findById(id).orElse(null);
+    public Optional<Bloqueo> obtenerPorId(Long id) {
+        return bloqueoRepository.findById(id);
     }
 
     public Bloqueo guardar(Bloqueo bloqueo) {

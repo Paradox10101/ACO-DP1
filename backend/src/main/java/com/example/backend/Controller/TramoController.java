@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tramos")
@@ -21,9 +22,8 @@ public class TramoController {
     }
 
     @GetMapping("/{id}")
-    public Tramo obtenerPorId(@PathVariable Long id) {
-        Tramo tramo = tramoService.obtenerPorId(id);
-        return tramo;
+    public Optional<Tramo> obtenerPorId(@PathVariable Long id) {
+        return tramoService.obtenerPorId(id);
     }
 
 @PostMapping

@@ -99,7 +99,7 @@ public class Oficina {
         this.capacidadMaxima = capacidadMaxima;
     }
 
-    public static ArrayList<Oficina> cargarOficinasDesdeArchivo(String rutaArchivo, List<Region> regiones,
+    /*public static ArrayList<Oficina> cargarOficinasDesdeArchivo(String rutaArchivo, List<Region> regiones,
                                                                 HashMap<String, ArrayList<Ubicacion>> caminos,
                                                                 ArrayList<Ubicacion> ubicaciones) {
         ArrayList<Oficina> oficinas = new ArrayList<>();
@@ -144,4 +144,5 @@ public class Oficina {
         }
         return oficinas;
     }
+    */
 }

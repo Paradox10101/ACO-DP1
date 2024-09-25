@@ -18,8 +18,8 @@ public class PedidoService {
         return pedidoRepository.findAll();
     }
 
-    public Pedido obtenerPorId(Long id) {
-        return pedidoRepository.findById(id).orElse(null);
+    public Optional<Pedido> obtenerPorId(Long id) {
+        return pedidoRepository.findById(id);
     }
 
     public Pedido guardar(Pedido pedido) {

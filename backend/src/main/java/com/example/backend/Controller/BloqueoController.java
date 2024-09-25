@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/bloqueos")
@@ -21,7 +22,7 @@ public class BloqueoController {
     }
 
     @GetMapping("/{id}")
-    public Bloqueo obtenerPorId(@PathVariable Long id) {
+    public Optional<Bloqueo> obtenerPorId(@PathVariable Long id) {
         return bloqueoService.obtenerPorId(id);
     }
 

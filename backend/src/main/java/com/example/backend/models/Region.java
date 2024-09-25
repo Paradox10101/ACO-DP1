@@ -3,8 +3,6 @@ package com.example.backend.models;
 
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-
 @Entity
 @Table(name = "Region")
 public class Region {

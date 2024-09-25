@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/almacenes")
@@ -21,8 +22,8 @@ public class AlmacenController {
     }
 
     @GetMapping("/{id}")
-    public Almacen obtenerPorId(@PathVariable Long id) {
-        Almacen almacen = almacenService.obtenerPorId(id);
+    public Optional<Almacen> obtenerPorId(@PathVariable Long id) {
+        Optional<Almacen> almacen = almacenService.obtenerPorId(id);
         return almacen; 
         //OTRA FORMA DE IMPLEMENTARLO
     }

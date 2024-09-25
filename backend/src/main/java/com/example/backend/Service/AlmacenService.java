@@ -18,8 +18,8 @@ public class AlmacenService {
         return almacenRepository.findAll();
     }
 
-    public Almacen obtenerPorId(Long id) {
-        return almacenRepository.findById(id).orElse(null);
+    public Optional<Almacen> obtenerPorId(Long id) {
+        return almacenRepository.findById(id);
     }
 
     public Almacen guardar(Almacen almacen) {

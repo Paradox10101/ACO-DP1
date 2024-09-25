@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/planTransporte")
@@ -20,12 +21,12 @@ public class PlanTransporteController {
     }
 
     @PostMapping
-    public PlanTransporte guardarPlan(@RequestBody PlanTransporte planTransporte) {
-        return planTransporteService.guardarPlan(planTransporte);
+    public Optional<PlanTransporte> guardarPlan(@RequestBody PlanTransporte planTransporte) {
+        return Optional.of(planTransporteService.guardarPlan(planTransporte));
     }
 
     @GetMapping("/{id}")
-    public PlanTransporte obtenerPlanPorId(@PathVariable Long id) {
+    public Optional<PlanTransporte> obtenerPlanPorId(@PathVariable Long id) {
         return planTransporteService.buscarPorId(id);
     }
 
