@@ -12,11 +12,7 @@ import com.example.backend.Repository.UbicacionRepository;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Optional;
 
 @Service
@@ -115,7 +111,7 @@ public class OficinaService {
             if (regionSeleccionada.isPresent()) {
                 ubicacion.setRegion(regionSeleccionada.get());
                 // Guardar la ubicación si aún no existe en la base de datos
-                if (!ubicacionRepository.existsById(ubicacion.getId_ubicacion())) {
+                if (Objects.isNull(ubicacion.getId_ubicacion()) || !ubicacionRepository.existsById(ubicacion.getId_ubicacion())) {
                     ubicacionRepository.save(ubicacion);
                 }
                 if (!caminos.containsKey(ubicacion.getUbigeo())) {
@@ -123,13 +119,18 @@ public class OficinaService {
                 }
             }
             caminos.put(ubicacion.getUbigeo(), new ArrayList<>(Arrays.asList(ubicacion)));
-        }
-        // Guardar todas las oficinas en la base de datos
-        for (Oficina oficina : oficinas) {
-            if (!oficinaRepository.existsById(oficina.getId_oficina())) {
+            if (Objects.isNull(oficina.getId_oficina()) || !oficinaRepository.existsById(oficina.getId_oficina())) {
                 oficinaRepository.save(oficina);
             }
         }
+        // Guardar todas las oficinas en la base de datos
+        /*
+        for (Oficina oficina : oficinas) {
+            /*if (!oficinaRepository.existsById(oficina.getId_oficina())) {
+            }
+            oficinaRepository.save(oficina);
+        }
+        */
         return oficinas;
     }
 

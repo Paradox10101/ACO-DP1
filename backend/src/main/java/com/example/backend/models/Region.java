@@ -24,20 +24,20 @@ public class Region {
 
 
     // Variable estática para manejar el autoincremento de IDs
-    private static Long idCounter = 1L;
+
 
     public Region() {
-        this.id_region = idCounter++;
+
     }
 
     public Region(String nombre, int diasLimite) {
-        this.id_region = idCounter++;
+
         this.nombre = nombre;
         this.diasLimite = diasLimite;
     }
 
     public Region(Long id_region, String nombre, int diasLimite) {
-        this.id_region = idCounter++;
+
         this.nombre = nombre;
         this.diasLimite = diasLimite;
     }

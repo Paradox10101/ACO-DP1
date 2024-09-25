@@ -38,11 +38,9 @@ public class Oficina {
 
 
     // Variable estática para manejar el autoincremento de IDs
-    private static Long idCounter = 1L;
 
     //no va tener ni longitud y latitud --> servir como prueba
     public Oficina(Long id_oficina, Ubicacion ubicacion, int capacidadUtilizada, int capacidadMaxima) {
-        this.id_oficina = idCounter++;
         this.ubicacion = ubicacion;
         this.capacidadUtilizada = capacidadUtilizada;
         this.capacidadMaxima = capacidadMaxima;
@@ -50,14 +48,14 @@ public class Oficina {
 
     public Oficina(Long id_oficina, Ubicacion ubicacion, double latitud, double longitud, int capacidadUtilizada,
             int capacidadMaxima) {
-        this.id_oficina = idCounter++;
+
         this.ubicacion = ubicacion;
         this.capacidadUtilizada = capacidadUtilizada;
         this.capacidadMaxima = capacidadMaxima;
     }
 
     public Oficina() {
-        this.id_oficina = idCounter++;
+
     }
 
 

@@ -3,6 +3,7 @@ package com.example.backend;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.example.backend.Service.RegionService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -31,31 +32,49 @@ public class BackendApplication {
         ApplicationContext context = SpringApplication.run(BackendApplication.class, args);
 
         ArrayList<Oficina> oficinas;
+        ArrayList<Region> regiones = new ArrayList<Region>(); // Es hardcodeado
+        HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
+        ArrayList<Ubicacion> ubicaciones = new ArrayList<>();
+        OficinaService oficinaService = context.getBean(OficinaService.class);
+        RegionService regionService = context.getBean(RegionService.class);
+        ArrayList<Vehiculo> vehiculos = new ArrayList<Vehiculo>();
+        ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
+        ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
+
+        regionService.guardar(new Region("COSTA", 1));
+        regionService.guardar(new Region("SIERRA", 2));
+        regionService.guardar(new Region("SELVA", 3));
+        regiones = regionService.obtenerTodas();
+
+        /*
         ArrayList<Tramo> tramos;
         ArrayList<Pedido> pedidos;
         ArrayList<Bloqueo> bloqueos;
         ArrayList<Mantenimiento> mantenimientos;
         ArrayList<Ubicacion> ubicaciones = new ArrayList<>();
-        ArrayList<Region> regiones = new ArrayList<Region>(); // Es hardcodeado
-        ArrayList<Vehiculo> vehiculos = new ArrayList<Vehiculo>(); // Es hardcodeado
-        ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
-        ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
-        HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
+        */
 
         /*
-        regiones.add(new Region("COSTA", 1));
-        regiones.add(new Region("SIERRA", 2));
-        regiones.add(new Region("SELVA", 3));
+
+        ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
+        ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
+        */
+
+
+        /*
         regiones.get(0).setVelocidad(70);
         regiones.get(0).setVelocidad( 50);
         regiones.get(1).setVelocidad( 60);
         regiones.get(1).setVelocidad( 55);
         regiones.get(2).setVelocidad( 65);
-
         */
-        OficinaService oficinaService = context.getBean(OficinaService.class);
-        oficinas = oficinaService.leerOficinasDesdeArchivo("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt");
 
+
+        //oficinas = oficinaService.leerOficinasDesdeArchivo("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt");
+        oficinas = oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, caminos, ubicaciones);
+        vehiculos = Vehiculo.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, oficinas, ubicaciones, tiposVehiculo);
+
+        System.out.println("done");
         /*
         System.out.println("Listado de Oficinas:");
         System.out.println("--------------------------------------------------");
@@ -72,11 +91,11 @@ public class BackendApplication {
         ArrayList<Pedido> pedidos;
         ArrayList<Bloqueo> bloqueos;
         ArrayList<Mantenimiento> mantenimientos;
-        ArrayList<Ubicacion> ubicaciones = new ArrayList<>();
+
         ArrayList<Region> regiones = new ArrayList<Region>(); //Es hardcodeado
         ArrayList<Vehiculo> vehiculos = new ArrayList<Vehiculo>(); //Es hardcodeado
-        ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
-        ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
+
+
         HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
         regiones.add(new Region("COSTA",1));
         regiones.add(new Region("SIERRA",2));
@@ -140,8 +159,6 @@ public class BackendApplication {
                 System.out.println("No se encontró una ruta válida para el pedido.");
             }
         }*/
-
-
         System.out.println("Fin Pruebas");
 
 	}
