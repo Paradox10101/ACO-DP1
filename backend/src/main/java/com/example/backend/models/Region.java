@@ -1,12 +1,7 @@
 
 package com.example.backend.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
 
@@ -28,8 +23,9 @@ public class Region {
 
     @Column(name = "velocidad")
     private float velocidad=0;
-    
-    private ArrayList<Region>relacionRegiones;
+
+    @Transient
+    private ArrayList<Region>relacionRegiones = new ArrayList<>();
 
 
     public Region() {

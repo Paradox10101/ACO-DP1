@@ -26,6 +26,34 @@ public class Ubicacion {
     @JoinColumn(name = "id_region")
     private Long fid_region;
 
+    @Column(name = "latitud")
+    private float latitud;
+
+    @Column(name = "longitud")
+    private float longitud;
+
+    @Column(name = "departamento")
+    private String departamento;
+
+    @Column(name = "provincia")
+    private String provincia;
+
+    public String getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(String departamento) {
+        this.departamento = departamento;
+    }
+
+    public String getProvincia() {
+        return provincia;
+    }
+
+    public void setProvincia(String provincia) {
+        this.provincia = provincia;
+    }
+
     public Ubicacion(){
     }
 
@@ -33,6 +61,39 @@ public class Ubicacion {
         this.id_ubicacion = id_ubicacion;
         this.ubigeo = ubigeo;
         this.fid_region = fid_region;
+    }
+
+
+    public Long getFid_region() {
+        return fid_region;
+    }
+
+    public void setFid_region(Long fid_region) {
+        this.fid_region = fid_region;
+    }
+
+    public Long getId_ubicacion() {
+        return id_ubicacion;
+    }
+
+    public void setId_ubicacion(Long id_ubicacion) {
+        this.id_ubicacion = id_ubicacion;
+    }
+
+    public float getLatitud() {
+        return latitud;
+    }
+
+    public void setLatitud(float latitud) {
+        this.latitud = latitud;
+    }
+
+    public float getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(float longitud) {
+        this.longitud = longitud;
     }
 
     public Long getIdUbicacion(){

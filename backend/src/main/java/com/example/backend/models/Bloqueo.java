@@ -8,22 +8,16 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
+import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.persistence.Table;
-import jakarta.persistence.OneToOne;
 
 //@AllArgsConstructor
 //@NoArgsConstructor
@@ -48,6 +42,14 @@ public class Bloqueo {
     @OneToOne
     @JoinColumn(name = "id_tramo", nullable = false)
     private Long fid_tramoAfectado;
+
+    @OneToMany
+    @JoinColumn(name = "fid_ubicacionOrigen", nullable = false)
+    private Long fid_ubicacionOrigen;
+
+    @OneToMany
+    @JoinColumn(name = "fid_ubicacionOrigen", nullable = false)
+    private Long fid_ubicacionDestino;
 
     public Bloqueo() {
 
@@ -92,13 +94,14 @@ public class Bloqueo {
         this.fid_tramoAfectado = fid_tramoAfectado;
     }
 
-    public static ArrayList<Bloqueo> cargarBloqueosDesdeArchivo(String rutaArchivo) {
+    public static ArrayList<Bloqueo> cargarBloqueosDesdeArchivo(String rutaArchivo, List<Ubicacion> ubicaciones){
         ArrayList<Bloqueo> bloqueos = new ArrayList<>();
         try {
             Path path = Paths.get(rutaArchivo).toAbsolutePath();
             try (BufferedReader br = Files.newBufferedReader(path)) {
                 String linea;
                 while ((linea = br.readLine()) != null) {
+                    Bloqueo bloqueo = new Bloqueo();
                     String[] valores = linea.split(";");
                     String ubigeoString = valores[0];
                     String fechaString = valores[1];
@@ -127,8 +130,15 @@ public class Bloqueo {
                             + horaMinutoFinString;
 
                     LocalDateTime fechaHoraFin = LocalDateTime.parse(fechaHoraFinString, formatter);
-
-                    System.out.println(fechaHoraInicio);
+                    Optional<Ubicacion> ubicacionOrigenSeleccionada = ubicaciones.stream().filter(ubicacionS -> ubicacionS.getUbigeo().equals(ubigeoOrigen)).findFirst();
+                    Optional<Ubicacion> ubicacionDestinoSeleccionada = ubicaciones.stream().filter(ubicacionS -> ubicacionS.getUbigeo().equals(ubigeoDestino)).findFirst();
+                    if(ubicacionOrigenSeleccionada.isPresent() && ubicacionDestinoSeleccionada.isPresent()){
+                        bloqueo.setFechaInicio(fechaHoraInicio);
+                        bloqueo.setFechaInicio(fechaHoraFin);
+                        bloqueo.setFid_ubicacionOrigen(ubicacionOrigenSeleccionada.get().getId_ubicacion());
+                        bloqueo.setFid_ubicacionOrigen(ubicacionDestinoSeleccionada.get().getId_ubicacion());
+                        bloqueos.add(bloqueo);
+                    }
                 }
             }
 
@@ -136,5 +146,21 @@ public class Bloqueo {
             System.out.println("Error al leer el archivo: " + e.getMessage());
         }
         return bloqueos;
+    }
+
+    public Long getFid_ubicacionOrigen() {
+        return fid_ubicacionOrigen;
+    }
+
+    public void setFid_ubicacionOrigen(Long fid_ubicacionOrigen) {
+        this.fid_ubicacionOrigen = fid_ubicacionOrigen;
+    }
+
+    public Long getFid_ubicacionDestino() {
+        return fid_ubicacionDestino;
+    }
+
+    public void setFid_ubicacionDestino(Long fid_ubicacionDestino) {
+        this.fid_ubicacionDestino = fid_ubicacionDestino;
     }
 }

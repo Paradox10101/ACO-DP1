@@ -21,12 +21,12 @@ public class Almacen {
     private Long fid_ubicacion;
 
     @Column(name = "cantidad_camiones")
-    private int cantidadCamiones;
+    private int cantidadVehiculos;
 
-    public Almacen(Long id_almacen, Long fid_ubicacion, int cantidadCamiones) {
+    public Almacen(Long id_almacen, Long fid_ubicacion, int cantidadVehiculos) {
         this.id_almacen = id_almacen;
         this.fid_ubicacion = fid_ubicacion;
-        this.cantidadCamiones = cantidadCamiones;
+        this.cantidadVehiculos = cantidadVehiculos;
     }
 
     public Long getId_almacen() {
@@ -45,12 +45,12 @@ public class Almacen {
         this.fid_ubicacion = fid_ubicacion;
     }
 
-    public int getCantidadCamiones() {
-        return cantidadCamiones;
+    public int getCantidadVehiculos() {
+        return cantidadVehiculos;
     }
 
-    public void setCantidadCamiones(int cantidadCamiones) {
-        this.cantidadCamiones = cantidadCamiones;
+    public void setCantidadVehiculos(int cantidadVehiculos) {
+        this.cantidadVehiculos = cantidadVehiculos;
     }
 
     public Almacen() {

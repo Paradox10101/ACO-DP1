@@ -2,6 +2,8 @@
 package com.example.backend.models;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -66,6 +68,8 @@ public class Pedido {
     
     public Pedido() {
     }
+
+
 
     public Pedido(Long id_pedido, Long fid_almacen, Long fid_oficinaDest, LocalDateTime fechaEntregaReal,
             LocalDateTime fechaEntregaEstimada, EstadoPedido estado, int cantidadPaquetes, String codigoSeguridad) {
@@ -163,16 +167,16 @@ public class Pedido {
 
     
 
-    public static ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo, List<Oficina> oficinas, HashMap<String, Ubicacion> ubicaciones) { // esto va ir en otra parte <---
+    public static ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo, List<Oficina> oficinas, List<Ubicacion> ubicaciones) { // esto va ir en otra parte <---
         ArrayList<Pedido> pedidos = new ArrayList<>();
 
         try {
-            Path path = Paths.get(rutaArchivo).toAbsolutePath();
-            try (BufferedReader br = Files.newBufferedReader(path)) {
+            try (BufferedReader lector = new BufferedReader(new FileReader(rutaArchivo))) {
                 String linea;
-                while ((linea = br.readLine()) != null) {
+                while ((linea = lector.readLine()) != null) {
                     Pedido pedido = new Pedido();
                     Cliente cliente = new Cliente();
+
                     //Debe consultarse la lista de clientes previamente
                     String[] valores = linea.split(",");
                     String anhoMesString = (rutaArchivo.substring(rutaArchivo.length() - 10)).split(".txt")[0];
@@ -190,26 +194,20 @@ public class Pedido {
                     int cantidadPaquetes = Integer.parseInt(valores[2].trim());
                     String codigoCliente = valores[3].trim();
                     
-                    Ubicacion ubicacionDestinoSeleccionada = ubicaciones.get(ubigeoDestino);
-                    if(ubicacionDestinoSeleccionada!=null){
+                    Optional<Ubicacion> ubicacionDestinoSeleccionada = ubicaciones.stream().filter(
+                            ubicacionS -> ubicacionS.getUbigeo().equals(ubigeoDestino)).findFirst();
+                    if(ubicacionDestinoSeleccionada.isPresent()){
                         Optional<Oficina> oficinaSeleccionada = oficinas.stream().filter(
-                        oficinaS -> oficinaS.getFid_ubicacion() == ubicacionDestinoSeleccionada.getIdUbicacion()).findFirst();
-                        if(oficinaSeleccionada != null){
+                        oficinaS -> oficinaS.getFid_ubicacion() == ubicacionDestinoSeleccionada.get().getIdUbicacion()).findFirst();
+                        if(oficinaSeleccionada.isPresent()){
                             pedido.setFid_oficinaDest(oficinaSeleccionada.get().getId_oficina());
+                            pedido.setFechaRegistro(fechaHora);
+                            pedido.setCantidadPaquetes(cantidadPaquetes);
+                            cliente.setCodigo(codigoCliente);
+                            pedidos.add(pedido);
                         }
-                        else{
-                            continue;
-                        }
-                    }
-                    else{
-                        continue;
-                    }
-                    pedido.setFechaRegistro(fechaHora);
-                    //pedido.setFid_oficinaDest()
-                    pedido.setCantidadPaquetes(cantidadPaquetes);
-                    cliente.setCodigo(codigoCliente);
 
-                    pedidos.add(pedido);
+                    }
                 }
             }
 

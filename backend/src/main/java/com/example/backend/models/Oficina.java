@@ -1,11 +1,14 @@
 package com.example.backend.models;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,12 +31,6 @@ public class Oficina {
     @Column(name = "fid_ubicacion")
     private Long fid_ubicacion;
 
-    @Column(name = "latitud")
-    private double latitud;
-
-    @Column(name = "longitud")
-    private double longitud;
-
     @Column(name = "capacidad_utilizada")
     private int capacidadUtilizada;
 
@@ -52,8 +49,6 @@ public class Oficina {
             int capacidadMaxima) {
         this.id_oficina = id_oficina;
         this.fid_ubicacion = fid_ubicacion;
-        this.latitud = latitud;
-        this.longitud = longitud;
         this.capacidadUtilizada = capacidadUtilizada;
         this.capacidadMaxima = capacidadMaxima;
     }
@@ -62,21 +57,6 @@ public class Oficina {
 
     }
 
-    public double getLatitud() {
-        return latitud;
-    }
-
-    public void setLatitud(double latitud) {
-        this.latitud = latitud;
-    }
-
-    public double getLongitud() {
-        return longitud;
-    }
-
-    public void setLongitud(double longitud) {
-        this.longitud = longitud;
-    }
 
     public Oficina(Long id_oficina, Long fid_ubicacion) {
         this.id_oficina = id_oficina;
@@ -116,36 +96,42 @@ public class Oficina {
         this.capacidadMaxima = capacidadMaxima;
     }
 
-    public static ArrayList<Oficina> cargarOficinasDesdeArchivo(String rutaArchivo, List<Region> regiones) {
+    public static ArrayList<Oficina> cargarOficinasDesdeArchivo(String rutaArchivo, List<Region> regiones,
+                                                                HashMap<String, ArrayList<Ubicacion>> caminos,
+                                                                ArrayList<Ubicacion> ubicaciones) {
         ArrayList<Oficina> oficinas = new ArrayList<>();
         try {
-            Path path = Paths.get(rutaArchivo).toAbsolutePath();
-            try (BufferedReader br = Files.newBufferedReader(path)) {
+            try (BufferedReader lector = new BufferedReader(new FileReader(rutaArchivo))) {
                 String linea;
-                while ((linea = br.readLine()) != null) {
+                while ((linea = lector.readLine()) != null) {
                     Oficina oficina  = new Oficina();
                     Ubicacion ubicacion = new Ubicacion();
                     String[] valores = linea.split(",");
                     String ubigeo = valores[0];
-                    String ciudadOrigen = valores[1];
-                    String ciudadDestino = valores[2];
+                    String departamento = valores[1];
+                    String provincia = valores[2];
                     Float latitud = Float.parseFloat(valores[3]);
                     Float longitud = Float.parseFloat(valores[4]);
                     String region = valores[5].trim();
                     int capacidadMaxima = Integer.parseInt(valores[6]);
                     ubicacion.setUbigeo(ubigeo);
+                    ubicacion.setDepartamento(departamento);
+                    ubicacion.setProvincia(provincia);
+                    ubicacion.setLatitud(latitud);
+                    ubicacion.setLongitud(longitud);
                     Optional<Region> regionSeleccionada = regiones.stream().filter(regionS -> regionS.getNombre().equals(region)).findFirst();
                     if(regionSeleccionada.isPresent()){
                         ubicacion.setFid_Region(regionSeleccionada.get().getIdRegion());
+                        if(!caminos.containsKey(ubigeo)){
+                            ubicaciones.add(ubicacion);
+                        }
                     }
                     else{
                         continue;
                     }
                     oficina.setFid_ubicacion(ubicacion.getIdUbicacion());
-                    oficina.setLatitud(latitud);
-                    oficina.setLongitud(longitud);
                     oficina.setCapacidadMaxima(capacidadMaxima);
-                    
+                    caminos.put(ubigeo,new ArrayList<Ubicacion>());
                     oficinas.add(oficina);
                 }
             }

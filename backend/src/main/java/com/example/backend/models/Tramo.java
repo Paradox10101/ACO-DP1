@@ -1,12 +1,15 @@
 package com.example.backend.models;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -139,18 +142,22 @@ public class Tramo {
         this.capacidadActual = capacidadActual;
     }
 
-    public static ArrayList<Tramo> cargarTramosDesdeArchivo(String rutaArchivo) {
+    public static ArrayList<Tramo>  cargarTramosDesdeArchivo(String rutaArchivo, HashMap<String, ArrayList<Ubicacion>> caminos) {
         ArrayList<Tramo> tramos = new ArrayList<>();
         try {
-            Path path = Paths.get(rutaArchivo).toAbsolutePath();
-            try (BufferedReader br = Files.newBufferedReader(path)) {
+            try (BufferedReader lector = new BufferedReader(new FileReader(rutaArchivo))) {
                 String linea;
-                while ((linea = br.readLine()) != null) {
+                while ((linea = lector.readLine()) != null) {
                     String[] valores = linea.split(" => ");
+                    Ubicacion ubicacion  = new Ubicacion();
                     String ubigeoOrigen = valores[0];
                     String ubigeoDestino = valores[1];
+                    ubicacion.setUbigeo(ubigeoOrigen);
 
-                    System.out.println(linea);
+                    ArrayList<Ubicacion>listaUbicacionesDestino = caminos.get(ubigeoOrigen);
+                    if(listaUbicacionesDestino!=null){
+                        listaUbicacionesDestino.add(ubicacion);
+                    }
                 }
             }
 

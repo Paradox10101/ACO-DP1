@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import jakarta.persistence.Entity;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import jakarta.persistence.Table;
 
 @Entity
@@ -20,10 +23,13 @@ public class Mantenimiento {
 
     private Long id_mantenimiento;
     private TipoMantenimiento tipo;
-    private LocalDateTime fechaProgramada;
+    private Date fechaProgramada;
     private Time duracion;
 
-    public Mantenimiento(Long id_mantenimiento, TipoMantenimiento tipo, LocalDateTime fechaProgramada, Time duracion) {
+    public Mantenimiento() {
+    }
+
+    public Mantenimiento(Long id_mantenimiento, TipoMantenimiento tipo, Date fechaProgramada, Time duracion) {
         this.id_mantenimiento = id_mantenimiento;
         this.tipo = tipo;
         this.fechaProgramada = fechaProgramada;
@@ -46,11 +52,11 @@ public class Mantenimiento {
         this.tipo = tipo;
     }
 
-    public LocalDateTime getFechaProgramada() {
+    public Date getFechaProgramada() {
         return fechaProgramada;
     }
 
-    public void setFechaProgramada(LocalDateTime fechaProgramada) {
+    public void setFechaProgramada(Date fechaProgramada) {
         this.fechaProgramada = fechaProgramada;
     }
 
@@ -62,16 +68,17 @@ public class Mantenimiento {
         this.duracion = duracion;
     }
 
-    public static ArrayList<Mantenimiento> cargarMantenimientosDesdeArchivo(String rutaArchivo) {
+    public static ArrayList<Mantenimiento> cargarMantenimientosDesdeArchivo(String rutaArchivo, List<Vehiculo> vehiculos) {
         ArrayList<Mantenimiento> mantenimientos = new ArrayList<>();
         try {
             Path path = Paths.get(rutaArchivo).toAbsolutePath();
             try (BufferedReader br = Files.newBufferedReader(path)) {
                 String linea;
                 while ((linea = br.readLine()) != null) {
+                    Mantenimiento mantenimiento = new Mantenimiento();
                     String[] valores = linea.split(":");
                     String anhoMesDiaString = valores[0];
-                    String placaString = valores[1];
+                    String codigoString = valores[1];
                     String anhoString = anhoMesDiaString.substring(0, 4);
                     String mesString = anhoMesDiaString.substring(4, 6);
                     String diaString = anhoMesDiaString.substring(6, 8);
@@ -79,8 +86,13 @@ public class Mantenimiento {
 
                     SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
                     Date fecha = formatter.parse(fechaString);
+                    Optional<Vehiculo> vehiculoSeleccionado = vehiculos.stream().filter(
+                            vehiculoS -> vehiculoS.getCodigo().equals(codigoString)).findFirst();
+                    if(vehiculoSeleccionado.isPresent()){
+                        mantenimiento.setFechaProgramada(fecha);
+                        mantenimientos.add(mantenimiento);
+                    }
 
-                    System.out.println(fecha);
                 }
             }
 
