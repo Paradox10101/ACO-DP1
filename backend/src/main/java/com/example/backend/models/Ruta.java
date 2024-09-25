@@ -48,7 +48,11 @@ public class Ruta {
     @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ArrayList<Tramo> tramos;
 
+    // Variable estática para manejar el autoincremento de IDs
+    private static Long idCounter = 1L;
+
     public Ruta() {
+        this.id_ruta = idCounter++;
     }
 
     public Ruta(
@@ -56,7 +60,7 @@ public class Ruta {
             Long id_ubicacion_origen,
             Long id_ubicacion_destino,
             LocalDateTime fechaInicio, LocalDateTime fechaFin) {
-        this.id_ruta = id_ruta;
+        this.id_ruta = idCounter++;
         this.fid_vehiculo = fid_vehiculo;
         this.distanciaTotal = distanciaTotal;
         this.fid_ubicacion_origen = id_ubicacion_origen;

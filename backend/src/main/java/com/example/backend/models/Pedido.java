@@ -66,14 +66,18 @@ public class Pedido {
     @Column(name = "fechaRegistro")
     private LocalDateTime fechaRegistro;
     
+    // Variable estática para manejar el autoincremento de IDs
+    private static Long idCounter = 1L;
+
     public Pedido() {
+        this.id_pedido = idCounter++;
     }
 
 
 
     public Pedido(Long id_pedido, Long fid_almacen, Long fid_oficinaDest, LocalDateTime fechaEntregaReal,
             LocalDateTime fechaEntregaEstimada, EstadoPedido estado, int cantidadPaquetes, String codigoSeguridad) {
-        this.id_pedido = id_pedido;
+        this.id_pedido = idCounter++;
         this.fid_almacen = fid_almacen;
         this.fid_oficinaDest = fid_oficinaDest;
         this.fechaEntregaReal = fechaEntregaReal;
@@ -202,6 +206,7 @@ public class Pedido {
                         if(oficinaSeleccionada.isPresent()){
                             pedido.setFid_oficinaDest(oficinaSeleccionada.get().getId_oficina());
                             pedido.setFechaRegistro(fechaHora);
+                            pedido.setFechaEntregaEstimada(LocalDateTime.now());//solo para prueba
                             pedido.setCantidadPaquetes(cantidadPaquetes);
                             cliente.setCodigo(codigoCliente);
                             pedidos.add(pedido);

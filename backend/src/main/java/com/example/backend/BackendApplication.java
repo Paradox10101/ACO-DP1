@@ -1,16 +1,25 @@
 package com.example.backend;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import com.example.backend.models.*;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.HashMap;
+import com.example.backend.algorithm.Aco;
+import com.example.backend.models.Almacen;
+import com.example.backend.models.Bloqueo;
+import com.example.backend.models.Mantenimiento;
+import com.example.backend.models.Oficina;
+import com.example.backend.models.Pedido;
+import com.example.backend.models.PlanTransporte;
+import com.example.backend.models.Region;
+import com.example.backend.models.TipoVehiculo;
+import com.example.backend.models.Tramo;
+import com.example.backend.models.Ubicacion;
+import com.example.backend.models.Vehiculo;
 
 @SpringBootApplication
 public class BackendApplication {
@@ -39,12 +48,38 @@ public class BackendApplication {
 
         oficinas = Oficina.cargarOficinasDesdeArchivo("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, caminos, ubicaciones);
         Vehiculo.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, oficinas,ubicaciones, tiposVehiculo);
-        Tramo.cargarTramosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", caminos);
+        tramos = Tramo.cargarTramosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", caminos);
         pedidos = Pedido.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202403.txt", oficinas, ubicaciones);
         bloqueos = Bloqueo.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
         mantenimientos = Mantenimiento.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
+        /*System.out.println("Listado de Oficinas:");
+        System.out.println("--------------------------------------------------");
+        for (Oficina oficina : oficinas) {
+            System.out.println("ID Oficina: " + oficina.getId_oficina());
+            System.out.println("Capacidad Utilizada: " + oficina.getCapacidadUtilizada());
+            System.out.println("Capacidad Máxima: " + oficina.getCapacidadMaxima());
+            System.out.println("--------------------------------------------------");
+        }*/
 
         boolean test = true;
+        // Crea una instancia del algoritmo ACO
+        Aco aco = new Aco();
+
+        // Para cada pedido, busca la mejor ruta utilizando ACO y el plan de transporte
+        for (Pedido pedido : pedidos) {
+            // Crea un nuevo PlanTransporte y ejecuta el ACO para encontrar la ruta óptima
+            PlanTransporte planTransporte = new PlanTransporte();
+            PlanTransporte rutaOptima = planTransporte.crearRuta(pedido, almacenes, oficinas, tramos, regiones);
+
+            if (rutaOptima != null) {
+                System.out.println("Ruta óptima encontrada para el pedido " + pedido.getId_pedido());
+                rutaOptima.getTramos().forEach(tramo -> System.out.println("Tramo de " + tramo.getFid_ubicacion_origen() 
+                    + " hacia " + tramo.getFid_ubicacion_destino()));
+            } else {
+                System.out.println("No se encontró una ruta válida para el pedido " + pedido.getId_pedido());
+            }
+        }
+        
         /*
         // Crear el grafo a partir de los tramos
         grafoTramos = new HashMap<>();

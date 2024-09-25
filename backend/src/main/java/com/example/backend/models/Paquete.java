@@ -31,11 +31,19 @@ public class Paquete {
     @Enumerated(EnumType.STRING)
     private EstadoPaquete estado;
 
+    // Variable estática para manejar el autoincremento de IDs
+    private static Long idCounter = 1L;
+
     public Paquete(Long id_paquete, Long fid_almacen, Long fid_pedido, Long fid_tramoActual, EstadoPaquete estado) {
-        this.id_paquete = id_paquete;
+        this.id_paquete = idCounter++;
         this.fid_almacen = fid_almacen;
         this.fid_pedido = fid_pedido;
         this.fid_tramoActual = fid_tramoActual;
         this.estado = estado;
+    }
+
+    public Paquete()
+    {
+        this.id_paquete = idCounter++;
     }
 }

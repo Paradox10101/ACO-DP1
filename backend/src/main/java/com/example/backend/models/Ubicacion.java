@@ -54,11 +54,15 @@ public class Ubicacion {
         this.provincia = provincia;
     }
 
+    // Variable estática para manejar el autoincremento de IDs
+    private static Long idCounter = 1L;
+
     public Ubicacion(){
+        this.id_ubicacion = idCounter++;
     }
 
     public Ubicacion(Long id_ubicacion, String ubigeo, String ciudad, Long fid_region){
-        this.id_ubicacion = id_ubicacion;
+        this.id_ubicacion = idCounter++;
         this.ubigeo = ubigeo;
         this.fid_region = fid_region;
     }

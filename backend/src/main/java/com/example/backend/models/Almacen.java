@@ -23,8 +23,15 @@ public class Almacen {
     @Column(name = "cantidad_camiones")
     private int cantidadVehiculos;
 
+    // Variable estática para manejar el autoincremento de IDs
+    private static Long idCounter = 1L;
+
+    public Almacen(){
+        this.id_almacen = idCounter++;
+    }
+
     public Almacen(Long id_almacen, Long fid_ubicacion, int cantidadVehiculos) {
-        this.id_almacen = id_almacen;
+        this.id_almacen = idCounter++;
         this.fid_ubicacion = fid_ubicacion;
         this.cantidadVehiculos = cantidadVehiculos;
     }
@@ -51,9 +58,6 @@ public class Almacen {
 
     public void setCantidadVehiculos(int cantidadVehiculos) {
         this.cantidadVehiculos = cantidadVehiculos;
-    }
-
-    public Almacen() {
     }
 
 }

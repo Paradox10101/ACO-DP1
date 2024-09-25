@@ -61,7 +61,7 @@ public class PlanTransporte {
     private EstadoPedido estado;
 
     @Autowired
-    private Aco aco;
+    private Aco aco = new Aco();
 
     public PlanTransporte() {
 
