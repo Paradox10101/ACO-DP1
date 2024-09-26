@@ -20,6 +20,7 @@ public class VehiculoService {
 
     @Autowired
     private TipoVehiculoRepository tipoVehiculoRepository;
+    
     @Autowired
     private AlmacenRepository   almacenRepository;
 
