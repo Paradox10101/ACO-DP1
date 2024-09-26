@@ -2,6 +2,7 @@ package com.example.backend;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.example.backend.Repository.MantenimientoRepository;
 import com.example.backend.Service.*;
@@ -42,6 +43,7 @@ public class BackendApplication {
         PedidoService pedidoService = context.getBean(PedidoService.class);
         BloqueoService bloqueoService = context.getBean(BloqueoService.class);
         MantenimientoService mantenimientoService = context.getBean(MantenimientoService.class);
+        PlanTransporteService planTransporte = context.getBean(PlanTransporteService.class);
         Aco aco = context.getBean(Aco.class);
 
         regionService.guardar(new Region("COSTA", 1));
@@ -52,9 +54,34 @@ public class BackendApplication {
         oficinas = oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, ubicaciones);
         vehiculos = vehiculoService.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, ubicaciones, tiposVehiculo);
         caminos = aco.cargarCaminosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", ubicaciones);
+        //tramos = Tramo.cargarTramosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", caminos);
         bloqueos = bloqueoService.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
         pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202403.txt", oficinas, ubicaciones, clientes, paquetes);
         mantenimientos = mantenimientoService.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
+        
+        System.out.println("Listado de Caminos:");
+        System.out.println("--------------------------------------------------");
+
+        for (Map.Entry<String, ArrayList<Ubicacion>> entry : caminos.entrySet()) {
+            String ubigeoOrigen = entry.getKey();
+            ArrayList<Ubicacion> ubicacionesDestino = entry.getValue();
+
+            System.out.println("Ubigeo Origen: " + ubigeoOrigen);
+            System.out.println("Destinos:");
+
+            for (Ubicacion ubicacionDestino : ubicacionesDestino) {
+                System.out.println("   - ID Ubicación: " + ubicacionDestino.getId_ubicacion());
+                System.out.println("     Departamento: " + ubicacionDestino.getDepartamento());
+                System.out.println("     Provincia: " + ubicacionDestino.getProvincia());
+                System.out.println("     Ubigeo: " + ubicacionDestino.getUbigeo());
+                System.out.println("     Latitud: " + ubicacionDestino.getLatitud());
+                System.out.println("     Longitud: " + ubicacionDestino.getLongitud());
+                System.out.println("--------------------------------------------------");
+            }
+        }
+        
+        PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones);
+        
         System.out.println("DONE");
 
         /*
