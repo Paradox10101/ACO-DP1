@@ -1,6 +1,7 @@
 package com.example.backend.Service;
 
 import com.example.backend.Repository.ClienteRepository;
+import com.example.backend.Repository.PaqueteRepository;
 import com.example.backend.models.*;
 import com.example.backend.Repository.PedidoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class PedidoService {
     @Autowired
     private PedidoRepository pedidoRepository;
 
+    @Autowired
+    private PaqueteRepository paqueteRepository;
+
     public List<Pedido> obtenerTodos() {
         return pedidoRepository.findAll();
     }
@@ -41,7 +45,7 @@ public class PedidoService {
         pedidoRepository.deleteById(id);
     }
 
-    public ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo, List<Oficina> oficinas, List<Ubicacion> ubicaciones) { // esto va ir en otra parte <---
+    public ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo, List<Oficina> oficinas, List<Ubicacion> ubicaciones, List<Cliente>clientes, List<Paquete>paquetes) { // esto va ir en otra parte <---
         ArrayList<Pedido> pedidos = new ArrayList<>();
         ArrayList<Cliente> clientesExistentes = new ArrayList<>(clienteRepository.findAll());
         try {
@@ -75,18 +79,14 @@ public class PedidoService {
                             //pedido.setFechaEntregaEstimada(LocalDateTime.now());//solo para prueba
                             pedido.setCantidadPaquetes(cantidadPaquetes);
                             pedido.setEstado(EstadoPedido.Registrado);
-
-                            /*
                             cliente.setCodigo(codigoCliente);
-                            pedido.setCliente(cliente);\
-
-                             */
 
                             Optional<Cliente> clienteSeleccionado = clientesExistentes.stream().filter(
                                     clienteS -> clienteS != null && clienteS.getCodigo() != null &&  clienteS.getCodigo().equals(codigoCliente)).findFirst();
                             if(!clienteSeleccionado.isPresent()){
                                 clienteRepository.save(cliente);
                                 clientesExistentes.add(cliente);
+                                clientes.add(cliente);
                             }
                             else{
                                 cliente = clienteSeleccionado.get();
@@ -94,6 +94,15 @@ public class PedidoService {
 
                             pedidoRepository.save(pedido);
                             pedidos.add(pedido);
+
+                            for(int i=0;i< pedido.getCantidadPaquetes(); i++){
+                                Paquete paquete = new Paquete();
+                                paquete.setPedido(pedido);
+                                paquete.setEstado(EstadoPaquete.EnAlmacen);
+                                paqueteRepository.save(paquete);
+                                paquetes.add(paquete);
+
+                            }
                         }
 
                     }

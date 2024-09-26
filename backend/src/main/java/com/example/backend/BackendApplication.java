@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import com.example.backend.Repository.MantenimientoRepository;
 import com.example.backend.Service.*;
+import com.example.backend.models.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -13,17 +14,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.example.backend.algorithm.Aco;
-import com.example.backend.models.Almacen;
-import com.example.backend.models.Bloqueo;
-import com.example.backend.models.Mantenimiento;
-import com.example.backend.models.Oficina;
-import com.example.backend.models.Pedido;
-import com.example.backend.models.PlanTransporte;
-import com.example.backend.models.Region;
-import com.example.backend.models.TipoVehiculo;
-import com.example.backend.models.Tramo;
-import com.example.backend.models.Ubicacion;
-import com.example.backend.models.Vehiculo;
 
 @SpringBootApplication
 public class BackendApplication {
@@ -41,6 +31,8 @@ public class BackendApplication {
         ArrayList<Vehiculo> vehiculos = new ArrayList<Vehiculo>(); // Es hardcodeado
         ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
         ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        ArrayList<Paquete> paquetes = new ArrayList<>();
         HashMap<String, ArrayList<Ubicacion>> caminos;
 
         RegionService regionService = context.getBean(RegionService.class);
@@ -61,7 +53,7 @@ public class BackendApplication {
         vehiculos = vehiculoService.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, ubicaciones, tiposVehiculo);
         caminos = aco.cargarCaminosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", ubicaciones);
         bloqueos = bloqueoService.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
-        pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202403.txt", oficinas, ubicaciones);
+        pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202403.txt", oficinas, ubicaciones, clientes, paquetes);
         mantenimientos = mantenimientoService.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
         System.out.println("DONE");
 
