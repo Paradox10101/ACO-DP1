@@ -3,6 +3,8 @@ package com.example.backend;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.example.backend.Service.RegionService;
+import com.example.backend.Service.VehiculoService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -42,20 +44,18 @@ public class BackendApplication {
         ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
         HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
 
-        /*
-        regiones.add(new Region("COSTA", 1));
-        regiones.add(new Region("SIERRA", 2));
-        regiones.add(new Region("SELVA", 3));
-        regiones.get(0).setVelocidad(70);
-        regiones.get(0).setVelocidad( 50);
-        regiones.get(1).setVelocidad( 60);
-        regiones.get(1).setVelocidad( 55);
-        regiones.get(2).setVelocidad( 65);
-
-        */
+        RegionService regionService = context.getBean(RegionService.class);
         OficinaService oficinaService = context.getBean(OficinaService.class);
-        oficinas = oficinaService.leerOficinasDesdeArchivo("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt");
+        VehiculoService vehiculoService = context.getBean(VehiculoService.class);
 
+
+        regionService.guardar(new Region("COSTA", 1));
+        regionService.guardar(new Region("SIERRA", 2));
+        regionService.guardar(new Region("SELVA", 3));
+        regiones = regionService.obtenerTodas();
+
+        oficinas = oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, caminos, ubicaciones);
+        vehiculos = vehiculoService.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, oficinas,ubicaciones, tiposVehiculo);
         /*
         System.out.println("Listado de Oficinas:");
         System.out.println("--------------------------------------------------");
