@@ -152,7 +152,7 @@ public class Aco {
         double total = 0.0;       
         // Recorremos los tramos posibles y calculamos la probabilidad utilizando feromonas y heurística
         for (Tramo tramo : tramosPosibles) {
-            double feromona = feromonas.getOrDefault(tramo.getId_tramo(), 0.0);
+            double feromona = feromonas.getOrDefault(tramo.getId_tramo(), 0.0);//Intensidad de uso de ese tramo por hormigas
             double heuristica = calcularHeuristica(tramo, fechaHoraLlegadaAnterior); 
             double valor = Math.pow(feromona, alpha) * Math.pow(heuristica, beta);
             probabilidades.put(tramo, valor);
