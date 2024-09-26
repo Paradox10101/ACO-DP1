@@ -55,8 +55,6 @@ public class Ubicacion {
     }
 
 
-
-
     public Ubicacion(){
 
     }
@@ -98,14 +96,6 @@ public class Ubicacion {
 
     public void setLongitud(float longitud) {
         this.longitud = longitud;
-    }
-
-    public Long getIdUbicacion(){
-        return id_ubicacion;
-    }
-
-    public void setIdUbicacion(Long id_ubicacion){
-        this.id_ubicacion = id_ubicacion;
     }
 
     public String getUbigeo(){

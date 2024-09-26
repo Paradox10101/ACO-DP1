@@ -105,21 +105,21 @@ public class PlanTransporteService {
                 // Primer tramo, origen es siempre un almacén
                 System.out.println(
                         "Almacén de origen: " + pedido.getAlmacen().getId_almacen() + " hasta "
-                                + tramo.getubicacionDestino().getIdUbicacion());
+                                + tramo.getubicacionDestino().getId_ubicacion());
             } else {
                 // Los tramos siguientes son entre oficinas
                 Tramo tramoAnterior = tramosRuta.get(i - 1);
                 System.out.println(
-                        "De: " + tramoAnterior.getubicacionOrigen().getIdUbicacion() + " a "
-                                + tramo.getubicacionDestino().getIdUbicacion());
+                        "De: " + tramoAnterior.getubicacionOrigen().getId_ubicacion() + " a "
+                                + tramo.getubicacionDestino().getId_ubicacion());
             }
         }
 
         // Al llegar al último tramo, verificar si se entrega correctamente a la oficina
         // de destino
         Tramo ultimoTramo = tramosRuta.get(tramosRuta.size() - 1);
-        if (ultimoTramo.getubicacionOrigen().getIdUbicacion()
-                .equals(oficinaDestino.get().getUbicacion().getIdUbicacion())) {
+        if (ultimoTramo.getubicacionOrigen().getId_ubicacion()
+                .equals(oficinaDestino.get().getUbicacion().getId_ubicacion())) {
             System.out.println("Pedido entregado en la oficina destino " + oficinaDestino.get().getId_oficina());
         } else {
             System.out.println("Error: La entrega no coincide con la oficina destino esperada.");

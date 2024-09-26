@@ -36,6 +36,7 @@ public class BackendApplication {
         ArrayList<Paquete> paquetes = new ArrayList<>();
         HashMap<String, ArrayList<Ubicacion>> caminos;
 
+        UbicacionService ubicacionService = context.getBean(UbicacionService.class);
         RegionService regionService = context.getBean(RegionService.class);
         OficinaService oficinaService = context.getBean(OficinaService.class);
         VehiculoService vehiculoService = context.getBean(VehiculoService.class);
@@ -58,11 +59,21 @@ public class BackendApplication {
         bloqueos = bloqueoService.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
         pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202403.txt", oficinas, ubicaciones, clientes, paquetes);
         mantenimientos = mantenimientoService.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
-        
+        /*ArrayList<Ubicacion> ubicacionesAux = new ArrayList(ubicacionService.obtenerTodasLasUbicaciones());
+        for (Ubicacion ubicacionDestino : ubicacionesAux) {
+            System.out.println("   - ID Ubicación: " + ubicacionDestino.getId_ubicacion());
+            System.out.println("     Departamento: " + ubicacionDestino.getDepartamento());
+            System.out.println("     Provincia: " + ubicacionDestino.getProvincia());
+            System.out.println("     Ubigeo: " + ubicacionDestino.getUbigeo());
+            System.out.println("     Latitud: " + ubicacionDestino.getLatitud());
+            System.out.println("     Longitud: " + ubicacionDestino.getLongitud());
+            System.out.println("--------------------------------------------------");
+        }*/
+
         System.out.println("Listado de Caminos:");
         System.out.println("--------------------------------------------------");
 
-        for (Map.Entry<String, ArrayList<Ubicacion>> entry : caminos.entrySet()) {
+        /*for (Map.Entry<String, ArrayList<Ubicacion>> entry : caminos.entrySet()) {
             String ubigeoOrigen = entry.getKey();
             ArrayList<Ubicacion> ubicacionesDestino = entry.getValue();
 
@@ -78,7 +89,7 @@ public class BackendApplication {
                 System.out.println("     Longitud: " + ubicacionDestino.getLongitud());
                 System.out.println("--------------------------------------------------");
             }
-        }
+        }*/
         
         PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones);
         

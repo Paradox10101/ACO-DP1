@@ -45,7 +45,9 @@ public class PedidoService {
         pedidoRepository.deleteById(id);
     }
 
-    public ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo, List<Oficina> oficinas, List<Ubicacion> ubicaciones, List<Cliente>clientes, List<Paquete>paquetes) { // esto va ir en otra parte <---
+    public ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo, List<Oficina> oficinas,
+            List<Ubicacion> ubicaciones, List<Cliente> clientes, List<Paquete> paquetes) { // esto va ir en otra parte
+                                                                                           // <---
         ArrayList<Pedido> pedidos = new ArrayList<>();
         ArrayList<Cliente> clientesExistentes = new ArrayList<>(clienteRepository.findAll());
         try {
@@ -70,32 +72,35 @@ public class PedidoService {
                     String codigoCliente = valores[3].trim();
                     Optional<Ubicacion> ubicacionDestinoSeleccionada = ubicaciones.stream().filter(
                             ubicacionS -> ubicacionS.getUbigeo().equals(ubigeoDestino)).findFirst();
-                    if(ubicacionDestinoSeleccionada.isPresent()){
+                    if (ubicacionDestinoSeleccionada.isPresent()) {
                         Optional<Oficina> oficinaSeleccionada = oficinas.stream().filter(
-                                oficinaS -> oficinaS.getUbicacion().getIdUbicacion() == ubicacionDestinoSeleccionada.get().getIdUbicacion()).findFirst();
-                        if(oficinaSeleccionada.isPresent()){
+                                oficinaS -> oficinaS.getUbicacion().getId_ubicacion() == ubicacionDestinoSeleccionada
+                                        .get().getId_ubicacion())
+                                .findFirst();
+                        if (oficinaSeleccionada.isPresent()) {
                             pedido.setOficinaDestino(oficinaSeleccionada.get());
                             pedido.setFechaRegistro(fechaHora);
-                            //pedido.setFechaEntregaEstimada(LocalDateTime.now());//solo para prueba
+                            // pedido.setFechaEntregaEstimada(LocalDateTime.now());//solo para prueba
                             pedido.setCantidadPaquetes(cantidadPaquetes);
                             pedido.setEstado(EstadoPedido.Registrado);
                             cliente.setCodigo(codigoCliente);
 
                             Optional<Cliente> clienteSeleccionado = clientesExistentes.stream().filter(
-                                    clienteS -> clienteS != null && clienteS.getCodigo() != null &&  clienteS.getCodigo().equals(codigoCliente)).findFirst();
-                            if(!clienteSeleccionado.isPresent()){
+                                    clienteS -> clienteS != null && clienteS.getCodigo() != null
+                                            && clienteS.getCodigo().equals(codigoCliente))
+                                    .findFirst();
+                            if (!clienteSeleccionado.isPresent()) {
                                 clienteRepository.save(cliente);
                                 clientesExistentes.add(cliente);
                                 clientes.add(cliente);
-                            }
-                            else{
+                            } else {
                                 cliente = clienteSeleccionado.get();
                             }
 
                             pedidoRepository.save(pedido);
                             pedidos.add(pedido);
 
-                            for(int i=0;i< pedido.getCantidadPaquetes(); i++){
+                            for (int i = 0; i < pedido.getCantidadPaquetes(); i++) {
                                 Paquete paquete = new Paquete();
                                 paquete.setPedido(pedido);
                                 paquete.setEstado(EstadoPaquete.EnAlmacen);

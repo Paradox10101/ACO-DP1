@@ -10,9 +10,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.Transient;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import com.example.backend.Repository.OficinaRepository;
+import com.example.backend.Repository.UbicacionRepository;
 import com.example.backend.models.Oficina;
 import com.example.backend.models.Pedido;
 import com.example.backend.models.PlanTransporte;
@@ -23,6 +27,13 @@ import com.example.backend.models.Vehiculo;
 
 @Service
 public class Aco {
+
+    @Autowired
+    private UbicacionRepository ubicacionRepository;
+
+    @Autowired
+    private OficinaRepository oficinaRepository;
+
     private List<Pedido> pedidos;
     // private List<Pedido> originalPedidos;
     // private List<Pedido> pedidosNuevos;
@@ -59,7 +70,8 @@ public class Aco {
             // Verifica que el tramo esté disponible antes de la fecha máxima de entrega
             if (tramo.getFechaFin().isBefore(fechaMaximaEntregaGMT)
                     || tramo.getFechaFin().isEqual(fechaMaximaEntregaGMT)) {
-                grafoTramos.computeIfAbsent(tramo.getubicacionOrigen().getIdUbicacion(), k -> new ArrayList<>()).add(tramo);
+                grafoTramos.computeIfAbsent(tramo.getubicacionOrigen().getId_ubicacion(), k -> new ArrayList<>())
+                        .add(tramo);
             }
         }
     }
@@ -74,7 +86,8 @@ public class Aco {
 
     // Se esta manejando que 1 tramo para 1 vehiculo
     // debemos hacer que se guarde o se cuente las distancias de cada tramo que va
-    // pasar el vehiculo y guardarlo en la tabla intermedia ----> Se actualiza solo en averias o cuando termina el recorrido
+    // pasar el vehiculo y guardarlo en la tabla intermedia ----> Se actualiza solo
+    // en averias o cuando termina el recorrido
     // Se calcula cuando se crea la ruta optima elegida <------
     private List<Tramo> construirRuta(Pedido pedido, int simulacion, LocalDateTime fechaMaximaEntregaGMT) {
         List<Tramo> ruta = new ArrayList<>(); // Rutas es un conjunto de tramos
@@ -88,10 +101,12 @@ public class Aco {
             List<Tramo> tramosPosibles = grafoTramos.getOrDefault(idUbicacionActual, new ArrayList<>());
 
             tramosPosibles = tramosPosibles.stream()
-                    .filter(t -> !ubicacionesVisitadas.contains(t.getubicacionDestino().getIdUbicacion()))
+                    .filter(t -> !ubicacionesVisitadas.contains(t.getubicacionDestino().getId_ubicacion()))
                     .filter(t -> t.getFechaInicio().isAfter(ultimaFechaHoraLlegada[0]))
-                    .filter(t -> t.getFechaFin().isBefore(fechaMaximaEntregaGMT)) // llega antes de la fecha máxima de entrega
-                    .filter(t -> t.getCapacidadActual() >= pedido.getCantidadPaquetes()) // Que el tramo tenga capacidad para el pedido
+                    .filter(t -> t.getFechaFin().isBefore(fechaMaximaEntregaGMT)) // llega antes de la fecha máxima de
+                                                                                  // entrega
+                    .filter(t -> t.getCapacidadActual() >= pedido.getCantidadPaquetes()) // Que el tramo tenga capacidad
+                                                                                         // para el pedido
                     .filter(t -> Duration.between(ultimaFechaHoraLlegada[0], t.getFechaInicio()).toMinutes() >= 320)
                     .collect(Collectors.toList());
 
@@ -102,7 +117,8 @@ public class Aco {
             // Long idUbicacionDestinoFinalLong = Long.valueOf(idUbicacionDestinoFinal); //
             // Si es un primitivo Long
             Tramo tramoDirecto = tramosPosibles.stream()
-                    .filter(t -> t.getubicacionDestino().getIdUbicacion().equals(Long.valueOf(idUbicacionDestinoFinal)))
+                    .filter(t -> t.getubicacionDestino().getId_ubicacion()
+                            .equals(Long.valueOf(idUbicacionDestinoFinal)))
                     .min(Comparator.comparing(Tramo::getFechaFin))
                     .orElse(null);
 
@@ -119,7 +135,7 @@ public class Aco {
             }
 
             ruta.add(siguienteTramo);
-            idUbicacionActual = siguienteTramo.getubicacionDestino().getIdUbicacion();
+            idUbicacionActual = siguienteTramo.getubicacionDestino().getId_ubicacion();
             LocalDateTime nuevaFechaHoraLlegada = siguienteTramo.getFechaFin();
 
             ultimaFechaHoraLlegada[0] = nuevaFechaHoraLlegada;
@@ -133,7 +149,8 @@ public class Aco {
     }
 
     // Método para calcular la distancia total de la ruta
-    // verificar como se calcula la distancia y tambien el tiempo "estimado" de llegada
+    // verificar como se calcula la distancia y tambien el tiempo "estimado" de
+    // llegada
     private float calcularDistanciaTotal(List<Tramo> tramos) {
         float distanciaTotal = 0;
         for (Tramo tramo : tramos) {
@@ -143,75 +160,94 @@ public class Aco {
     }
 
     private Tramo elegirTramo(List<Tramo> tramosPosibles, LocalDateTime fechaHoraLlegadaAnterior) {
- 
+
         Map<Tramo, Double> probabilidades = new HashMap<>();
-        double total = 0.0;       
-        // Recorremos los tramos posibles y calculamos la probabilidad utilizando feromonas y heurística
+        double total = 0.0;
+        // Recorremos los tramos posibles y calculamos la probabilidad utilizando
+        // feromonas y heurística
         for (Tramo tramo : tramosPosibles) {
-            double feromona = feromonas.getOrDefault(tramo.getId_tramo(), 0.0);//Intensidad de uso de ese tramo por hormigas
-            double heuristica = calcularHeuristica(tramo, fechaHoraLlegadaAnterior); 
+            double feromona = feromonas.getOrDefault(tramo.getId_tramo(), 0.0);// Intensidad de uso de ese tramo por
+                                                                               // hormigas
+            double heuristica = calcularHeuristica(tramo, fechaHoraLlegadaAnterior);
             double valor = Math.pow(feromona, alpha) * Math.pow(heuristica, beta);
             probabilidades.put(tramo, valor);
             total += valor;
         }
         // Normalizamos las probabilidades
         for (Tramo tramo : tramosPosibles) {
-            probabilidades.put(tramo, probabilidades.get(tramo)/total);
+            probabilidades.put(tramo, probabilidades.get(tramo) / total);
         }
         // Seleccionamos un tramo basándonos en las probabilidades
-        double r = random.nextDouble(); 
+        double r = random.nextDouble();
         double sum = 0.0;
-        
+
         for (Map.Entry<Tramo, Double> entry : probabilidades.entrySet()) {
             sum += entry.getValue();
-            if (sum >= r) return entry.getKey();
+            if (sum >= r)
+                return entry.getKey();
         }
-        
-        return null;  
+
+        return null;
     }
 
     private double calcularHeuristica(Tramo tramo, LocalDateTime fechaHoraLlegadaAnterior) {
         LocalDateTime fechaHoraSalida = tramo.getFechaInicio();
         LocalDateTime fechaHoraLlegada = tramo.getFechaFin();
-        
-        // Calcular el tiempo de espera en minutos entre la llegada del último tramo y la salida de este tramo
+
+        // Calcular el tiempo de espera en minutos entre la llegada del último tramo y
+        // la salida de este tramo
         long tiempoEspera = fechaHoraLlegadaAnterior.until(fechaHoraSalida, java.time.temporal.ChronoUnit.MINUTES);
-        
-        double tiempoEsperaHoras = (double) tiempoEspera/60.0;
+
+        double tiempoEsperaHoras = (double) tiempoEspera / 60.0;
 
         double ponderacionTiempoEspera = 1.0;
-        
-        return (ponderacionTiempoEspera );
+
+        return (ponderacionTiempoEspera);
     }
 
-    public PlanTransporte ejecutar(List<Oficina> oficinas, List<Tramo> tramos, Pedido pedidoIngresado, int simulacion, List<Region> regiones) {
-        this.tramos = tramos;
+    public PlanTransporte ejecutar(List<Oficina> oficinas,
+            HashMap<String, ArrayList<Ubicacion>> caminos, Pedido pedidoIngresado, int simulacion,
+            List<Region> regiones) {
+        // this.tramos = tramos;
         this.pedido = pedidoIngresado;
         boolean solutionFound = false;
-        LocalDateTime fechaMaximaEntrega = calcularFechaMaximaEntregaDestino(pedidoIngresado, oficinas,regiones); // Calcula la fecha máxima de entrega en destino
+        LocalDateTime fechaMaximaEntrega = calcularFechaMaximaEntregaDestino(pedidoIngresado, oficinas, regiones); // Calcula
+                                                                                                                   // la
+                                                                                                                   // fecha
+                                                                                                                   // máxima
+                                                                                                                   // de
+                                                                                                                   // entrega
+                                                                                                                   // en
+                                                                                                                   // destino
         inicializarGrafoTramos(fechaMaximaEntrega);
         inicializarFeromonas();
-        
+
         PlanTransporte planTransporteFinal = null;
 
-        System.out.println("El pedido actual es: " + pedidoIngresado.getId_pedido() + " " + pedidoIngresado.getFechaEntregaEstimada() + "  " +
-                pedido.getAlmacen().getId_almacen() + "  ->  " + pedido.getOficinaDestino().getId_oficina() + "  " + "ciudades ORIGEN - DESTINO");
-                // Asegúrate de ajustar la forma en la que obtienes las ciudades de origen y destino según la lógica de OdiparPack
+        System.out.println("El pedido actual es: " + pedidoIngresado.getId_pedido() + " "
+                + pedidoIngresado.getFechaEntregaEstimada() + "  " +
+                pedido.getAlmacen().getId_almacen() + "  ->  " + pedido.getOficinaDestino().getId_oficina() + "  "
+                + "ciudades ORIGEN - DESTINO");
+
+        // Asegúrate de ajustar la forma en la que obtienes las ciudades de origen y
+        // destino según la lógica de OdiparPack
         for (int i = 1; i <= numeroIteraciones; i++) {
-            if(solutionFound)break;
+            if (solutionFound)
+                break;
             List<PlanTransporte> rutasEncontradas = new ArrayList<>(); // PlanTransporte = pedido y lista de tramos
             for (int j = 1; j <= numeroHormigas; j++) {
                 List<Tramo> ruta = construirRuta(pedido, simulacion, fechaMaximaEntrega); // Ruta = lista de tramos
-                
+
                 if (!ruta.isEmpty()) {
                     PlanTransporte planTransporte = new PlanTransporte();
                     planTransporte.setPedido(pedido);
-                    //planTransporte.setTramos(ruta);
+                    // planTransporte.setTramos(ruta);
                     rutasEncontradas.add(planTransporte);
 
                     // Devolver la primera ruta válida encontrada
                     for (Tramo tramo : ruta) {
-                        System.out.println("Tramo de " + tramo.getubicacionOrigen().getIdUbicacion() + " hacia " + tramo.getubicacionDestino().getIdUbicacion()
+                        System.out.println("Tramo de " + tramo.getubicacionOrigen().getId_ubicacion() + " hacia "
+                                + tramo.getubicacionDestino().getId_ubicacion()
                                 + "  ->  " + tramo.getFechaInicio() + " - " + tramo.getFechaFin());
                     }
                     planTransporteFinal = planTransporte;
@@ -219,67 +255,77 @@ public class Aco {
                     break; // Devolver la primera ruta válida y cortar el bucle
                 }
             }
-            
+
             if (!rutasEncontradas.isEmpty()) {
-                actualizarFeromonasRuta(rutasEncontradas); // Evapora y actualiza con las rutas encontradas por todas las hormigas
-            }
-            else{
+                actualizarFeromonasRuta(rutasEncontradas); // Evapora y actualiza con las rutas encontradas por todas
+                                                           // las hormigas
+            } else {
                 System.out.println("No se encontró una ruta válida después de todas las iteraciones");
                 return null;
             }
         }
-        return planTransporteFinal;        
+        return planTransporteFinal;
     }
 
-    private LocalDateTime calcularFechaMaximaEntregaDestino(Pedido pedido,List<Oficina> oficinas,List<Region> regiones) {
+    private LocalDateTime calcularFechaMaximaEntregaDestino(Pedido pedido, List<Oficina> oficinas,
+            List<Region> regiones) {
 
-        /*List<Oficina> oficinas = Arrays.asList(
-            new Oficina(1L,1L, 101,200), 
-            new Oficina(2L,2L, 102,200),
-            new Oficina(3L, 3L, 103,200)
-        );
-        
-        List<Region> regiones = Arrays.asList(
-            new Region(101L, "Costa", 2), 
-            new Region(102L, "Sierra", 4),
-            new Region(103L, "Selva", 5)
-        );
+        /*
+         * List<Oficina> oficinas = Arrays.asList(
+         * new Oficina(1L,1L, 101,200),
+         * new Oficina(2L,2L, 102,200),
+         * new Oficina(3L, 3L, 103,200)
+         * );
+         * 
+         * List<Region> regiones = Arrays.asList(
+         * new Region(101L, "Costa", 2),
+         * new Region(102L, "Sierra", 4),
+         * new Region(103L, "Selva", 5)
+         * );
+         * 
+         * // Buscar la oficina de destino usando el ID proporcionado en el pedido
+         * Oficina oficinaDestino = oficinas.stream()
+         * .filter(oficina ->
+         * oficina.getId_oficina().equals(pedido.getFid_oficinaDest()))
+         * .findFirst()
+         * .orElseThrow(() -> new IllegalArgumentException("Oficina no encontrada"));
+         * 
+         * // Buscar la región asociada a la oficina de destino
+         * Region regionDestino = regiones.stream()
+         * .filter(region ->
+         * region.getIdRegion().equals(oficinaDestino.getFid_ubicacion()))
+         * .findFirst()
+         * .orElseThrow(() -> new IllegalArgumentException("Región no encontrada"));
+         * LocalDateTime fechaMaximaEntregaGMT =
+         * pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite()).with
+         * (LocalTime.MAX);
+         */
 
-        // Buscar la oficina de destino usando el ID proporcionado en el pedido
-        Oficina oficinaDestino = oficinas.stream()
-                .filter(oficina -> oficina.getId_oficina().equals(pedido.getFid_oficinaDest()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Oficina no encontrada"));
-        
-        // Buscar la región asociada a la oficina de destino
-        Region regionDestino = regiones.stream()
-                .filter(region -> region.getIdRegion().equals(oficinaDestino.getFid_ubicacion()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Región no encontrada"));
-        LocalDateTime fechaMaximaEntregaGMT = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite()).with(LocalTime.MAX);
-        */
+        /*
+         * if(regionDestino.getNombre() == "Costa"){
+         * return pedido.getFechaEntregaEstimada().plusDays(1).with(LocalTime.MAX);
+         * }
+         * else{
+         * if(regionDestino.getNombre() == "Selva"){
+         * return pedido.getFechaEntregaEstimada().plusDays(3).with(LocalTime.MAX);
+         * }
+         * else{
+         * //sierra
+         * return pedido.getFechaEntregaEstimada().plusDays(2).with(LocalTime.MAX);
+         * }
+         * }
+         */
 
-        /*if(regionDestino.getNombre() == "Costa"){
-            return pedido.getFechaEntregaEstimada().plusDays(1).with(LocalTime.MAX);
-        }
-        else{
-            if(regionDestino.getNombre() == "Selva"){
-                return pedido.getFechaEntregaEstimada().plusDays(3).with(LocalTime.MAX);
-            }
-            else{
-                //sierra
-                return pedido.getFechaEntregaEstimada().plusDays(2).with(LocalTime.MAX);
-            }
-        }*/
-
-        Oficina oficinaDestino = obtenerOficinaPorId(pedido.getOficinaDestino().getId_oficina(), oficinas); // Simulación de búsqueda de oficina
-        Ubicacion ubicacionDestino = obtenerUbicacionPorId(oficinaDestino.getUbicacion().getIdUbicacion()); // Simulación de búsqueda
-                                                                                               // de ubicación
+        Oficina oficinaDestino = oficinaRepository.findById(pedido.getOficinaDestino().getId_oficina()).get(); // Simulación de búsqueda de oficina
+        Ubicacion ubicacionDestino = ubicacionRepository.findById(oficinaDestino.getUbicacion().getId_ubicacion()).get(); // Simulación de búsqueda de ubicación
         Region regionDestino = obtenerRegionPorId(ubicacionDestino.getRegion().getIdRegion(), regiones);
 
-        LocalDateTime fechaMaximaEntregaGMT = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite())
+        /*LocalDateTime fechaMaximaEntrega = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite())
+                .with(LocalTime.MAX);*/
+        LocalDateTime fechaMaximaEntrega = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite())
                 .with(LocalTime.MAX);
-        return fechaMaximaEntregaGMT;
+        
+        return fechaMaximaEntrega;
     }
 
     // Métodos simulados para obtener la oficina y la ubicación (para pruebas):
@@ -294,8 +340,9 @@ public class Aco {
 
     private Ubicacion obtenerUbicacionPorId(Long idUbicacion) {
         // Simula la obtención de la ubicación según su ID
-        //Falta obtener region por ID
-        //return new Ubicacion(idUbicacion, "Ubigeo 001", "Ciudad Prueba", 1L); // 1L es el ID de la región, cambia según tus datos
+        // Falta obtener region por ID
+        // return new Ubicacion(idUbicacion, "Ubigeo 001", "Ciudad Prueba", 1L); // 1L
+        // es el ID de la región, cambia según tus datos
         return null;
     }
 
@@ -314,20 +361,21 @@ public class Aco {
         for (PlanTransporte plan : rutasEncontradas) {
             double costoTotal = 0.0;
 
-            //Obtencion de tramos por plan
+            // Obtencion de tramos por plan
             /*
-            for (Tramo tramo : plan.getTramos()) {
-                costoTotal += calcularDuracionTramo(tramo); // Calcula solo la duración de los tramos
-            }
-            */
+             * for (Tramo tramo : plan.getTramos()) {
+             * costoTotal += calcularDuracionTramo(tramo); // Calcula solo la duración de
+             * los tramos
+             * }
+             */
 
-            //Obtencion de tramos por plan
+            // Obtencion de tramos por plan
             /*
-            for (Tramo tramo : plan.getTramos()) {
-                Long key = tramo.getId_tramo();
-                feromonas.put(key, feromonas.get(key) + (1 / costoTotal));
-            }
-            */
+             * for (Tramo tramo : plan.getTramos()) {
+             * Long key = tramo.getId_tramo();
+             * feromonas.put(key, feromonas.get(key) + (1 / costoTotal));
+             * }
+             */
         }
     }
 
@@ -352,9 +400,10 @@ public class Aco {
         }
     }
 
-    public HashMap<String, ArrayList<Ubicacion>>  cargarCaminosDesdeArchivo(String rutaArchivo, ArrayList<Ubicacion> ubicaciones) {
+    public HashMap<String, ArrayList<Ubicacion>> cargarCaminosDesdeArchivo(String rutaArchivo,
+            ArrayList<Ubicacion> ubicaciones) {
         HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
-        for(Ubicacion ubicacion: ubicaciones){
+        for (Ubicacion ubicacion : ubicaciones) {
             caminos.put(ubicacion.getUbigeo(), new ArrayList<>());
         }
         try {
@@ -366,8 +415,8 @@ public class Aco {
                     String ubigeoDestino = valores[1].trim();
                     Optional<Ubicacion> ubicacionDestino = ubicaciones.stream()
                             .filter(ubicacionSel -> ubicacionSel.getUbigeo().equals(ubigeoDestino)).findFirst();
-                    //caminos.get(ubigeoOrigen).add(ubicacionDestino.get());
-                    if(ubicacionDestino.isPresent()){
+                    // caminos.get(ubigeoOrigen).add(ubicacionDestino.get());
+                    if (ubicacionDestino.isPresent()) {
                         caminos.get(ubigeoOrigen).add(ubicacionDestino.get());
                     }
                 }

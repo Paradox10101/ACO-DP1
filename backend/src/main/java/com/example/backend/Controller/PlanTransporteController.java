@@ -34,4 +34,5 @@ public class PlanTransporteController {
     public void eliminarPlan(@PathVariable Long id) {
         planTransporteService.eliminarPlan(id);
     }
+
 }
