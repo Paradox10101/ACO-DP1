@@ -80,39 +80,11 @@ public class Mantenimiento {
         this.duracion = duracion;
     }
 
-    public static ArrayList<Mantenimiento> cargarMantenimientosDesdeArchivo(String rutaArchivo, List<Vehiculo> vehiculos) {
-        ArrayList<Mantenimiento> mantenimientos = new ArrayList<>();
-        try {
-            Path path = Paths.get(rutaArchivo).toAbsolutePath();
-            try (BufferedReader br = Files.newBufferedReader(path)) {
-                String linea;
-                while ((linea = br.readLine()) != null) {
-                    Mantenimiento mantenimiento = new Mantenimiento();
-                    String[] valores = linea.split(":");
-                    String anhoMesDiaString = valores[0];
-                    String codigoString = valores[1];
-                    String anhoString = anhoMesDiaString.substring(0, 4);
-                    String mesString = anhoMesDiaString.substring(4, 6);
-                    String diaString = anhoMesDiaString.substring(6, 8);
-                    String fechaString = diaString + "/" + mesString + "/" + anhoString;
+    public Vehiculo getVehiculo() {
+        return vehiculo;
+    }
 
-                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                    Date fecha = formatter.parse(fechaString);
-                    Optional<Vehiculo> vehiculoSeleccionado = vehiculos.stream().filter(
-                            vehiculoS -> vehiculoS.getCodigo().equals(codigoString)).findFirst();
-                    if(vehiculoSeleccionado.isPresent()){
-                        mantenimiento.setFechaProgramada(fecha);
-                        mantenimientos.add(mantenimiento);
-                    }
-
-                }
-            }
-
-        } catch (IOException e) {
-            System.out.println("Error al leer el archivo: " + e.getMessage());
-        } catch (ParseException e) {
-            System.out.println("Error al leer formato de fecha: " + e.getMessage());
-        }
-        return mantenimientos;
+    public void setVehiculo(Vehiculo vehiculo) {
+        this.vehiculo = vehiculo;
     }
 }

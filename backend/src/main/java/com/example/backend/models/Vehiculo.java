@@ -27,7 +27,7 @@ public class Vehiculo {
     @JoinColumn(name = "fid_plan_transporte")
     private PlanTransporte planTransporte;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fid_almacen")
     private Almacen almacen;
 
@@ -35,7 +35,7 @@ public class Vehiculo {
     @JoinColumn(name = "fid_ubicacion")
     private Ubicacion ubicacionActual;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fid_tipoVehiculo", nullable=false)
     private TipoVehiculo tipoVehiculo;
 
@@ -55,6 +55,10 @@ public class Vehiculo {
     @Column(name = "distancia_total")
     private float distanciaTotal;
 
+    public Vehiculo() {
+
+    }
+
     public Vehiculo(Long id_vehiculo, PlanTransporte planTransporte, Almacen almacen, LocalDateTime fechaSalida,
             LocalDateTime fechaLlegada, int capacidadMaxima, EstadoVehiculo estado, float distanciaTotal) {
         this.id_vehiculo = id_vehiculo;
@@ -67,8 +71,28 @@ public class Vehiculo {
         this.distanciaTotal = distanciaTotal;
     }
 
-    public Vehiculo() {
+    public Vehiculo(String codigo, Almacen almacen, Ubicacion ubicacionActual, TipoVehiculo tipoVehiculo, int capacidadMaxima, EstadoVehiculo estado, float distanciaTotal) {
+        this.codigo = codigo;
+        this.almacen = almacen;
+        this.ubicacionActual = ubicacionActual;
+        this.tipoVehiculo = tipoVehiculo;
+        this.capacidadMaxima = capacidadMaxima;
+        this.estado = estado;
+        this.distanciaTotal = distanciaTotal;
+    }
 
+    public Vehiculo(Long id_vehiculo, String codigo, PlanTransporte planTransporte, Almacen almacen, Ubicacion ubicacionActual, TipoVehiculo tipoVehiculo, LocalDateTime fechaSalida, LocalDateTime fechaLlegada, int capacidadMaxima, EstadoVehiculo estado, float distanciaTotal) {
+        this.id_vehiculo = id_vehiculo;
+        this.codigo = codigo;
+        this.planTransporte = planTransporte;
+        this.almacen = almacen;
+        this.ubicacionActual = ubicacionActual;
+        this.tipoVehiculo = tipoVehiculo;
+        this.fechaSalida = fechaSalida;
+        this.fechaLlegada = fechaLlegada;
+        this.capacidadMaxima = capacidadMaxima;
+        this.estado = estado;
+        this.distanciaTotal = distanciaTotal;
     }
 
     public Long getId_vehiculo() {
@@ -140,7 +164,7 @@ public class Vehiculo {
         return ubicacionActual;
     }
 
-    public void setFid_ubicacionActual(Ubicacion ubicacionActual) {
+    public void setUbicacionActual(Ubicacion ubicacionActual) {
         this.ubicacionActual = ubicacionActual;
     }
 

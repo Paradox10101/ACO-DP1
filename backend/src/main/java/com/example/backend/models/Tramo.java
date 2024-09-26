@@ -140,28 +140,5 @@ public class Tramo {
         this.capacidadActual = capacidadActual;
     }
 
-    public static ArrayList<Tramo>  cargarTramosDesdeArchivo(String rutaArchivo, HashMap<String, ArrayList<Ubicacion>> caminos) {
-        ArrayList<Tramo> tramos = new ArrayList<>();
-        try {
-            try (BufferedReader lector = new BufferedReader(new FileReader(rutaArchivo))) {
-                String linea;
-                while ((linea = lector.readLine()) != null) {
-                    String[] valores = linea.split(" => ");
-                    Ubicacion ubicacion  = new Ubicacion();
-                    String ubigeoOrigen = valores[0];
-                    String ubigeoDestino = valores[1];
-                    ubicacion.setUbigeo(ubigeoOrigen);
 
-                    ArrayList<Ubicacion>listaUbicacionesDestino = caminos.get(ubigeoOrigen);
-                    if(listaUbicacionesDestino!=null){
-                        listaUbicacionesDestino.add(ubicacion);
-                    }
-                }
-            }
-
-        } catch (IOException e) {
-            System.out.println("Error al leer el archivo: " + e.getMessage());
-        }
-        return tramos;
-    }
 }

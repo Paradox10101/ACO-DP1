@@ -1,13 +1,12 @@
 package com.example.backend.Service;
 
 import com.example.backend.Repository.AlmacenRepository;
-import com.example.backend.Repository.OficinaRepository;
+
 import com.example.backend.Repository.TipoVehiculoRepository;
 import com.example.backend.models.*;
 import com.example.backend.Repository.VehiculoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.example.backend.Repository.TipoVehiculoRepository;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -20,10 +19,9 @@ public class VehiculoService {
     private VehiculoRepository vehiculoRepository;
 
     @Autowired
-    private AlmacenRepository almacenRepository;
-
-    @Autowired
     private TipoVehiculoRepository tipoVehiculoRepository;
+    @Autowired
+    private AlmacenRepository   almacenRepository;
 
     public List<Vehiculo> obtenerTodos() {
         return vehiculoRepository.findAll();
@@ -41,7 +39,7 @@ public class VehiculoService {
         vehiculoRepository.deleteById(id);
     }
 
-    public static ArrayList<Vehiculo> cargarVehiculosAlmacenesDesdeArchivo(String rutaArchivo, List<Almacen> almacenes, ArrayList<Vehiculo> vehiculos, List<Oficina> oficinas, List<Ubicacion> ubicaciones, ArrayList<TipoVehiculo> tiposVehiculo) {
+    public ArrayList<Vehiculo> cargarVehiculosAlmacenesDesdeArchivo(String rutaArchivo, List<Almacen> almacenes, ArrayList<Vehiculo> vehiculos, List<Ubicacion> ubicaciones, ArrayList<TipoVehiculo> tiposVehiculo) {
         try {
             try (BufferedReader lector = new BufferedReader(new FileReader(rutaArchivo))) {
                 String linea;
@@ -54,9 +52,8 @@ public class VehiculoService {
                     int capacidad = Integer.parseInt(valores[1].trim());
                     tipoVehiculo.setNombre(categoria);
                     tipoVehiculo.setCapacidadMaxima(capacidad);
+                    tipoVehiculoRepository.save(tipoVehiculo);
                     tiposVehiculo.add(tipoVehiculo);
-
-
                 }
                 for(int i=0; i<3 ;i++){
                     Almacen almacen = new Almacen();
@@ -64,11 +61,11 @@ public class VehiculoService {
                     String provinciaSel = linea.trim().toUpperCase();
                     Optional<Ubicacion> ubicacionSeleccionada = ubicaciones.stream().filter(ubicacionS -> ubicacionS.getProvincia().equals(provinciaSel)).findFirst();
                     if(ubicacionSeleccionada.isPresent()){
-                        Long id_ubicacion = ubicacionSeleccionada.get().getId_ubicacion();
-                        almacen.setUbicacion(ubicacion);
+                        almacen.setUbicacion(ubicacionSeleccionada.get());
                         linea = lector.readLine();
                         String[] codigosVehiculos = linea.split(",");
                         almacen.setCantidadVehiculos(codigosVehiculos.length);
+                        almacenRepository.save(almacen);
                         almacenes.add(almacen);
                         for(String codigoVehiculo : codigosVehiculos){
                             Vehiculo vehiculo = new Vehiculo();
@@ -78,7 +75,12 @@ public class VehiculoService {
                                 if(tipoVehiculo.getNombre().equals(String.valueOf(codigoCorregido.charAt(0)))){
                                     vehiculo.setTipoVehiculo(tipoVehiculo);
                                     vehiculo.setDistanciaTotal(0);
+                                    vehiculo.setUbicacionActual(ubicacionSeleccionada.get());
                                     vehiculo.setCodigo(codigoCorregido);
+                                    vehiculo.setAlmacen(almacen);
+                                    vehiculo.setEstado(EstadoVehiculo.Disponible);
+                                    vehiculo.setCapacidadMaxima(vehiculo.getTipoVehiculo().getCapacidadMaxima());
+                                    vehiculoRepository.save(vehiculo);
                                     vehiculos.add(vehiculo);
                                     break;
                                 }

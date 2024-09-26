@@ -16,13 +16,13 @@ public class Cliente {
     @Column(name = "id_cliente")
     private Long id_cliente;
 
-    @Column(name="codigo", nullable = false)
+    @Column(name="codigo")
     private String codigo;
     
-    @Column(name = "nombres", nullable = false)
+    @Column(name = "nombres")
     private String nombres;
     
-    @Column(name = "apellidos", nullable = false)
+    @Column(name = "apellidos")
     private String apellidos;
     
     @Column(name = "telefono")
@@ -30,6 +30,18 @@ public class Cliente {
 
     @Column(name = "email")
     private String email;
+
+    public Cliente() {
+    }
+
+    public Cliente(String codigo) {
+        this.codigo = codigo;
+    }
+
+    public Cliente(Long id_cliente, String codigo) {
+        this.id_cliente = id_cliente;
+        this.codigo = codigo;
+    }
 
     public Long getId_cliente() {
         return id_cliente;

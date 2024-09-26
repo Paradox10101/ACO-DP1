@@ -66,7 +66,6 @@ public class OficinaController {
         ArrayList<Region> regiones = regionService.obtenerTodas();
         ArrayList<Ubicacion> ubicaciones = new ArrayList<>();
         HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
-        return oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones,
-                caminos, ubicaciones);
+        return oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, ubicaciones);
     }
 }

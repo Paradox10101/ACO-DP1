@@ -31,6 +31,11 @@ public class Almacen {
        
     }
 
+    public Almacen(Ubicacion ubicacion, int cantidadVehiculos) {
+        this.ubicacion = ubicacion;
+        this.cantidadVehiculos = cantidadVehiculos;
+    }
+
     public Almacen(Long id_almacen, Ubicacion ubicacion, int cantidadVehiculos) {
         this.id_almacen = id_almacen;
         this.ubicacion = ubicacion;

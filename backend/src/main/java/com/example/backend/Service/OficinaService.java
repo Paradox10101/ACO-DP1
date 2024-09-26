@@ -97,8 +97,7 @@ public class OficinaService {
 
 
     public ArrayList<Oficina> cargarOficinasDesdeBD(String rutaArchivo,
-            ArrayList<Region> regiones,
-            Map<String, ArrayList<Ubicacion>> caminos, ArrayList<Ubicacion> ubicaciones) {
+            ArrayList<Region> regiones, ArrayList<Ubicacion> ubicaciones) {
         // Leer las oficinas desde el archivo
         ArrayList<Oficina> oficinas = leerOficinasDesdeArchivo(rutaArchivo);
 
@@ -114,24 +113,14 @@ public class OficinaService {
                 // Guardar la ubicación si aún no existe en la base de datos
                 if (Objects.isNull(ubicacion.getId_ubicacion()) || !ubicacionRepository.existsById(ubicacion.getId_ubicacion())) {
                     ubicacionRepository.save(ubicacion);
-                }
-                if (!caminos.containsKey(ubicacion.getUbigeo())) {
                     ubicaciones.add(ubicacion);
                 }
             }
-            caminos.put(ubicacion.getUbigeo(), new ArrayList<>(Arrays.asList(ubicacion)));
             if (Objects.isNull(oficina.getId_oficina()) || !oficinaRepository.existsById(oficina.getId_oficina())) {
                 oficinaRepository.save(oficina);
             }
         }
-        // Guardar todas las oficinas en la base de datos
-        /*
-        for (Oficina oficina : oficinas) {
-            /*if (!oficinaRepository.existsById(oficina.getId_oficina())) {
-            }
-            oficinaRepository.save(oficina);
-        }
-        */
+
         return oficinas;
     }
 

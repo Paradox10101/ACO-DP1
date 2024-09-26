@@ -3,8 +3,8 @@ package com.example.backend;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.example.backend.Service.RegionService;
-import com.example.backend.Service.VehiculoService;
+import com.example.backend.Repository.MantenimientoRepository;
+import com.example.backend.Service.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.example.backend.Service.OficinaService;
 import com.example.backend.algorithm.Aco;
 import com.example.backend.models.Almacen;
 import com.example.backend.models.Bloqueo;
@@ -42,24 +41,30 @@ public class BackendApplication {
         ArrayList<Vehiculo> vehiculos = new ArrayList<Vehiculo>(); // Es hardcodeado
         ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
         ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
-        HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
+        HashMap<String, ArrayList<Ubicacion>> caminos;
 
         RegionService regionService = context.getBean(RegionService.class);
         OficinaService oficinaService = context.getBean(OficinaService.class);
         VehiculoService vehiculoService = context.getBean(VehiculoService.class);
-
+        TramoService tramoService = context.getBean(TramoService.class);
+        PedidoService pedidoService = context.getBean(PedidoService.class);
+        BloqueoService bloqueoService = context.getBean(BloqueoService.class);
+        MantenimientoService mantenimientoService = context.getBean(MantenimientoService.class);
+        Aco aco = context.getBean(Aco.class);
 
         regionService.guardar(new Region("COSTA", 1));
         regionService.guardar(new Region("SIERRA", 2));
         regionService.guardar(new Region("SELVA", 3));
         regiones = regionService.obtenerTodas();
 
-        oficinas = oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, caminos, ubicaciones);
-        vehiculos = vehiculoService.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, oficinas,ubicaciones, tiposVehiculo);
-        tramos = Tramo.cargarTramosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", caminos);
-        pedidos = Pedido.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202403.txt", oficinas, ubicaciones);
-        bloqueos = Bloqueo.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
-        mantenimientos = Mantenimiento.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
+        oficinas = oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, ubicaciones);
+        vehiculos = vehiculoService.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, ubicaciones, tiposVehiculo);
+        caminos = aco.cargarCaminosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", ubicaciones);
+        bloqueos = bloqueoService.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
+        pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202403.txt", oficinas, ubicaciones);
+        mantenimientos = mantenimientoService.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
+        System.out.println("DONE");
+
         /*
         System.out.println("Listado de Oficinas:");
         System.out.println("--------------------------------------------------");

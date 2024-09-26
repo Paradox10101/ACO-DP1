@@ -1,16 +1,12 @@
 package com.example.backend.algorithm;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.Transient;
@@ -96,7 +92,7 @@ public class Aco {
                     .filter(t -> t.getFechaInicio().isAfter(ultimaFechaHoraLlegada[0]))
                     .filter(t -> t.getFechaFin().isBefore(fechaMaximaEntregaGMT)) // llega antes de la fecha máxima de entrega
                     .filter(t -> t.getCapacidadActual() >= pedido.getCantidadPaquetes()) // Que el tramo tenga capacidad para el pedido
-                    .filter(t -> Duration.between(ultimaFechaHoraLlegada[0], t.getFechaInicio()).toMinutes() >= 5) // Que el tramo inicie al menos 5 min después de la llegada
+                    .filter(t -> Duration.between(ultimaFechaHoraLlegada[0], t.getFechaInicio()).toMinutes() >= 320)
                     .collect(Collectors.toList());
 
             if (tramosPosibles.isEmpty()) { // La hormiga no encuentra tramos disponibles
@@ -354,5 +350,32 @@ public class Aco {
             Double value = entry.getValue();
             feromonas.put(key, (1 - tasaEvaporacion) * value);
         }
+    }
+
+    public HashMap<String, ArrayList<Ubicacion>>  cargarCaminosDesdeArchivo(String rutaArchivo, ArrayList<Ubicacion> ubicaciones) {
+        HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
+        for(Ubicacion ubicacion: ubicaciones){
+            caminos.put(ubicacion.getUbigeo(), new ArrayList<>());
+        }
+        try {
+            try (BufferedReader lector = new BufferedReader(new FileReader(rutaArchivo))) {
+                String linea;
+                while ((linea = lector.readLine()) != null) {
+                    String[] valores = linea.split(" => ");
+                    String ubigeoOrigen = valores[0].trim();
+                    String ubigeoDestino = valores[1].trim();
+                    Optional<Ubicacion> ubicacionDestino = ubicaciones.stream()
+                            .filter(ubicacionSel -> ubicacionSel.getUbigeo().equals(ubigeoDestino)).findFirst();
+                    //caminos.get(ubigeoOrigen).add(ubicacionDestino.get());
+                    if(ubicacionDestino.isPresent()){
+                        caminos.get(ubigeoOrigen).add(ubicacionDestino.get());
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error al leer el archivo: " + e.getMessage());
+        }
+        return caminos;
     }
 }
