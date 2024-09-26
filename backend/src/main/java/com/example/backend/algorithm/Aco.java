@@ -182,17 +182,10 @@ public class Aco {
         long tiempoEspera = fechaHoraLlegadaAnterior.until(fechaHoraSalida, java.time.temporal.ChronoUnit.MINUTES);
         
         double tiempoEsperaHoras = (double) tiempoEspera/60.0;
-        
-        // Calcular la duracion del vuelo (Deberia ser considerando GMT)
-        long duracionVuelo = fechaHoraSalida.until(fechaHoraLlegada, java.time.temporal.ChronoUnit.MINUTES);
-        double duracionVueloHoras = duracionVuelo/60.0;
-        
-        // Factor de tiempo de espera: Penalizar tiempos de espera largos
-        double factorTiempoEspera = (tiempoEsperaHoras > 0) ? 1.0 / (tiempoEsperaHoras+duracionVueloHoras) : 0;  // Evita la división por cero
-   
+
         double ponderacionTiempoEspera = 1.0;
         
-        return (ponderacionTiempoEspera * factorTiempoEspera);
+        return (ponderacionTiempoEspera );
     }
 
     public PlanTransporte ejecutar(List<Oficina> oficinas, List<Tramo> tramos, Pedido pedidoIngresado, int simulacion, List<Region> regiones) {
@@ -243,28 +236,7 @@ public class Aco {
     }
 
     private LocalDateTime calcularFechaMaximaEntregaDestino(Pedido pedido,List<Oficina> oficinas,List<Region> regiones) {
-        // LOGICA ANTIGUA 23:59:59 DEL DIA DE DESTINO
-        /*
-         * LocalDateTime fechaHoraRecepcionEnDestino =
-         * envio.getFechaHoraRecepcion().plusHours(envio.getAeropuertoDestino().
-         * getCiudad().getGmt()); // La hora en el lugar de destino
-         * int diasAdicionales = envio.getTipo() ? 2 : 1; // 2 días si es
-         * intercontinental, 1 día en caso contrario
-         * LocalDateTime fechaMaximaEntregaEnDestino =
-         * fechaHoraRecepcionEnDestino.plusDays(diasAdicionales).with(LocalTime.MAX);
-         * // De nuevo se convierte a GMT
-         * LocalDateTime fechaMaximaEntregaGMT =
-         * fechaMaximaEntregaEnDestino.minusHours(envio.getAeropuertoDestino().getCiudad
-         * ().getGmt());
-         * 
-         * return fechaMaximaEntregaGMT;
-         */
-        // LOGICA NUEVA
-        //Oficina oficinaDestino = oficinaDestino.findbyId(pedido.getFid_oficinaDest());
-        //Region regionDestino = regionDestino.findbyId(oficinaDestino.getFid_ubicacion());
-// Simulación de datos de Oficinas y Regiones (Hard-coded)
 
-        //Long a = 1L,b,c,d;
         /*List<Oficina> oficinas = Arrays.asList(
             new Oficina(1L,1L, 101,200), 
             new Oficina(2L,2L, 102,200),
@@ -288,9 +260,6 @@ public class Aco {
                 .filter(region -> region.getIdRegion().equals(oficinaDestino.getFid_ubicacion()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Región no encontrada"));
-
-
-
         LocalDateTime fechaMaximaEntregaGMT = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite()).with(LocalTime.MAX);
         */
 
@@ -305,19 +274,8 @@ public class Aco {
                 //sierra
                 return pedido.getFechaEntregaEstimada().plusDays(2).with(LocalTime.MAX);
             }
-            
-
         }*/
 
-        /*LocalDateTime fechaHoraRecepcionEnOrigen = pedido.getFechaEntregaEstimada()
-                .plusHours(.getGmt()); // La hora en el lugar de origen
-        int diasAdicionales = pedido.getTipo(); // 2 días si es intercontinental, 1 día en caso contrario
-        LocalDateTime fechaMaximaEntregaEnDestino = fechaHoraRecepcionEnOrigen.plusDays(diasAdicionales);
-        // De nuevo se convierte a GMT
-        LocalDateTime fechaMaximaEntregaGMT = fechaMaximaEntregaEnDestino
-                .minusHours(pedido.getAeropuertoDestino().getCiudad().getGmt());*/
-
-        // Aquí simulas la búsqueda de la oficina y la región sin usar una BD real
         Oficina oficinaDestino = obtenerOficinaPorId(pedido.getOficinaDestino().getId_oficina(), oficinas); // Simulación de búsqueda de oficina
         Ubicacion ubicacionDestino = obtenerUbicacionPorId(oficinaDestino.getUbicacion().getIdUbicacion()); // Simulación de búsqueda
                                                                                                // de ubicación
@@ -338,7 +296,6 @@ public class Aco {
         return null; // Devuelve null si no encuentra la oficina
     }
 
-        ///ESTE ES EL UNICO QUE SE  ESTA CREANDO ASI POR PRUEBAS <------- REVISAR SI SE NECESITA
     private Ubicacion obtenerUbicacionPorId(Long idUbicacion) {
         // Simula la obtención de la ubicación según su ID
         //Falta obtener region por ID
