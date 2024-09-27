@@ -31,8 +31,8 @@ public class PlanTransporteService {
     @Autowired
     private OficinaService oficinaService;
 
-    @Transient
-    private Aco aco = new Aco();
+    @Autowired
+    private Aco aco;
 
     public List<PlanTransporte> obtenerTodosLosPlanes() {
         return planTransporteRepository.findAll();
@@ -56,7 +56,7 @@ public class PlanTransporteService {
 
     // Algo implementado en el service <----
     public PlanTransporte crearRuta(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos, 
-            List<Region> regiones){
+            List<Region> regiones, List<Ubicacion> ubicaciones){
         
         
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
@@ -67,8 +67,8 @@ public class PlanTransporteService {
         //List<Oficina> oficinas = new ArrayList<>();
         //List<Tramo> tramos = new ArrayList<>();
         //List<Tramo> rutas = new ArrayList<>();
-
-        PlanTransporte planOptimo =  aco.ejecutar(oficinas, caminos, pedido, 0, regiones);
+        System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
+        PlanTransporte planOptimo =  aco.ejecutar(oficinas, caminos, pedido, 0, regiones, ubicaciones);
 
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);

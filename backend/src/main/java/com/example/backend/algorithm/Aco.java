@@ -12,11 +12,14 @@ import java.util.stream.Collectors;
 import jakarta.persistence.Transient;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import com.example.backend.Repository.AlmacenRepository;
 import com.example.backend.Repository.OficinaRepository;
 import com.example.backend.Repository.UbicacionRepository;
+import com.example.backend.models.Almacen;
 import com.example.backend.models.Oficina;
 import com.example.backend.models.Pedido;
 import com.example.backend.models.PlanTransporte;
@@ -33,6 +36,9 @@ public class Aco {
 
     @Autowired
     private OficinaRepository oficinaRepository;
+
+    @Autowired
+    private AlmacenRepository almacenRepository;
 
     private List<Pedido> pedidos;
     // private List<Pedido> originalPedidos;
@@ -64,12 +70,12 @@ public class Aco {
 
     }
 
-    private void inicializarGrafoTramos(LocalDateTime fechaMaximaEntregaGMT) {
+    private void inicializarGrafoTramos(LocalDateTime fechaMaximaEntrega) {
         grafoTramos = new HashMap<>();
         for (Tramo tramo : tramos) {
             // Verifica que el tramo esté disponible antes de la fecha máxima de entrega
-            if (tramo.getFechaFin().isBefore(fechaMaximaEntregaGMT)
-                    || tramo.getFechaFin().isEqual(fechaMaximaEntregaGMT)) {
+            if (tramo.getFechaFin().isBefore(fechaMaximaEntrega)
+                    || tramo.getFechaFin().isEqual(fechaMaximaEntrega)) {
                 grafoTramos.computeIfAbsent(tramo.getubicacionOrigen().getId_ubicacion(), k -> new ArrayList<>())
                         .add(tramo);
             }
@@ -89,29 +95,40 @@ public class Aco {
     // pasar el vehiculo y guardarlo en la tabla intermedia ----> Se actualiza solo
     // en averias o cuando termina el recorrido
     // Se calcula cuando se crea la ruta optima elegida <------
-    private List<Tramo> construirRuta(Pedido pedido, int simulacion, LocalDateTime fechaMaximaEntregaGMT) {
+    private List<Tramo> construirRuta(Pedido pedido, int simulacion, LocalDateTime fechaMaximaEntrega) {
+        //Eleccion del mejor almacen
         List<Tramo> ruta = new ArrayList<>(); // Rutas es un conjunto de tramos
         Set<Long> ubicacionesVisitadas = new HashSet<>(); // Para evitar ciclos
         Long idUbicacionActual = pedido.getAlmacen().getId_almacen();
         Long idUbicacionDestinoFinal = pedido.getOficinaDestino().getId_oficina();
         LocalDateTime[] ultimaFechaHoraLlegada = { pedido.getFechaEntregaEstimada() };
-
+        
+        System.out.println("Ejecucion pre-construir ruta");
+        //List<Tramo> tramosPosibles = grafoTramos.getOrDefault(idUbicacionActual, new ArrayList<>());
+        
         while (!idUbicacionActual.equals(idUbicacionDestinoFinal)) {
             ubicacionesVisitadas.add(idUbicacionActual);
             List<Tramo> tramosPosibles = grafoTramos.getOrDefault(idUbicacionActual, new ArrayList<>());
 
+            if (tramosPosibles.isEmpty()) { // La hormiga no encuentra tramos disponibles
+                //ruta.clear();
+                System.out.println("-----------------RUTAS ES VACIO DESDE EL INICIO ---------------------------------");
+                break;
+            }
+
             tramosPosibles = tramosPosibles.stream()
                     .filter(t -> !ubicacionesVisitadas.contains(t.getubicacionDestino().getId_ubicacion()))
-                    .filter(t -> t.getFechaInicio().isAfter(ultimaFechaHoraLlegada[0]))
-                    .filter(t -> t.getFechaFin().isBefore(fechaMaximaEntregaGMT)) // llega antes de la fecha máxima de
+                    /*.filter(t -> t.getFechaInicio().isAfter(ultimaFechaHoraLlegada[0]))*/
+                    /*.filter(t -> t.getFechaFin().isBefore(fechaMaximaEntrega))*/ // llega antes de la fecha máxima de
                                                                                   // entrega
-                    .filter(t -> t.getCapacidadActual() >= pedido.getCantidadPaquetes()) // Que el tramo tenga capacidad
+                    /*.filter(t -> t.getCapacidadActual() >= pedido.getCantidadPaquetes())*/ // Que el tramo tenga capacidad
                                                                                          // para el pedido
-                    .filter(t -> Duration.between(ultimaFechaHoraLlegada[0], t.getFechaInicio()).toMinutes() >= 320)
+                    /*.filter(t -> Duration.between(ultimaFechaHoraLlegada[0], t.getFechaInicio()).toMinutes() >= 320)*/
                     .collect(Collectors.toList());
 
             if (tramosPosibles.isEmpty()) { // La hormiga no encuentra tramos disponibles
                 ruta.clear();
+                System.out.println("-----------------RUTAS NO ENCONTRADAS---------------------------------");
                 break;
             }
             // Long idUbicacionDestinoFinalLong = Long.valueOf(idUbicacionDestinoFinal); //
@@ -205,25 +222,192 @@ public class Aco {
         return (ponderacionTiempoEspera);
     }
 
+    public ArrayList<Tramo> generarTramosDesdeCaminos(HashMap<String, ArrayList<Ubicacion>> caminos, List<Ubicacion> todasLasUbicaciones) {
+        ArrayList<Tramo> tramos = new ArrayList<>();
+
+        for (Map.Entry<String, ArrayList<Ubicacion>> entry : caminos.entrySet()) {
+            String ubigeoOrigen = entry.getKey();
+            ArrayList<Ubicacion> ubicacionesDestino = entry.getValue();
+
+            // Encuentra la ubicación de origen en la lista completa de ubicaciones
+            Optional<Ubicacion> ubicacionOrigen = todasLasUbicaciones.stream()
+                    .filter(ubicacion -> ubicacion.getUbigeo().equals(ubigeoOrigen))
+                    .findFirst();
+
+            // Si existe la ubicación de origen, procede
+            if (ubicacionOrigen.isPresent()) {
+                for (Ubicacion ubicacionDestino : ubicacionesDestino) {
+                    // Crea un nuevo tramo para cada destino desde la ubicación origen
+                    Tramo tramo = new Tramo(
+                            ubicacionOrigen.get(),
+                            ubicacionDestino,
+                            false, // bloqueado, valor inicial
+                            0.0f, // distancia inicial
+                            0.0f, // velocidad inicial
+                            null // PlanTransporte, valor inicial nulo
+                    );
+                    // Calcular la distancia utilizando la función que ya hemos definido
+                    double distancia = calcularDistanciaEntreTramos(tramo);
+                    tramo.setDistancia((float) distancia); // Asignar la distancia calculada
+                    float velocidad = obtenerVelocidadTramo(tramo);
+                    if((velocidad==0)){ // Condicional provisional, algo en los tramos no es totalmente correcto
+                        velocidad=65;
+                    }
+                    tramo.setVelocidad(velocidad);
+                    tramos.add(tramo);
+                }
+            } else {
+                System.out.println("Ubicación de origen no encontrada para el ubigeo: " + ubigeoOrigen);
+            }
+        }
+
+        return tramos;
+    }
+
+    public double       calcularDistanciaEntreTramos(Tramo tramo) {
+        Ubicacion origen = tramo.getubicacionOrigen();
+        Ubicacion destino = tramo.getubicacionDestino();
+
+        // Convertir latitud y longitud de grados a radianes
+        double latOrigen = Math.toRadians(origen.getLatitud());
+        double lonOrigen = Math.toRadians(origen.getLongitud());
+        double latDestino = Math.toRadians(destino.getLatitud());
+        double lonDestino = Math.toRadians(destino.getLongitud());
+
+        // Diferencias entre las latitudes y longitudes
+        double deltaLat = latDestino - latOrigen;
+        double deltaLon = lonDestino - lonOrigen;
+
+        // Fórmula Haversine
+        double a = Math.pow(Math.sin(deltaLat / 2), 2) +
+                Math.cos(latOrigen) * Math.cos(latDestino) * Math.pow(Math.sin(deltaLon / 2), 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        // Radio de la Tierra en kilómetros
+        final double radioTierra = 6371.0;
+
+        // Distancia en kilómetros
+        double distancia = radioTierra * c;
+
+        return distancia;
+    }
+
+    private double calcularDistanciaEntrePuntos(double lat1, double lon1, double lat2, double lon2) {
+        final int RADIO_TIERRA = 6371; // Radio de la Tierra en km
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return RADIO_TIERRA * c; // Retorna la distancia en kilómetros
+    }
+
+    private double calcularDistanciaMinima(Ubicacion actual, Ubicacion destino,
+            HashMap<String, ArrayList<Ubicacion>> caminos, double distanciaAcumulada, Set<String> visitados) {
+        // Si hemos llegado al destino, devolvemos la distancia acumulada
+        if (actual.getUbigeo().equals(destino.getUbigeo())) {
+            return distanciaAcumulada;
+        }
+
+        // Marcamos la ubicación actual como visitada para evitar ciclos
+        visitados.add(actual.getUbigeo());
+
+        // Obtenemos los posibles destinos desde la ubicación actual
+        ArrayList<Ubicacion> ubicacionesSiguientes = caminos.get(actual.getUbigeo());
+        if (ubicacionesSiguientes == null || ubicacionesSiguientes.isEmpty()) {
+            return Double.MAX_VALUE; // Si no hay caminos, devolvemos una distancia infinita
+        }
+
+        double distanciaMinima = Double.MAX_VALUE;
+
+        // Iterar sobre los posibles destinos
+        for (Ubicacion siguiente : ubicacionesSiguientes) {
+            if (!visitados.contains(siguiente.getUbigeo())) {
+                // Calcular la distancia desde la ubicación actual hasta la siguiente
+                double distanciaTramo = calcularDistanciaEntrePuntos(actual.getLatitud(), actual.getLongitud(),
+                        siguiente.getLatitud(), siguiente.getLongitud());
+                // Recursivamente encontrar la distancia mínima desde la siguiente ubicación
+                // hasta el destino
+                double distanciaTotal = calcularDistanciaMinima(siguiente, destino, caminos,
+                        distanciaAcumulada + distanciaTramo, new HashSet<>(visitados));
+
+                // Actualizar la distancia mínima encontrada
+                if (distanciaTotal < distanciaMinima) {
+                    distanciaMinima = distanciaTotal;
+                }
+            }
+        }
+
+        return distanciaMinima;
+    }
+
     public PlanTransporte ejecutar(List<Oficina> oficinas,
             HashMap<String, ArrayList<Ubicacion>> caminos, Pedido pedidoIngresado, int simulacion,
-            List<Region> regiones) {
-        // this.tramos = tramos;
-        this.pedido = pedidoIngresado;
+            List<Region> regiones, List<Ubicacion> ubicaciones) {
+
         boolean solutionFound = false;
-        LocalDateTime fechaMaximaEntrega = calcularFechaMaximaEntregaDestino(pedidoIngresado, oficinas, regiones); // Calcula
-                                                                                                                   // la
-                                                                                                                   // fecha
-                                                                                                                   // máxima
-                                                                                                                   // de
-                                                                                                                   // entrega
-                                                                                                                   // en
-                                                                                                                   // destino
+        LocalDateTime fechaMaximaEntrega = calcularFechaMaximaEntregaDestino(pedidoIngresado, oficinas, regiones); // Calcula la fecha máxima de entrega en destino
+        
+        List<Tramo> tramos = generarTramosDesdeCaminos(caminos, ubicaciones);//caminos.get(pedidoIngresado.getOficinaDestino().getUbicacion().getUbigeo()); // Simulación de búsqueda de tramos
+        this.tramos = tramos;
+        System.out.println("Listado de Tramos Registrados:");
+        System.out.println("--------------------------------------------------");
+
+        for (Tramo tramo : tramos) {
+            float tiempoTotal = (tramo.getDistancia()/tramo.getVelocidad());
+            long tiempoHoras = (long)tiempoTotal;
+            long tiempoMinutos = (long)((tiempoTotal-tiempoHoras)*60);
+            tramo.setFechaInicio(LocalDateTime.now());
+            tramo.setFechaFin(LocalDateTime.now().plusHours(tiempoHoras).plusMinutes(tiempoMinutos));
+
+            //System.out.println("ID Tramo: " + tramo.getId_tramo());
+            System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo());
+            System.out.println("Ubicación Destino - ID: " + tramo.getubicacionDestino().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionDestino().getUbigeo());
+            System.out.println("Distancia: " + tramo.getDistancia() + " km");
+            System.out.println("Fecha Inicio Recorrido: " + tramo.getFechaInicio().getDayOfMonth() + "/" + tramo.getFechaInicio().getMonthValue() + "/" + tramo.getFechaInicio().getYear() + " " + tramo.getFechaInicio().getHour() + "h:" + tramo.getFechaInicio().getMinute() + "m");
+            System.out.println("Fecha Fin Recorrido: " + tramo.getFechaFin().getDayOfMonth() + "/" + tramo.getFechaFin().getMonthValue() + "/" + tramo.getFechaFin().getYear() + " " + tramo.getFechaFin().getHour() + "h:" + tramo.getFechaFin().getMinute() + "m");
+            //System.out.println("Bloqueado: " + (tramo.isBloqueado() ? "Sí" : "No"));
+            System.out.println("--------------------------------------------------");
+        }
+
         inicializarGrafoTramos(fechaMaximaEntrega);
         inicializarFeromonas();
 
+        System.out.println("intento de ejecutar");
+        System.out.println("-----------------ELECCION DEL MEJOR ALMACEN---------------------------------");
+        //Se calcula el Almacen de origen
+        //Se basa en la distancia entre el primer, luego el segundo y el tercer almacen y la oficina de destino
+        //Se calcula la distancia menor entre cada almacen y se elige el que tenga la menor distancia
+        // Iterar sobre todos los almacenes
+        double distanciaMinima = Double.MAX_VALUE;
+        Almacen almacenMasCercano = null;
+        List<Almacen> almacenes = almacenRepository.findAll();
+        /*for (Almacen almacen : almacenes) {
+            // Obtener la distancia más corta desde este almacén hasta el destino
+            double distancia = calcularDistanciaMinima(almacen.getUbicacion(), 
+                    pedidoIngresado.getOficinaDestino().getUbicacion(), caminos, 0, new HashSet<>());
+            
+            // Si encontramos una distancia más corta, actualizamos el almacén más cercano
+            if (distancia < distanciaMinima) {
+                distanciaMinima = distancia;
+                almacenMasCercano = almacen;
+            }
+        }*/
+
+
+        pedidoIngresado.setAlmacen(almacenes.get(0)); // Asignamos el almacén más cercano al pedido
+
         PlanTransporte planTransporteFinal = null;
 
+        this.pedido = pedidoIngresado;
         System.out.println("El pedido actual es: " + pedidoIngresado.getId_pedido() + " "
                 + pedidoIngresado.getFechaEntregaEstimada() + "  " +
                 pedido.getAlmacen().getId_almacen() + "  ->  " + pedido.getOficinaDestino().getId_oficina() + "  "
@@ -266,6 +450,66 @@ public class Aco {
         }
         return planTransporteFinal;
     }
+
+    private float obtenerVelocidadTramo(Tramo tramo){
+        float velocidad;
+        Region regionOrigen = tramo.getubicacionOrigen().getRegion();
+        Region regionDestino = tramo.getubicacionDestino().getRegion();
+        if(regionOrigen == null || regionDestino == null){
+            return 0;
+        }
+        switch(regionOrigen.getNombre()){
+            case"COSTA":
+                switch(regionDestino.getNombre()){
+                    case "COSTA":
+                        velocidad=70;
+                        break;
+                    case "SIERRA":
+                        velocidad=50;
+                        break;
+                    default:
+                        velocidad=0;
+                        break;
+                }
+                break;
+            case"SIERRA":
+                switch(regionDestino.getNombre()){
+                    case "COSTA":
+                        velocidad=50;
+                        break;
+                    case "SIERRA":
+                        velocidad=60;
+                        break;
+                    case "SELVA":
+                        velocidad=55;
+                        break;
+                    default:
+                        velocidad=0;
+                        break;
+                }
+                break;
+            case"SELVA":
+                switch(regionDestino.getNombre()){
+                    case "SIERRA":
+                        velocidad=55;
+                        break;
+                    case "SELVA":
+                        velocidad=65;
+                        break;
+                    default:
+                        velocidad=0;
+                        break;
+                }
+                break;
+            default:
+                velocidad=0;
+                break;
+        }
+
+        return  velocidad;
+    }
+
+
 
     private LocalDateTime calcularFechaMaximaEntregaDestino(Pedido pedido, List<Oficina> oficinas,
             List<Region> regiones) {
@@ -322,8 +566,8 @@ public class Aco {
 
         /*LocalDateTime fechaMaximaEntrega = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite())
                 .with(LocalTime.MAX);*/
-        LocalDateTime fechaMaximaEntrega = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite())
-                .with(LocalTime.MAX);
+        LocalDateTime fechaMaximaEntrega = pedido.getFechaEntregaEstimada().plusDays(regionDestino.getDiasLimite());
+                //.with(LocalTime.MAX);
         
         return fechaMaximaEntrega;
     }
