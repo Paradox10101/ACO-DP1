@@ -56,7 +56,7 @@ public class PlanTransporteService {
 
     // Algo implementado en el service <----
     public PlanTransporte crearRuta(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos, 
-            List<Region> regiones){
+            List<Region> regiones, List<Ubicacion> ubicaciones){
         
         
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
@@ -68,7 +68,7 @@ public class PlanTransporteService {
         //List<Tramo> tramos = new ArrayList<>();
         //List<Tramo> rutas = new ArrayList<>();
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
-        PlanTransporte planOptimo =  aco.ejecutar(oficinas, caminos, pedido, 0, regiones);
+        PlanTransporte planOptimo =  aco.ejecutar(oficinas, caminos, pedido, 0, regiones, ubicaciones);
 
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);

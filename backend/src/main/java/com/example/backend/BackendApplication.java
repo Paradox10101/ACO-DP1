@@ -97,7 +97,7 @@ public class BackendApplication {
             
         }
         System.out.println("-----------------ENTRANDO DESDE MAIN---------------------------------");
-        PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones);
+        PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones, ubicaciones);
         
         System.out.println("DONE");
 

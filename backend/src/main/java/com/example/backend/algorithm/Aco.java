@@ -221,15 +221,15 @@ public class Aco {
         return (ponderacionTiempoEspera);
     }
 
-    public ArrayList<Tramo> generarTramosDesdeCaminos(HashMap<String, ArrayList<Ubicacion>> caminos) {
+    public ArrayList<Tramo> generarTramosDesdeCaminos(HashMap<String, ArrayList<Ubicacion>> caminos, List<Ubicacion> todasLasUbicaciones) {
         ArrayList<Tramo> tramos = new ArrayList<>();
 
         for (Map.Entry<String, ArrayList<Ubicacion>> entry : caminos.entrySet()) {
             String ubigeoOrigen = entry.getKey();
             ArrayList<Ubicacion> ubicacionesDestino = entry.getValue();
 
-            // Encuentra la ubicación de origen --> LOGICA MAL HECHA REVISARAAAAAAAAAAAAAAAAAAAAAAR
-            Optional<Ubicacion> ubicacionOrigen = ubicacionesDestino.stream()
+            // Encuentra la ubicación de origen en la lista completa de ubicaciones
+            Optional<Ubicacion> ubicacionOrigen = todasLasUbicaciones.stream()
                     .filter(ubicacion -> ubicacion.getUbigeo().equals(ubigeoOrigen))
                     .findFirst();
 
@@ -247,12 +247,12 @@ public class Aco {
                     );
                     // Calcular la distancia utilizando la función que ya hemos definido
                     double distancia = calcularDistanciaEntreTramos(tramo);
-                    tramo.setDistancia((float) distancia); // Asignar la distancia calculada  ---> AQUI SE ASIGNA LA DISTANCIA ENTRE TRAMOS
+                    tramo.setDistancia((float) distancia); // Asignar la distancia calculada
 
                     tramos.add(tramo);
                 }
-            }else{
-                System.out.println("Ubicación de origen no encontrada <-------------SUSUSUUSUSUSUUS");
+            } else {
+                System.out.println("Ubicación de origen no encontrada para el ubigeo: " + ubigeoOrigen);
             }
         }
 
@@ -344,13 +344,13 @@ public class Aco {
 
     public PlanTransporte ejecutar(List<Oficina> oficinas,
             HashMap<String, ArrayList<Ubicacion>> caminos, Pedido pedidoIngresado, int simulacion,
-            List<Region> regiones) {
+            List<Region> regiones, List<Ubicacion> ubicaciones) {
         
         
         boolean solutionFound = false;
         LocalDateTime fechaMaximaEntrega = calcularFechaMaximaEntregaDestino(pedidoIngresado, oficinas, regiones); // Calcula la fecha máxima de entrega en destino
         
-        List<Tramo> tramos = generarTramosDesdeCaminos(caminos);//caminos.get(pedidoIngresado.getOficinaDestino().getUbicacion().getUbigeo()); // Simulación de búsqueda de tramos
+        List<Tramo> tramos = generarTramosDesdeCaminos(caminos, ubicaciones);//caminos.get(pedidoIngresado.getOficinaDestino().getUbicacion().getUbigeo()); // Simulación de búsqueda de tramos
         this.tramos = tramos;
         System.out.println("Listado de Tramos Registrados:");
         System.out.println("--------------------------------------------------");
