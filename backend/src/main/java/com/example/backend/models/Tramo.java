@@ -55,11 +55,7 @@ public class Tramo {
     private int capacidadActual;
 
 
-    public Tramo(Long id_tramo,
-            Ubicacion ubicacionOrigen,
-            Ubicacion ubicacionDestino, boolean bloqueado, float distancia,
-            float velocidad, PlanTransporte planTransporte) {
-        this.id_tramo = id_tramo;
+    public Tramo(Ubicacion ubicacionOrigen,Ubicacion ubicacionDestino, boolean bloqueado, float distancia,float velocidad, PlanTransporte planTransporte) {
         this.ubicacionOrigen = ubicacionOrigen;
         this.ubicacionDestino = ubicacionDestino;
         this.bloqueado = bloqueado;
@@ -70,10 +66,6 @@ public class Tramo {
 
     public Long getId_tramo() {
         return id_tramo;
-    }
-
-    public void setId_tramo(Long id_tramo) {
-        this.id_tramo = id_tramo;
     }
 
     public Ubicacion getubicacionOrigen() {

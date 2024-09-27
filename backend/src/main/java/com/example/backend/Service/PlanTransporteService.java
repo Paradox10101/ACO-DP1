@@ -31,8 +31,8 @@ public class PlanTransporteService {
     @Autowired
     private OficinaService oficinaService;
 
-    @Transient
-    private Aco aco = new Aco();
+    @Autowired
+    private Aco aco;
 
     public List<PlanTransporte> obtenerTodosLosPlanes() {
         return planTransporteRepository.findAll();
@@ -67,7 +67,7 @@ public class PlanTransporteService {
         //List<Oficina> oficinas = new ArrayList<>();
         //List<Tramo> tramos = new ArrayList<>();
         //List<Tramo> rutas = new ArrayList<>();
-
+        System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
         PlanTransporte planOptimo =  aco.ejecutar(oficinas, caminos, pedido, 0, regiones);
 
         if(planOptimo != null){

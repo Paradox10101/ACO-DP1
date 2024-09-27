@@ -90,7 +90,13 @@ public class BackendApplication {
                 System.out.println("--------------------------------------------------");
             }
         }*/
-        
+        for (Almacen almacen : almacenes) {
+            System.out.println("Listado de Almacenes:");
+            System.out.println("--------------------------------------------------");
+            System.out.println(almacen.getUbicacion().getProvincia());
+            
+        }
+        System.out.println("-----------------ENTRANDO DESDE MAIN---------------------------------");
         PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones);
         
         System.out.println("DONE");
