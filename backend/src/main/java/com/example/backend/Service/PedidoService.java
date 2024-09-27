@@ -80,7 +80,7 @@ public class PedidoService {
                         if (oficinaSeleccionada.isPresent()) {
                             pedido.setOficinaDestino(oficinaSeleccionada.get());
                             pedido.setFechaRegistro(fechaHora);
-                            // pedido.setFechaEntregaEstimada(LocalDateTime.now());//solo para prueba
+                            pedido.setFechaEntregaEstimada(fechaHora.plusDays(oficinaSeleccionada.get().getUbicacion().getRegion().getDiasLimite()));
                             pedido.setCantidadPaquetes(cantidadPaquetes);
                             pedido.setEstado(EstadoPedido.Registrado);
                             cliente.setCodigo(codigoCliente);

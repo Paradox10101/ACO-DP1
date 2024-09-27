@@ -54,12 +54,12 @@ public class Tramo {
     @Column(name = "capacidadActual")
     private int capacidadActual;
 
+    public Tramo(Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino) {
+        this.ubicacionOrigen = ubicacionOrigen;
+        this.ubicacionDestino = ubicacionDestino;
+    }
 
-    public Tramo(Long id_tramo,
-            Ubicacion ubicacionOrigen,
-            Ubicacion ubicacionDestino, boolean bloqueado, float distancia,
-            float velocidad, PlanTransporte planTransporte) {
-        this.id_tramo = id_tramo;
+    public Tramo(Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino, boolean bloqueado, float distancia, float velocidad, PlanTransporte planTransporte) {
         this.ubicacionOrigen = ubicacionOrigen;
         this.ubicacionDestino = ubicacionDestino;
         this.bloqueado = bloqueado;
@@ -70,10 +70,6 @@ public class Tramo {
 
     public Long getId_tramo() {
         return id_tramo;
-    }
-
-    public void setId_tramo(Long id_tramo) {
-        this.id_tramo = id_tramo;
     }
 
     public Ubicacion getubicacionOrigen() {
@@ -121,6 +117,10 @@ public class Tramo {
     }
 
     public void setVelocidad(LocalDateTime fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public void setFechaInicio(LocalDateTime fechaInicio) {
         this.fechaInicio = fechaInicio;
     }
 

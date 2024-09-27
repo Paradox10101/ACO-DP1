@@ -1,8 +1,10 @@
 package com.example.backend;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.example.backend.Repository.MantenimientoRepository;
 import com.example.backend.Service.*;
@@ -57,7 +59,7 @@ public class BackendApplication {
         caminos = aco.cargarCaminosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", ubicaciones);
         //tramos = Tramo.cargarTramosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", caminos);
         bloqueos = bloqueoService.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
-        pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202403.txt", oficinas, ubicaciones, clientes, paquetes);
+        pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202409.txt", oficinas, ubicaciones, clientes, paquetes);
         mantenimientos = mantenimientoService.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
         /*ArrayList<Ubicacion> ubicacionesAux = new ArrayList(ubicacionService.obtenerTodasLasUbicaciones());
         for (Ubicacion ubicacionDestino : ubicacionesAux) {
@@ -90,9 +92,21 @@ public class BackendApplication {
                 System.out.println("--------------------------------------------------");
             }
         }*/
-        
-        //PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones);
-        
+        for (Almacen almacen : almacenes) {
+            System.out.println("Listado de Almacenes:");
+            System.out.println("--------------------------------------------------");
+            System.out.println(almacen.getUbicacion().getProvincia());
+            
+        }
+        System.out.println("-----------------ENTRANDO DESDE MAIN---------------------------------");
+        //PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones, ubicaciones);
+        LocalDateTime fechaActual = LocalDateTime.now();
+
+        ArrayList<Pedido> pedidosFuturos = pedidos.stream()
+                        .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaActual))
+                        .collect(Collectors.toCollection(ArrayList::new));
+        PlanTransporte plan = planTransporte.definirPlanTransporte(pedidosFuturos.get(0), almacenes, caminos, regiones, ubicaciones, vehiculos);
+
         System.out.println("DONE");
 
         /*
