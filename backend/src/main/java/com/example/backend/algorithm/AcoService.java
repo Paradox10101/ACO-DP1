@@ -31,13 +31,13 @@ public class AcoService {
     private List<Oficina> oficinas;
     private List<Ubicacion> ubicaciones;
     private List<Vehiculo> vehiculos;
-    private Pedido pedido;
     private Map<String, ArrayList<Ubicacion>> caminos;
     private Map<String, Map<String, Double>> feromonas;
     private Map<String, Map<String, Double>> distancias;
     private Map<String, Map<String, Double>> velocidadesTramos;
+    private Map<String, List<Vehiculo>> oficinaVehiculos = new HashMap<>();
 
-    private int numeroHormigas = 15;
+    private int numeroHormigas = 50;
     private int numeroIteraciones = 100;
     private double tasaEvaporacion = 0.5;
     private double feromonaInicial = 1.0;
@@ -50,7 +50,7 @@ public class AcoService {
 
     }
 
-    public void inicializarFeromonas(){
+    private void inicializarFeromonas(){
         feromonas = new HashMap<>();
         for(String ubigeoOrigen: caminos.keySet()) {
             feromonas.put(ubigeoOrigen, new HashMap<>());
@@ -60,7 +60,7 @@ public class AcoService {
         }
     }
 
-    public void inicializarDistancias(){
+    private void inicializarDistancias(){
         distancias = new HashMap<>();
         for(String ubigeoOrigen: caminos.keySet()) {
             distancias.put(ubigeoOrigen, new HashMap<>());
@@ -75,32 +75,31 @@ public class AcoService {
         }
     }
 
-public void inicializarVelocidadesTramos(){
-    velocidadesTramos = new HashMap<>();
-    for(String ubigeoOrigen: caminos.keySet()) {
-        velocidadesTramos.put(ubigeoOrigen, new HashMap<>());
-        Optional<Ubicacion> ubicacionSeleccionada = ubicaciones.stream()
-                .filter(ubicacionS -> ubicacionS.getUbigeo().equals(ubigeoOrigen))
-                .findFirst();
+    private void inicializarVelocidadesTramos(){
+        velocidadesTramos = new HashMap<>();
+        for(String ubigeoOrigen: caminos.keySet()) {
+            velocidadesTramos.put(ubigeoOrigen, new HashMap<>());
+            Optional<Ubicacion> ubicacionSeleccionada = ubicaciones.stream()
+                    .filter(ubicacionS -> ubicacionS.getUbigeo().equals(ubigeoOrigen))
+                    .findFirst();
 
-        if(ubicacionSeleccionada.isPresent()){
-            for (Ubicacion ubicacionDestino : caminos.get(ubigeoOrigen)) {
-                velocidadesTramos.get(ubigeoOrigen).put(ubicacionDestino.getUbigeo(),obtenerVelocidadEntreUbicaciones((ubicacionSeleccionada.get()), ubicacionDestino));
+            if(ubicacionSeleccionada.isPresent()){
+                for (Ubicacion ubicacionDestino : caminos.get(ubigeoOrigen)) {
+                    velocidadesTramos.get(ubigeoOrigen).put(ubicacionDestino.getUbigeo(),obtenerVelocidadEntreUbicaciones((ubicacionSeleccionada.get()), ubicacionDestino));
+                }
             }
         }
     }
-}
 
-    // Método para calcular la distancia total de la ruta
-    // verificar como se calcula la distancia y tambien el tiempo "estimado" de
-    // llegada
-    private float calcularDistanciaTotal(List<Tramo> tramos) {
-        float distanciaTotal = 0;
-        for (Tramo tramo : tramos) {
-            distanciaTotal += tramo.getDistancia();
+    private void inicializarOficinasVehiculos(){
+        oficinaVehiculos = new HashMap<>();
+        for(Oficina oficina: oficinas) {
+            oficinaVehiculos.put(oficina.getUbicacion().getUbigeo(), vehiculos.stream()
+                .filter(vehiculoS -> vehiculoS.getUbicacionActual().getUbigeo().equals(oficina.getUbicacion().getUbigeo()))
+                .collect(Collectors.toCollection(ArrayList::new)));
         }
-        return distanciaTotal;
     }
+
 
     private Tramo elegirTramo(List<Tramo> tramosPosibles, LocalDateTime fechaHoraLlegadaAnterior) {
 
@@ -148,44 +147,61 @@ public void inicializarVelocidadesTramos(){
         return (ponderacionTiempoEspera);
     }
 
-    public ArrayList<Tramo> generarTramos(Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino, LocalDateTime fechaInicioPedido, LocalDateTime fechaLimite) {
+    public ArrayList<Tramo> generarTramos(Ubicacion ubicacionDestino, LocalDateTime fechaInicioPedido, LocalDateTime fechaLimite, int cantidadPaquetes) {
         ArrayList<Tramo> tramos = new ArrayList<>();
         Set<Ubicacion> ubicacionesVisitadas = new HashSet<>();
-        Ubicacion ubicacionActual = ubicacionOrigen;
-        ubicacionesVisitadas.add(ubicacionActual);
+
+        double tiempoAcumulado = 0.0;
+        Vehiculo vehiculo = seleccionarVehiculo(cantidadPaquetes);
         double distanciaEntreUbicaciones;
         double velocidadEntreUbicaciones;
         LocalDateTime fechaInicio = fechaInicioPedido;
         LocalDateTime fechaFin;
-        while(!ubicacionActual.getUbigeo().equals(ubicacionDestino.getUbigeo()) && tramos.size() < caminos.keySet().size() - 1) {
-            Ubicacion siguienteUbicacion = seleccionarSiguienteUbicacion(ubicacionActual, ubicacionesVisitadas);
-            if(siguienteUbicacion == null) break;
-            distanciaEntreUbicaciones = distancias.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo());
-            velocidadEntreUbicaciones = velocidadesTramos.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo());
-            Long horasTranscurridas = (long)(distanciaEntreUbicaciones/velocidadEntreUbicaciones);
-            Long minutosTranscurridos = (long)(((distanciaEntreUbicaciones/velocidadEntreUbicaciones) - (int)(distanciaEntreUbicaciones/velocidadEntreUbicaciones)))*60;
-            fechaFin = fechaInicio.plusHours(horasTranscurridas).plusMinutes(minutosTranscurridos);
-            if(fechaFin.isAfter(fechaLimite)) break;
-            Tramo tramo = new Tramo(ubicacionActual, siguienteUbicacion);
-            tramo.setFechaInicio(fechaInicio);
-            tramo.setFechaFin(fechaFin);
-            ubicacionActual = siguienteUbicacion;
-            fechaInicio = fechaFin;
-            tramos.add(tramo);
-            ubicacionesVisitadas.add(ubicacionActual);
+        for(String ubigeoOficina: oficinaVehiculos.keySet()) {
+            if(vehiculo==null)continue;
+            String ubigeoActual = ubigeoOficina;
+            Optional<Ubicacion> ubicacionActualOpt = ubicaciones.stream().filter(ubicacionS -> ubicacionS.getUbigeo().equals(ubigeoActual)).findFirst();
+            if(ubicacionActualOpt.isPresent()){
+                Ubicacion ubicacionActual = ubicacionActualOpt.get();
+                ubicacionesVisitadas.add(ubicacionActual);
+
+                while(!ubicacionActual.getUbigeo().equals(ubicacionDestino.getUbigeo()) && tramos.size() < caminos.keySet().size() - 1) {
+                    Ubicacion siguienteUbicacion = seleccionarSiguienteUbicacion(ubicacionActual, ubicacionesVisitadas, vehiculo);
+                    if(siguienteUbicacion == null) break;
+                    double tiempoTranscurrido = calcularTiempoEntreUbicaciones(ubicacionActual,ubicacionDestino, vehiculo);
+                    int horas = (int)tiempoTranscurrido;
+                    int minutos = (int)((tiempoTranscurrido - horas)*60);
+                    fechaFin = fechaInicio.plusHours(horas+2).plusMinutes(minutos);
+                    if(fechaFin.isAfter(fechaLimite)) break;
+                    Tramo tramo = new Tramo(ubicacionActual, siguienteUbicacion);
+                    tramo.setVelocidad((float)obtenerVelocidadEntreUbicaciones(ubicacionActual,ubicacionDestino) + vehiculo.getTipoVehiculo().getVelocidad());
+                    tramo.setDistancia(distancias.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo()).floatValue());
+                    tramo.setFechaInicio(fechaInicio);
+                    tramo.setFechaFin(fechaFin);
+                    tramo.setVehiculo(vehiculo);
+                    ubicacionActual = siguienteUbicacion;
+                    fechaInicio = fechaFin;
+                    tramos.add(tramo);
+                    ubicacionesVisitadas.add(ubicacionActual);
+                }
+            }
+
         }
+
+
 
         return tramos;
     }
 
-    private Ubicacion seleccionarSiguienteUbicacion(Ubicacion ubicacionActual, Set<Ubicacion> ubicacionesVisitadas){
+    private Ubicacion seleccionarSiguienteUbicacion(Ubicacion ubicacionActual, Set<Ubicacion> ubicacionesVisitadas, Vehiculo vehiculo){
         Map<Ubicacion, Double> probabilidades = new HashMap<>();
         double total = 0.0;
 
         for(Ubicacion destino : caminos.get(ubicacionActual.getUbigeo())) {
             if(!ubicacionesVisitadas.contains(destino)) {
+                double tiempo = calcularTiempoEntreUbicaciones(ubicacionActual, destino, vehiculo);
                 double probabilidad = Math.pow(feromonas.get(ubicacionActual.getUbigeo()).get(destino.getUbigeo()), alpha)*
-                        Math.pow(distancias.get(ubicacionActual.getUbigeo()).get(destino.getUbigeo()), beta);
+                        Math.pow(tiempo, beta);
                 probabilidades.put(destino, probabilidad);
                 total += probabilidad;
             }
@@ -258,6 +274,25 @@ public void inicializarVelocidadesTramos(){
         return distancia;
     }
 
+    private Vehiculo seleccionarVehiculo(int cantidadPaquetes){
+        for(List<Vehiculo> vehiculos : oficinaVehiculos.values()){
+            for(Vehiculo vehiculo : vehiculos){
+                if((vehiculo.getCapacidadMaxima() - vehiculo.getCapacidadUtilizada()) - cantidadPaquetes >=0)
+                    return vehiculo;
+            }
+        }
+        return null;
+    }
+
+
+
+
+    private double calcularTiempoEntreUbicaciones(Ubicacion origen, Ubicacion destino, Vehiculo vehiculo){
+        double velocidadEntreUbicaciones = calcularDistanciaEntreUbicaciones(origen, destino);
+        double distancia = calcularDistanciaEntreUbicaciones(origen, destino);
+        return distancia / (velocidadEntreUbicaciones + vehiculo.getTipoVehiculo().getVelocidad());
+    }
+
     private double calcularDistanciaEntrePuntos(double lat1, double lon1, double lat2, double lon2) {
         final int RADIO_TIERRA = 6371; // Radio de la Tierra en km
 
@@ -317,24 +352,23 @@ public void inicializarVelocidadesTramos(){
             List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos) {
         ArrayList<Tramo> mejorSolucion = null;
         PlanTransporte planTransporteFinal = new PlanTransporte();
-        double mejorCosto = Double.MAX_VALUE;
-        this.oficinas = oficinas;
+        double mejorTiempo = Double.MAX_VALUE;
         this.caminos = caminos;
         this.ubicaciones = ubicaciones;
         this.vehiculos = vehiculos;
+        this.oficinas = oficinas;
         boolean solutionFound = false;
         inicializarDistancias();
         inicializarFeromonas();
         inicializarVelocidadesTramos();
+        inicializarOficinasVehiculos();
         LocalDateTime fechaMaximaEntrega = calcularFechaMaximaEntregaDestino(pedidoIngresado, oficinas, regiones); // Calcula la fecha máxima de entrega en destino
-        //List<Tramo> tramos = generarTramosDesdeCaminos(caminos, ubicaciones);
-
         for(int iteracion = 0 ; iteracion < numeroIteraciones ; iteracion++){
             for(int hormiga = 0; hormiga < numeroHormigas; hormiga++){
-                ArrayList<Tramo> solucion = generarTramos(vehiculos.get(0).getUbicacionActual(), pedidoIngresado.getOficinaDestino().getUbicacion(), LocalDateTime.now(), fechaMaximaEntrega);
+                ArrayList<Tramo> solucion = generarTramos(pedidoIngresado.getOficinaDestino().getUbicacion(), LocalDateTime.now(), fechaMaximaEntrega, pedidoIngresado.getCantidadPaquetes());
                 double costo = calcularCostoSolucion(solucion);
-                if(costo < mejorCosto){
-                    mejorCosto = costo;
+                if(costo < mejorTiempo){
+                    mejorTiempo = costo;
                     mejorSolucion = new ArrayList<>(solucion);
                 }
                 actualizarFeromonasRuta(solucion, costo);
@@ -352,6 +386,7 @@ public void inicializarVelocidadesTramos(){
             System.out.println("Ubicación Destino - ID: " + tramo.getubicacionDestino().getId_ubicacion()
                     + " | Ubigeo: " + tramo.getubicacionDestino().getUbigeo());
             System.out.println("Distancia: " + tramo.getDistancia() + " km");
+            System.out.println("Velocidad: " + tramo.getVelocidad() + " km/h");
             System.out.println("Fecha Inicio Recorrido: " + tramo.getFechaInicio().getDayOfMonth() + "/" + tramo.getFechaInicio().getMonthValue() + "/" + tramo.getFechaInicio().getYear() + " " + tramo.getFechaInicio().getHour() + "h:" + tramo.getFechaInicio().getMinute() + "m");
             System.out.println("Fecha Fin Recorrido: " + tramo.getFechaFin().getDayOfMonth() + "/" + tramo.getFechaFin().getMonthValue() + "/" + tramo.getFechaFin().getYear() + " " + tramo.getFechaFin().getHour() + "h:" + tramo.getFechaFin().getMinute() + "m");
             //System.out.println("Bloqueado: " + (tramo.isBloqueado() ? "Sí" : "No"));
@@ -367,7 +402,7 @@ public void inicializarVelocidadesTramos(){
     double calcularCostoSolucion(ArrayList<Tramo>tramos){
         double costo = 0.0;
         for(Tramo tramo : tramos){
-            costo += distancias.get(tramo.getubicacionOrigen().getUbigeo()).get(tramo.getubicacionDestino().getUbigeo());
+            costo += calcularTiempoEntreUbicaciones(tramo.getubicacionOrigen(), tramo.getubicacionDestino(), tramo.getVehiculo());
         }
         return costo;
     }
@@ -528,8 +563,8 @@ public void inicializarVelocidadesTramos(){
         return null; // Devuelve null si no encuentra la oficina
     }
 
-    private void actualizarFeromonasRuta(List<Tramo> tramos, double costo) {
-        double feromonasDeposito = 1.0/costo;
+    private void actualizarFeromonasRuta(List<Tramo> tramos, double mejorTiempo) {
+        double feromonasDeposito = 1.0/mejorTiempo;
         for(Tramo tramo : tramos){
             String ubigeoOrigen = tramo.getubicacionOrigen().getUbigeo();
             String ubigeoDestino = tramo.getubicacionDestino().getUbigeo();

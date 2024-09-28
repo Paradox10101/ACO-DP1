@@ -51,12 +51,31 @@ public class Tramo {
     @Column(name = "fechaFin")
     private LocalDateTime fechaFin;
 
-    @Column(name = "capacidadActual")
-    private int capacidadActual;
+    @Column(name = "cantidadPaquetes")
+    private int cantidadPaquetes;
+
+    @OneToOne
+    @JoinColumn(name = "fid_vehiculo", nullable = false)
+    private Vehiculo vehiculo;
+
+
 
     public Tramo(Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino) {
         this.ubicacionOrigen = ubicacionOrigen;
         this.ubicacionDestino = ubicacionDestino;
+    }
+
+    public Tramo(Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino, PlanTransporte planTransporte, boolean bloqueado, float distancia, float velocidad, LocalDateTime fechaInicio, LocalDateTime fechaFin, int cantidadPaquetes, Vehiculo vehiculo) {
+        this.ubicacionOrigen = ubicacionOrigen;
+        this.ubicacionDestino = ubicacionDestino;
+        this.planTransporte = planTransporte;
+        this.bloqueado = bloqueado;
+        this.distancia = distancia;
+        this.velocidad = velocidad;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+        this.cantidadPaquetes = cantidadPaquetes;
+        this.vehiculo = vehiculo;
     }
 
     public Tramo(Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino, boolean bloqueado, float distancia, float velocidad, PlanTransporte planTransporte) {
@@ -132,13 +151,19 @@ public class Tramo {
         this.fechaFin = fechaFin;
     }
 
-    public int getCapacidadActual() {
-        return capacidadActual;
+    public int getCantidadPaquetes() {
+        return cantidadPaquetes;
     }
 
-    public void setCapacidadActual(int capacidadActual) {
-        this.capacidadActual = capacidadActual;
+    public void setCantidadPaquetes(int cantidadPaquetes) {
+        this.cantidadPaquetes = cantidadPaquetes;
     }
 
+    public Vehiculo getVehiculo() {
+        return vehiculo;
+    }
 
+    public void setVehiculo(Vehiculo vehiculo) {
+        this.vehiculo = vehiculo;
+    }
 }

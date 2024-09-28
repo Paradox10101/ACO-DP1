@@ -23,9 +23,6 @@ public class Vehiculo {
     @Column(name = "codigo")
     private String codigo;
 
-    @ManyToOne
-    @JoinColumn(name = "fid_plan_transporte")
-    private PlanTransporte planTransporte;
 
     @ManyToOne
     @JoinColumn(name = "fid_almacen")
@@ -55,6 +52,9 @@ public class Vehiculo {
     @Column(name = "distancia_total")
     private float distanciaTotal;
 
+    @Column(name = "capacidad_utilizada")
+    private int capacidadUtilizada;
+
     public Vehiculo() {
 
     }
@@ -62,7 +62,6 @@ public class Vehiculo {
     public Vehiculo(Long id_vehiculo, PlanTransporte planTransporte, Almacen almacen, LocalDateTime fechaSalida,
             LocalDateTime fechaLlegada, int capacidadMaxima, EstadoVehiculo estado, float distanciaTotal) {
         this.id_vehiculo = id_vehiculo;
-        this.planTransporte = planTransporte;
         this.almacen = almacen;
         this.fechaSalida = fechaSalida;
         this.fechaLlegada = fechaLlegada;
@@ -84,7 +83,7 @@ public class Vehiculo {
     public Vehiculo(Long id_vehiculo, String codigo, PlanTransporte planTransporte, Almacen almacen, Ubicacion ubicacionActual, TipoVehiculo tipoVehiculo, LocalDateTime fechaSalida, LocalDateTime fechaLlegada, int capacidadMaxima, EstadoVehiculo estado, float distanciaTotal) {
         this.id_vehiculo = id_vehiculo;
         this.codigo = codigo;
-        this.planTransporte = planTransporte;
+
         this.almacen = almacen;
         this.ubicacionActual = ubicacionActual;
         this.tipoVehiculo = tipoVehiculo;
@@ -95,6 +94,19 @@ public class Vehiculo {
         this.distanciaTotal = distanciaTotal;
     }
 
+    public Vehiculo(String codigo, Almacen almacen, Ubicacion ubicacionActual, TipoVehiculo tipoVehiculo, LocalDateTime fechaSalida, LocalDateTime fechaLlegada, int capacidadMaxima, EstadoVehiculo estado, float distanciaTotal, int capacidadUtilizada) {
+        this.codigo = codigo;
+        this.almacen = almacen;
+        this.ubicacionActual = ubicacionActual;
+        this.tipoVehiculo = tipoVehiculo;
+        this.fechaSalida = fechaSalida;
+        this.fechaLlegada = fechaLlegada;
+        this.capacidadMaxima = capacidadMaxima;
+        this.estado = estado;
+        this.distanciaTotal = distanciaTotal;
+        this.capacidadUtilizada = capacidadUtilizada;
+    }
+
     public Long getId_vehiculo() {
         return id_vehiculo;
     }
@@ -103,13 +115,6 @@ public class Vehiculo {
         this.id_vehiculo = id_vehiculo;
     }
 
-    public PlanTransporte getPlanTransporte() {
-        return planTransporte;
-    }
-
-    public void setPlanTransporte(PlanTransporte planTransporte) {
-        this.planTransporte = planTransporte;
-    }
 
     public LocalDateTime getFechaSalida() {
         return fechaSalida;
@@ -182,5 +187,13 @@ public class Vehiculo {
 
     public void setCodigo(String codigo) {
         this.codigo = codigo;
+    }
+
+    public int getCapacidadUtilizada() {
+        return capacidadUtilizada;
+    }
+
+    public void setCapacidadUtilizada(int capacidadUtilizada) {
+        this.capacidadUtilizada = capacidadUtilizada;
     }
 }
