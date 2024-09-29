@@ -91,7 +91,9 @@ public class PlanTransporteService {
                                                 List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos){
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
+
         PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes);
+
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);
             planOptimo.setPedido(pedido);
