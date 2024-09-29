@@ -1,16 +1,12 @@
 package com.example.backend.Service;
 
-import com.example.backend.models.Almacen;
-import com.example.backend.models.EstadoPedido;
-import com.example.backend.models.Oficina;
-import com.example.backend.models.Pedido;
-import com.example.backend.models.PlanTransporte;
-import com.example.backend.models.Region;
-import com.example.backend.models.Tramo;
-import com.example.backend.models.Ubicacion;
+import com.example.backend.algorithm.AcoService;
+import com.example.backend.models.*;
 
 import jakarta.persistence.Transient;
 
+import com.example.backend.Repository.AlmacenRepository;
+import com.example.backend.Repository.PedidoRepository;
 import com.example.backend.Repository.PlanTransporteRepository;
 import com.example.backend.algorithm.Aco;
 
@@ -32,7 +28,13 @@ public class PlanTransporteService {
     private OficinaService oficinaService;
 
     @Autowired
-    private Aco aco;
+    private PedidoService pedidoService;
+
+    @Autowired
+    private AcoService  acoService;
+
+    @Autowired
+    private PedidoRepository pedidoRepository;
 
     public List<PlanTransporte> obtenerTodosLosPlanes() {
         return planTransporteRepository.findAll();
@@ -56,7 +58,7 @@ public class PlanTransporteService {
 
     // Algo implementado en el service <----
     public PlanTransporte crearRuta(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos, 
-            List<Region> regiones, List<Ubicacion> ubicaciones){
+            List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos){
         
         
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
@@ -68,13 +70,76 @@ public class PlanTransporteService {
         //List<Tramo> tramos = new ArrayList<>();
         //List<Tramo> rutas = new ArrayList<>();
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
-        PlanTransporte planOptimo =  aco.ejecutar(oficinas, caminos, pedido, 0, regiones, ubicaciones);
+        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos);
 
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);
             planOptimo.setPedido(pedido);
             planOptimo.setEstado(EstadoPedido.Registrado);
             
+            //Falta hallar tramos por plan de transporte
+            //List<Tramo> tramosRuta = planOptimo.getTra();
+            //actualizarCambiosEnvio(tramosRuta, pedido, oficinas);
+            return planOptimo; // Retorna el plan de transporte encontrado
+            //planViajeRepository.save(rutaOptima);
+            //rutas.add(rutaOptima);
+        }else{
+            PlanTransporte rutaInvalida = new PlanTransporte(); // Crear una nueva instancia de PlanViaje
+            rutaInvalida.setPedido(pedido); // Asignar el envío a la nueva instancia
+            //rutas.add(rutaInvalida);
+            System.out.println("No se encontró una ruta válida para el envío: " + pedido.getId_pedido());
+            return null;
+        }
+
+        //return planOptimo;
+    }
+
+
+    public PlanTransporte definirPlanTransporte(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos,
+                                                List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos){
+        List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
+        System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
+        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos);
+        
+        //List<Almacen> almacenes = almacenRepository.findAll();
+        for (Almacen almacen : almacenes) {
+            System.out.println("Listado de Almacenes:");
+            System.out.println("--------------------------------------------------");
+            System.out.println(almacen.getUbicacion().getProvincia());
+
+        }
+
+        /*
+         * for (Almacen almacen : almacenes) {
+         * // Obtener la distancia más corta desde este almacén hasta el destino
+         * double distancia = calcularDistanciaMinima(almacen.getUbicacion(),
+         * pedidoIngresado.getOficinaDestino().getUbicacion(), caminos, 0, new
+         * HashSet<>());
+         * 
+         * // Si encontramos una distancia más corta, actualizamos el almacén más
+         * cercano
+         * if (distancia < distanciaMinima) {
+         * distanciaMinima = distancia;
+         * almacenMasCercano = almacen;
+         * }
+         * }
+         */
+
+        pedido.setAlmacen(almacenes.get(0)); // Asignamos el almacén más cercano al pedido
+        
+        pedidoRepository.save(pedido);//Es util para guardar un nuevo pedido o actualizar un pedido existente
+        
+        System.out.println("Almacen seteado para el pedido: " + pedido.getAlmacen().getId_almacen());
+        System.out.println("-----------------IMPRESION DE DATOS DEL PEDIDO---------------------------------");
+        pedidoService.mostrarDatosDelPedido(pedido.getId_pedido());                                    
+        
+        
+
+        if(planOptimo != null){
+            pedido.setEstado(EstadoPedido.Registrado);
+            planOptimo.setPedido(pedido);
+            planOptimo.setEstado(EstadoPedido.Registrado);
+
             //Falta hallar tramos por plan de transporte
             //List<Tramo> tramosRuta = planOptimo.getTra();
             //actualizarCambiosEnvio(tramosRuta, pedido, oficinas);
