@@ -115,7 +115,7 @@ public class PedidoService {
                         if (oficinaSeleccionada.isPresent()) {
                             pedido.setOficinaDestino(oficinaSeleccionada.get());
                             pedido.setFechaRegistro(fechaHora);
-                            pedido.setFechaEntregaEstimada(fechaHora.plusDays(oficinaSeleccionada.get().getUbicacion().getRegion().getDiasLimite()));
+                            pedido.setFechaEntregaEstimada(fechaHora.plusDays(oficinaSeleccionada.get().getUbicacion().getRegion().getDiasLimite()));//ESTO SE DEBE CAMBIAR A UNA FUNCION QUE CALCULE LA FECHA DE ENTREGA ESTIMADA
                             pedido.setCantidadPaquetes(cantidadPaquetes);
                             pedido.setEstado(EstadoPedido.Registrado);
                             cliente.setCodigo(codigoCliente);

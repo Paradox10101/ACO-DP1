@@ -23,8 +23,7 @@ public class AcoService {
     @Autowired
     private OficinaRepository oficinaRepository;
 
-    @Autowired
-    private AlmacenRepository almacenRepository;
+    
 
 
     private List<Tramo> tramos;
@@ -159,17 +158,23 @@ public void inicializarVelocidadesTramos(){
         LocalDateTime fechaFin;
         while(!ubicacionActual.getUbigeo().equals(ubicacionDestino.getUbigeo()) && tramos.size() < caminos.keySet().size() - 1) {
             Ubicacion siguienteUbicacion = seleccionarSiguienteUbicacion(ubicacionActual, ubicacionesVisitadas);
+            
             if(siguienteUbicacion == null) break;
+            
             distanciaEntreUbicaciones = distancias.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo());
             velocidadEntreUbicaciones = velocidadesTramos.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo());
             Long horasTranscurridas = (long)(distanciaEntreUbicaciones/velocidadEntreUbicaciones);
             Long minutosTranscurridos = (long)(((distanciaEntreUbicaciones/velocidadEntreUbicaciones) - (int)(distanciaEntreUbicaciones/velocidadEntreUbicaciones)))*60;
+
             fechaFin = fechaInicio.plusHours(horasTranscurridas).plusMinutes(minutosTranscurridos);
             if(fechaFin.isAfter(fechaLimite)) break;
+            
             Tramo tramo = new Tramo(ubicacionActual, siguienteUbicacion);
             tramo.setFechaInicio(fechaInicio);
             tramo.setFechaFin(fechaFin);
+            
             ubicacionActual = siguienteUbicacion;
+            
             fechaInicio = fechaFin;
             tramos.add(tramo);
             ubicacionesVisitadas.add(ubicacionActual);
@@ -328,6 +333,8 @@ public void inicializarVelocidadesTramos(){
         inicializarVelocidadesTramos();
         LocalDateTime fechaMaximaEntrega = calcularFechaMaximaEntregaDestino(pedidoIngresado, oficinas, regiones); // Calcula la fecha máxima de entrega en destino
         //List<Tramo> tramos = generarTramosDesdeCaminos(caminos, ubicaciones);
+        
+        
 
         for(int iteracion = 0 ; iteracion < numeroIteraciones ; iteracion++){
             for(int hormiga = 0; hormiga < numeroHormigas; hormiga++){
