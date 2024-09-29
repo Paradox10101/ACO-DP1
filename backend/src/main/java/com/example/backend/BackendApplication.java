@@ -83,8 +83,8 @@ public class BackendApplication {
                 System.out.println("--------------------------------------------------");
             }
         }*/
-        for (Almacen almacen : almacenes) {
-            System.out.println("Listado de Almacenes:");
+        System.out.println("Listado de Almacenes:");
+        for (Almacen almacen : almacenes) {            
             System.out.println("--------------------------------------------------");
             System.out.println(almacen.getUbicacion().getProvincia());
             
@@ -97,12 +97,17 @@ public class BackendApplication {
         ArrayList<Pedido> pedidosFuturos = pedidos.stream()
                         .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaActual))
                         .collect(Collectors.toCollection(ArrayList::new));
+        System.out.println("PRIMERA VEZ");
         PlanTransporte plan = planTransporte.definirPlanTransporte(pedidosFuturos.get(0), almacenes, caminos, regiones, ubicaciones, vehiculos);
-
+        System.out.println("SEGUNDA VEZ");
         PlanTransporte plan2 = planTransporte.definirPlanTransporte(pedidosFuturos.get(1), almacenes, caminos, regiones, ubicaciones, vehiculos);
+        System.out.println("TERCERA VEZ");
         PlanTransporte plan3 = planTransporte.definirPlanTransporte(pedidosFuturos.get(2), almacenes, caminos, regiones, ubicaciones, vehiculos);
+        System.out.println("CUARTA VEZ");
         PlanTransporte plan4 = planTransporte.definirPlanTransporte(pedidosFuturos.get(3), almacenes, caminos, regiones, ubicaciones, vehiculos);
-
+        
+        System.out.println("-----------------DATOS DEL PEDIDO 3---------------------------------");
+        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(2).getId_pedido());
 
 
         System.out.println("DONE");

@@ -102,8 +102,8 @@ public class PlanTransporteService {
         PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos);
         
         //List<Almacen> almacenes = almacenRepository.findAll();
-        for (Almacen almacen : almacenes) {
-            System.out.println("Listado de Almacenes:");
+        System.out.println("Listado de Almacenes:");
+        for (Almacen almacen : almacenes) {            
             System.out.println("--------------------------------------------------");
             System.out.println(almacen.getUbicacion().getProvincia());
 
@@ -128,7 +128,7 @@ public class PlanTransporteService {
         pedido.setAlmacen(almacenes.get(0)); // Asignamos el almacén más cercano al pedido
         
         pedidoRepository.save(pedido);//Es util para guardar un nuevo pedido o actualizar un pedido existente
-        
+
         System.out.println("Almacen seteado para el pedido: " + pedido.getAlmacen().getId_almacen());
         System.out.println("-----------------IMPRESION DE DATOS DEL PEDIDO---------------------------------");
         pedidoService.mostrarDatosDelPedido(pedido.getId_pedido());                                    
