@@ -32,6 +32,9 @@ public class PlanTransporteService {
     private OficinaService oficinaService;
 
     @Autowired
+    private PedidoService pedidoService;
+
+    @Autowired
     private Aco aco;
 
     public List<PlanTransporte> obtenerTodosLosPlanes() {
@@ -69,7 +72,10 @@ public class PlanTransporteService {
         //List<Tramo> rutas = new ArrayList<>();
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
         PlanTransporte planOptimo =  aco.ejecutar(oficinas, caminos, pedido, 0, regiones, ubicaciones);
+        System.out.println("-----------------SALIENDO DE EJECUTAR ALGORITMO---------------------------------");
 
+        //pedidoService.mostrarDatosDelPedido(pedido.getId_pedido());
+        
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);
             planOptimo.setPedido(pedido);

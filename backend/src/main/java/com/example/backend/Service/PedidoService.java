@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -44,6 +45,40 @@ public class PedidoService {
     public void eliminar(Long id) {
         pedidoRepository.deleteById(id);
     }
+
+    public void mostrarDatosDelPedido(Long id){
+        Optional<Pedido> pedido = pedidoRepository.findById(id);
+        if(pedido.isPresent()){
+            System.out.println("Datos del pedido: ");
+            System.out.println("--------------------");
+            System.out.println("Datos de la ruta del pedido: ");
+            System.out.println("Almacen"+ pedido.get().getAlmacen().getUbicacion().getProvincia() + "Oficina"+ pedido.get().getOficinaDestino().getUbicacion().getProvincia());
+            System.out.println("--------------------");
+            System.out.println("Cantidad de paquetes: " + pedido.get().getCantidadPaquetes());
+            System.out.println("--------FECHAS RELACION:------------");            
+            //System.out.println("ID: " + pedido.get().getId_pedido());
+            System.out.println("Fecha de registro: " + pedido.get().getFechaRegistro());
+
+            System.out.println("Fecha de entrega estimada: " + pedido.get().getFechaEntregaEstimada());
+            System.out.println("Tiempo Restante: " + calcularTiempoRestante(pedido.get().getFechaRegistro(), pedido.get().getFechaEntregaEstimada()));
+            System.out.println("Estado: " + pedido.get().getEstado());
+        } else {
+            System.out.println("Pedido no encontrado");
+        }
+    }
+
+    public String calcularTiempoRestante(LocalDateTime fechaRegistro, LocalDateTime fechaEntregaEstimada) {
+        // Calcular la duración entre las dos fechas
+        Duration duracion = Duration.between(fechaRegistro, fechaEntregaEstimada);
+
+        // Obtener los días y horas de la duración
+        long dias = duracion.toDays();
+        long horas = duracion.minusDays(dias).toHours(); // Restar los días para obtener las horas restantes
+
+        return dias + "d " + horas + "h";
+    }
+    
+    
 
     public ArrayList<Pedido> cargarPedidosDesdeArchivo(String rutaArchivo, List<Oficina> oficinas,
             List<Ubicacion> ubicaciones, List<Cliente> clientes, List<Paquete> paquetes) { // esto va ir en otra parte
