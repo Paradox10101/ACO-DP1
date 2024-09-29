@@ -3,10 +3,8 @@ package com.example.backend.Service;
 import com.example.backend.algorithm.AcoService;
 import com.example.backend.models.*;
 
-import jakarta.persistence.Transient;
 
 import com.example.backend.Repository.PlanTransporteRepository;
-import com.example.backend.algorithm.Aco;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

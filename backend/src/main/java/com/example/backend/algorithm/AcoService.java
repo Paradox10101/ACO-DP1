@@ -1,10 +1,9 @@
 package com.example.backend.algorithm;
 
-import com.example.backend.Repository.AlmacenRepository;
-import com.example.backend.Repository.OficinaRepository;
+//import com.example.backend.Repository.AlmacenRepository;
+//import com.example.backend.Repository.OficinaRepository;
 import com.example.backend.Repository.PedidoRepository;
-import com.example.backend.Repository.UbicacionRepository;
-import com.example.backend.Service.PedidoService;
+//import com.example.backend.Repository.UbicacionRepository;
 import com.example.backend.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,14 +18,14 @@ import java.util.stream.Collectors;
 @Service
 public class AcoService {
 
-    @Autowired
+    /*@Autowired
     private UbicacionRepository ubicacionRepository;
 
     @Autowired
     private OficinaRepository oficinaRepository;
 
     @Autowired
-    private AlmacenRepository almacenRepository;
+    private AlmacenRepository almacenRepository;*/
 
     @Autowired
     private PedidoRepository pedidoRepository;
@@ -110,46 +109,39 @@ public class AcoService {
     }
 
     public ArrayList<Tramo> generarTramos(Ubicacion ubicacionOrigen,Ubicacion ubicacionDestino, LocalDateTime fechaInicioPedido, LocalDateTime fechaLimite, Vehiculo vehiculo) {
-            ArrayList<Tramo> tramos = new ArrayList<>();
-            Set<Ubicacion> ubicacionesVisitadas = new HashSet<>();
-            LocalDateTime fechaInicio = fechaInicioPedido;
-            LocalDateTime fechaFin;
-            Ubicacion ubicacionActual = ubicacionOrigen;
-            ubicacionesVisitadas.add(ubicacionActual);
-            while(true) {
-                if(ubicacionActual.getUbigeo().equals(ubicacionDestino.getUbigeo()))break;
-                Ubicacion siguienteUbicacion = seleccionarSiguienteUbicacion(ubicacionActual, ubicacionesVisitadas, vehiculo);
-                if(siguienteUbicacion == null) return null;
-                double tiempoTranscurrido = calcularTiempoEntreUbicaciones(ubicacionActual,ubicacionDestino, vehiculo);
-                /*System.out.println(
-                        "Tiempo entre ubicaciones---------------------------------------***************************: "
-                                + tiempoTranscurrido);*/
-                int horas = (int)tiempoTranscurrido;
-                int minutos = (int)((tiempoTranscurrido - horas)*60);
-                fechaFin = fechaInicio.plusHours(horas+2).plusMinutes(minutos);
-                if(fechaFin.isAfter(fechaLimite)){
-                    return null;
-                }
-                Tramo tramo = new Tramo(ubicacionActual, siguienteUbicacion);
-                tramo.setVelocidad((float)obtenerVelocidadEntreUbicaciones(ubicacionActual,ubicacionDestino) + vehiculo.getTipoVehiculo().getVelocidad());
-                tramo.setDistancia(distancias.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo()).floatValue());
-                tramo.setFechaInicio(fechaInicio);
-                tramo.setFechaFin(fechaFin);
-                tramo.setVehiculo(vehiculo);
-                ubicacionActual = siguienteUbicacion;
-                fechaInicio = fechaFin;
-                tramos.add(tramo);
-                ubicacionesVisitadas.add(ubicacionActual);
-                }
-                return tramos;
+        ArrayList<Tramo> tramos = new ArrayList<>();
+        Set<Ubicacion> ubicacionesVisitadas = new HashSet<>();
+        LocalDateTime fechaInicio = fechaInicioPedido;
+        LocalDateTime fechaFin;
+        Ubicacion ubicacionActual = ubicacionOrigen;
+        ubicacionesVisitadas.add(ubicacionActual);
+        while(true) {
+            if(ubicacionActual.getUbigeo().equals(ubicacionDestino.getUbigeo()))break;
+            Ubicacion siguienteUbicacion = seleccionarSiguienteUbicacion(ubicacionActual, ubicacionesVisitadas, vehiculo);
+            if(siguienteUbicacion == null) return null;
+            double tiempoTranscurrido = calcularTiempoEntreUbicaciones(ubicacionActual,ubicacionDestino, vehiculo);
+            /*System.out.println(
+                    "Tiempo entre ubicaciones---------------------------------------***************************: "
+                            + tiempoTranscurrido);*/
+            int horas = (int)tiempoTranscurrido;
+            int minutos = (int)((tiempoTranscurrido - horas)*60);
+            fechaFin = fechaInicio.plusHours(horas+2).plusMinutes(minutos);
+            if(fechaFin.isAfter(fechaLimite)){
+                return null;
             }
-
-
-
-
-
-
-
+            Tramo tramo = new Tramo(ubicacionActual, siguienteUbicacion);
+            tramo.setVelocidad((float)obtenerVelocidadEntreUbicaciones(ubicacionActual,ubicacionDestino) + vehiculo.getTipoVehiculo().getVelocidad());
+            tramo.setDistancia(distancias.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo()).floatValue());
+            tramo.setFechaInicio(fechaInicio);
+            tramo.setFechaFin(fechaFin);
+            tramo.setVehiculo(vehiculo);
+            ubicacionActual = siguienteUbicacion;
+            fechaInicio = fechaFin;
+            tramos.add(tramo);
+            ubicacionesVisitadas.add(ubicacionActual);
+            }
+            return tramos;
+        }
 
     private Ubicacion seleccionarSiguienteUbicacion(Ubicacion ubicacionActual, Set<Ubicacion> ubicacionesVisitadas, Vehiculo vehiculo){
         Map<String, Double> posiblesCiudades = distancias.get(ubicacionActual.getUbigeo());
@@ -256,8 +248,6 @@ public class AcoService {
         }
         return null;
     }
-
-
 
 
     private double calcularTiempoEntreUbicaciones(Ubicacion origen, Ubicacion destino, Vehiculo vehiculo){
