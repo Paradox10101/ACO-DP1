@@ -92,14 +92,16 @@ public class BackendApplication {
         System.out.println("-----------------ENTRANDO DESDE MAIN---------------------------------");
         //PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones, ubicaciones);
 
-        LocalDateTime fechaActual = LocalDateTime.now();
+        LocalDateTime fechaSeleccionada = LocalDateTime.now().minusHours(3).minusMinutes(0);
 
         ArrayList<Pedido> pedidosFuturos = pedidos.stream()
-                        .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaActual))
+                        .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaSeleccionada))
                         .collect(Collectors.toCollection(ArrayList::new));
         System.out.println("PRIMERA VEZ");
         PlanTransporte plan = planTransporte.definirPlanTransporte(pedidosFuturos.get(0), almacenes, caminos, regiones, ubicaciones, vehiculos);
+
         System.out.println("SEGUNDA VEZ");
+
         PlanTransporte plan2 = planTransporte.definirPlanTransporte(pedidosFuturos.get(1), almacenes, caminos, regiones, ubicaciones, vehiculos);
         System.out.println("TERCERA VEZ");
         PlanTransporte plan3 = planTransporte.definirPlanTransporte(pedidosFuturos.get(2), almacenes, caminos, regiones, ubicaciones, vehiculos);
@@ -108,7 +110,6 @@ public class BackendApplication {
         
         System.out.println("-----------------DATOS DEL PEDIDO 3---------------------------------");
         pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(2).getId_pedido());
-
 
         System.out.println("DONE");
 

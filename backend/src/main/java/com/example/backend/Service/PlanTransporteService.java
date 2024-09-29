@@ -5,8 +5,6 @@ import com.example.backend.models.*;
 
 import jakarta.persistence.Transient;
 
-import com.example.backend.Repository.AlmacenRepository;
-import com.example.backend.Repository.PedidoRepository;
 import com.example.backend.Repository.PlanTransporteRepository;
 import com.example.backend.algorithm.Aco;
 
@@ -28,13 +26,7 @@ public class PlanTransporteService {
     private OficinaService oficinaService;
 
     @Autowired
-    private PedidoService pedidoService;
-
-    @Autowired
     private AcoService  acoService;
-
-    @Autowired
-    private PedidoRepository pedidoRepository;
 
     public List<PlanTransporte> obtenerTodosLosPlanes() {
         return planTransporteRepository.findAll();
@@ -70,7 +62,7 @@ public class PlanTransporteService {
         //List<Tramo> tramos = new ArrayList<>();
         //List<Tramo> rutas = new ArrayList<>();
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
-        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos);
+        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes);
 
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);
@@ -99,41 +91,8 @@ public class PlanTransporteService {
                                                 List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos){
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
-        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos);
-        
-        //List<Almacen> almacenes = almacenRepository.findAll();
-        System.out.println("Listado de Almacenes:");
-        for (Almacen almacen : almacenes) {            
-            System.out.println("--------------------------------------------------");
-            System.out.println(almacen.getUbicacion().getProvincia());
 
-        }
-
-        /*
-         * for (Almacen almacen : almacenes) {
-         * // Obtener la distancia más corta desde este almacén hasta el destino
-         * double distancia = calcularDistanciaMinima(almacen.getUbicacion(),
-         * pedidoIngresado.getOficinaDestino().getUbicacion(), caminos, 0, new
-         * HashSet<>());
-         * 
-         * // Si encontramos una distancia más corta, actualizamos el almacén más
-         * cercano
-         * if (distancia < distanciaMinima) {
-         * distanciaMinima = distancia;
-         * almacenMasCercano = almacen;
-         * }
-         * }
-         */
-
-        pedido.setAlmacen(almacenes.get(0)); // Asignamos el almacén más cercano al pedido
-        
-        pedidoRepository.save(pedido);//Es util para guardar un nuevo pedido o actualizar un pedido existente
-
-        System.out.println("Almacen seteado para el pedido: " + pedido.getAlmacen().getId_almacen());
-        System.out.println("-----------------IMPRESION DE DATOS DEL PEDIDO---------------------------------");
-        pedidoService.mostrarDatosDelPedido(pedido.getId_pedido());                                    
-        
-        
+        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes);
 
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);
