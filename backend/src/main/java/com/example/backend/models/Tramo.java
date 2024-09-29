@@ -54,9 +54,12 @@ public class Tramo {
     @Column(name = "capacidadActual")
     private int capacidadActual;
 
+    public Tramo(Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino) {
+        this.ubicacionOrigen = ubicacionOrigen;
+        this.ubicacionDestino = ubicacionDestino;
+    }
 
-
-    public Tramo(Ubicacion ubicacionOrigen,Ubicacion ubicacionDestino, boolean bloqueado, float distancia,float velocidad, PlanTransporte planTransporte) {
+    public Tramo(Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino, boolean bloqueado, float distancia, float velocidad, PlanTransporte planTransporte) {
         this.ubicacionOrigen = ubicacionOrigen;
         this.ubicacionDestino = ubicacionDestino;
         this.bloqueado = bloqueado;
