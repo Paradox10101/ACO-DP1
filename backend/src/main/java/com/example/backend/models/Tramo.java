@@ -135,10 +135,6 @@ public class Tramo {
         return fechaInicio;
     }
 
-    public void setVelocidad(LocalDateTime fechaInicio) {
-        this.fechaInicio = fechaInicio;
-    }
-
     public void setFechaInicio(LocalDateTime fechaInicio) {
         this.fechaInicio = fechaInicio;
     }

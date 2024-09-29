@@ -23,8 +23,7 @@ public class AcoService {
     @Autowired
     private OficinaRepository oficinaRepository;
 
-    @Autowired
-    private AlmacenRepository almacenRepository;
+    
 
 
     private List<Tramo> tramos;
@@ -157,6 +156,7 @@ public class AcoService {
         double velocidadEntreUbicaciones;
         LocalDateTime fechaInicio = fechaInicioPedido;
         LocalDateTime fechaFin;
+
         for(String ubigeoOficina: oficinaVehiculos.keySet()) {
             if(vehiculo==null)continue;
             String ubigeoActual = ubigeoOficina;
@@ -363,6 +363,7 @@ public class AcoService {
         inicializarVelocidadesTramos();
         inicializarOficinasVehiculos();
         LocalDateTime fechaMaximaEntrega = calcularFechaMaximaEntregaDestino(pedidoIngresado, oficinas, regiones); // Calcula la fecha máxima de entrega en destino
+
         for(int iteracion = 0 ; iteracion < numeroIteraciones ; iteracion++){
             for(int hormiga = 0; hormiga < numeroHormigas; hormiga++){
                 ArrayList<Tramo> solucion = generarTramos(pedidoIngresado.getOficinaDestino().getUbicacion(), LocalDateTime.now(), fechaMaximaEntrega, pedidoIngresado.getCantidadPaquetes());

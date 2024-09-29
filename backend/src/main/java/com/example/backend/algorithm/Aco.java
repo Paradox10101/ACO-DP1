@@ -367,7 +367,7 @@ public class Aco {
             tramo.setFechaFin(LocalDateTime.now().plusHours(tiempoHoras).plusMinutes(tiempoMinutos));
 
             //System.out.println("ID Tramo: " + tramo.getId_tramo());
-            System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
+            /*System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
                     + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo());
             System.out.println("Ubicación Destino - ID: " + tramo.getubicacionDestino().getId_ubicacion()
                     + " | Ubigeo: " + tramo.getubicacionDestino().getUbigeo());
@@ -375,7 +375,7 @@ public class Aco {
             System.out.println("Fecha Inicio Recorrido: " + tramo.getFechaInicio().getDayOfMonth() + "/" + tramo.getFechaInicio().getMonthValue() + "/" + tramo.getFechaInicio().getYear() + " " + tramo.getFechaInicio().getHour() + "h:" + tramo.getFechaInicio().getMinute() + "m");
             System.out.println("Fecha Fin Recorrido: " + tramo.getFechaFin().getDayOfMonth() + "/" + tramo.getFechaFin().getMonthValue() + "/" + tramo.getFechaFin().getYear() + " " + tramo.getFechaFin().getHour() + "h:" + tramo.getFechaFin().getMinute() + "m");
             //System.out.println("Bloqueado: " + (tramo.isBloqueado() ? "Sí" : "No"));
-            System.out.println("--------------------------------------------------");
+            System.out.println("--------------------------------------------------");*/
         }
 
         inicializarGrafoTramos(fechaMaximaEntrega);
