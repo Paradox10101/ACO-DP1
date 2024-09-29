@@ -3,13 +3,13 @@ package com.example.backend.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.example.backend.models.Oficina;
-import com.example.backend.models.Region;
-import com.example.backend.models.Ubicacion;
+//import com.example.backend.models.Region;
+//import com.example.backend.models.Ubicacion;
 import com.example.backend.Service.OficinaService;
-import com.example.backend.Service.RegionService;
+//import com.example.backend.Service.RegionService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+//import java.util.ArrayList;
+//import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,8 +20,8 @@ public class OficinaController {
     @Autowired
     private OficinaService oficinaService;
 
-    @Autowired
-    private RegionService regionService;
+   /*@Autowired
+    private RegionService regionService;*/
 
     // Endpoint para obtener todas las oficinas
     @GetMapping
@@ -60,12 +60,12 @@ public class OficinaController {
         oficinaService.eliminarOficina(id);
     }
 
-    // Agregar un endpoint que permita cargar oficinas desde la base de datos
+   /*/ // Agregar un endpoint que permita cargar oficinas desde la base de datos
     @GetMapping("/cargarOficinas")
     public ArrayList<Oficina> cargarOficinas() {
         ArrayList<Region> regiones = regionService.obtenerTodas();
         ArrayList<Ubicacion> ubicaciones = new ArrayList<>();
         HashMap<String, ArrayList<Ubicacion>> caminos = new HashMap<>();
         return oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, ubicaciones);
-    }
+    }*/
 }

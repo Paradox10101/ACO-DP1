@@ -2,11 +2,7 @@
 package com.example.backend.models;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.example.backend.algorithm.Aco;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +15,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 
 @Entity
@@ -49,12 +44,8 @@ public class PlanTransporte {
     @JoinColumn(name = "fid_ubicacion_destino")
     private Ubicacion ubicacionDestino;
 
-
     @Enumerated(EnumType.STRING)
     private EstadoPedido estado;
-
-    @Transient
-    private Aco aco = new Aco();
 
     public PlanTransporte() {
 
@@ -110,17 +101,4 @@ public class PlanTransporte {
     public void setEstado(EstadoPedido estado) {
         this.estado = estado;
     }
-
-    
-    private Oficina buscarOficinaPorId(Long idOficina, List<Oficina> oficinas) {
-        for (Oficina oficina : oficinas) {
-            if (oficina.getId_oficina().equals(idOficina)) {
-                return oficina;
-            }
-        }
-        return null; // Devuelve null si no encuentra la oficina
-    }
-
-
-
 }

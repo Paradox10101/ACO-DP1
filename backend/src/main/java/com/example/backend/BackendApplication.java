@@ -3,10 +3,8 @@ package com.example.backend;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.example.backend.Repository.MantenimientoRepository;
 import com.example.backend.Service.*;
 import com.example.backend.models.*;
 import org.springframework.boot.SpringApplication;
@@ -16,7 +14,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.example.backend.algorithm.Aco;
 
 @SpringBootApplication
 public class BackendApplication {
@@ -25,7 +22,6 @@ public class BackendApplication {
         ApplicationContext context = SpringApplication.run(BackendApplication.class, args);
 
         ArrayList<Oficina> oficinas;
-        ArrayList<Tramo> tramos;
         ArrayList<Pedido> pedidos;
         ArrayList<Bloqueo> bloqueos;
         ArrayList<Mantenimiento> mantenimientos;
@@ -38,57 +34,26 @@ public class BackendApplication {
         ArrayList<Paquete> paquetes = new ArrayList<>();
         HashMap<String, ArrayList<Ubicacion>> caminos;
 
-        UbicacionService ubicacionService = context.getBean(UbicacionService.class);
         RegionService regionService = context.getBean(RegionService.class);
-        OficinaService oficinaService = context.getBean(OficinaService.class);
-        VehiculoService vehiculoService = context.getBean(VehiculoService.class);
-        TramoService tramoService = context.getBean(TramoService.class);
         PedidoService pedidoService = context.getBean(PedidoService.class);
-        BloqueoService bloqueoService = context.getBean(BloqueoService.class);
-        MantenimientoService mantenimientoService = context.getBean(MantenimientoService.class);
         PlanTransporteService planTransporte = context.getBean(PlanTransporteService.class);
-        Aco aco = context.getBean(Aco.class);
+        FilesService filesService = context.getBean(FilesService.class);
 
         regionService.guardar(new Region("COSTA", 1));
         regionService.guardar(new Region("SIERRA", 2));
         regionService.guardar(new Region("SELVA", 3));
         regiones = regionService.obtenerTodas();
 
-        oficinas = oficinaService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, ubicaciones);
-        vehiculos = vehiculoService.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, ubicaciones, tiposVehiculo);
-        caminos = aco.cargarCaminosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", ubicaciones);
+        oficinas = filesService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, ubicaciones);
+        vehiculos = filesService.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, ubicaciones, tiposVehiculo);
+        caminos = filesService.cargarCaminosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", ubicaciones);
         //tramos = Tramo.cargarTramosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", caminos);
-        bloqueos = bloqueoService.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
-        pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202409.txt", oficinas, ubicaciones, clientes, paquetes);
-        mantenimientos = mantenimientoService.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
+        bloqueos = filesService.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.01.txt", ubicaciones);
+        //pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202409.txt", oficinas, ubicaciones, clientes, paquetes);
+        pedidos = filesService.cargarPedidosDesdeDirectorio("dataset/Pedidos", oficinas, ubicaciones, clientes, paquetes);
 
+        mantenimientos = filesService.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
 
-        System.out.println("Listado de Caminos:");
-        System.out.println("--------------------------------------------------");
-
-        /*for (Map.Entry<String, ArrayList<Ubicacion>> entry : caminos.entrySet()) {
-            String ubigeoOrigen = entry.getKey();
-            ArrayList<Ubicacion> ubicacionesDestino = entry.getValue();
-
-            System.out.println("Ubigeo Origen: " + ubigeoOrigen);
-            System.out.println("Destinos:");
-
-            for (Ubicacion ubicacionDestino : ubicacionesDestino) {
-                System.out.println("   - ID Ubicación: " + ubicacionDestino.getId_ubicacion());
-                System.out.println("     Departamento: " + ubicacionDestino.getDepartamento());
-                System.out.println("     Provincia: " + ubicacionDestino.getProvincia());
-                System.out.println("     Ubigeo: " + ubicacionDestino.getUbigeo());
-                System.out.println("     Latitud: " + ubicacionDestino.getLatitud());
-                System.out.println("     Longitud: " + ubicacionDestino.getLongitud());
-                System.out.println("--------------------------------------------------");
-            }
-        }*/
-        System.out.println("Listado de Almacenes:");
-        for (Almacen almacen : almacenes) {            
-            System.out.println("--------------------------------------------------");
-            System.out.println(almacen.getUbicacion().getProvincia());
-            
-        }
         System.out.println("-----------------ENTRANDO DESDE MAIN---------------------------------");
         //PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones, ubicaciones);
 
@@ -97,19 +62,21 @@ public class BackendApplication {
         ArrayList<Pedido> pedidosFuturos = pedidos.stream()
                         .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaSeleccionada))
                         .collect(Collectors.toCollection(ArrayList::new));
+        
         System.out.println("PRIMERA VEZ");
         PlanTransporte plan = planTransporte.definirPlanTransporte(pedidosFuturos.get(0), almacenes, caminos, regiones, ubicaciones, vehiculos);
 
         System.out.println("SEGUNDA VEZ");
-
         PlanTransporte plan2 = planTransporte.definirPlanTransporte(pedidosFuturos.get(1), almacenes, caminos, regiones, ubicaciones, vehiculos);
+        
         System.out.println("TERCERA VEZ");
         PlanTransporte plan3 = planTransporte.definirPlanTransporte(pedidosFuturos.get(2), almacenes, caminos, regiones, ubicaciones, vehiculos);
+        
         System.out.println("CUARTA VEZ");
         PlanTransporte plan4 = planTransporte.definirPlanTransporte(pedidosFuturos.get(3), almacenes, caminos, regiones, ubicaciones, vehiculos);
         
-        System.out.println("-----------------DATOS DEL PEDIDO 3---------------------------------");
-        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(2).getId_pedido());
+        System.out.println("-----------------DATOS DEL PEDIDO 4---------------------------------");
+        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(3).getId_pedido());
 
         System.out.println("DONE");
 
