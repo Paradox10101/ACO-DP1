@@ -47,7 +47,7 @@ public class AcoService {
     private int numeroIteraciones = 150;
     private double tasaEvaporacion = 0.5;
     private double feromonaInicial = 1.0;
-    private double alpha = 1.0;
+    private double alpha = 1.5;
     private double beta = 2.0;
     private Random random = new Random();
 
