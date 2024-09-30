@@ -172,7 +172,8 @@ public class AcoService {
             if(duracionActual > duracionLimite){
                 return null;
             }
-            
+
+
             Tramo tramo = new Tramo(ubicacionActual, siguienteUbicacion);
             tramo.setVelocidad((float)(velocidadesTramos.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo()) + vehiculo.getTipoVehiculo().getVelocidad()));
             tramo.setDistancia((float)calcularDistanciaEntreUbicaciones(ubicacionActual, siguienteUbicacion));
