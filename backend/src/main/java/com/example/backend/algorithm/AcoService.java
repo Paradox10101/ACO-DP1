@@ -43,11 +43,11 @@ public class AcoService {
     private Map<String, List<Vehiculo>> oficinaVehiculos = new HashMap<>();
     private Map<String, Map<String, Double>> tiempos;
 
-    private int numeroHormigas = 100;
-    private int numeroIteraciones = 100;
+    private int numeroHormigas = 150;
+    private int numeroIteraciones = 150;
     private double tasaEvaporacion = 0.5;
     private double feromonaInicial = 1.0;
-    private double alpha = 1.0;
+    private double alpha = 1.5;
     private double beta = 2.0;
     private Random random = new Random();
 
@@ -135,7 +135,7 @@ public class AcoService {
             double tiempoTranscurrido = tiempos.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo());
             int horas = (int)tiempoTranscurrido;
             int minutos = (int)((tiempoTranscurrido - horas)*60);
-            fechaFin = fechaInicio.plusHours(horas+2).plusMinutes(minutos);
+            fechaFin = fechaInicio.plusHours(horas).plusMinutes(minutos);
 
             if(fechaFin.isAfter(fechaLimite)){
                 return null;
@@ -148,7 +148,7 @@ public class AcoService {
             //tramo.setFechaInicio(fechaInicio);
             //tramo.setFechaFin(fechaFin);
             ubicacionActual = siguienteUbicacion;
-            fechaInicio = fechaFin;
+            fechaInicio = fechaFin.plusHours(2);
             tramos.add(tramo);
             ubicacionesVisitadas.add(ubicacionActual);
         }
@@ -424,8 +424,12 @@ public class AcoService {
             System.out.println("--------------------------------------------------");
             System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
                     + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo());
+            System.out.println("Region Origen: " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionOrigen().getRegion().getNombre());
             System.out.println("Ubicación Destino - ID: " + tramo.getubicacionDestino().getId_ubicacion()
                     + " | Ubigeo: " + tramo.getubicacionDestino().getUbigeo());
+            System.out.println("Region Destino: " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionDestino().getRegion().getNombre());
             System.out.println("Distancia: " + tramo.getDistancia() + " km");
             System.out.println("Velocidad: " + tramo.getVelocidad() + " km/h");
             System.out.println("Fecha Inicio Recorrido: " + tramo.getFechaInicio().getDayOfMonth() + "/" + tramo.getFechaInicio().getMonthValue() + "/" + tramo.getFechaInicio().getYear() + " " + tramo.getFechaInicio().getHour() + "h:" + tramo.getFechaInicio().getMinute() + "m");
@@ -493,7 +497,7 @@ public class AcoService {
     double calcularCostoSolucion (ArrayList < Tramo > tramos) {
         double costo = 0.0;
         for (Tramo tramo : tramos) {
-            costo += tiempos.get(tramo.getubicacionOrigen().getUbigeo()).get(tramo.getubicacionDestino().getUbigeo());
+            costo += tramo.getDuracion() + 2;
         }
         return costo;
     }
