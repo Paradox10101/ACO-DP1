@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PlanTransporteService {
@@ -95,14 +96,23 @@ public class PlanTransporteService {
 
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
         //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
-        //while(cantidadSolicitada > 0){
-            PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes, cantidadSolicitada);
-            if(planOptimo != null){
-                planesTransporte.add(planOptimo);
-                cantidadSolicitada -= planOptimo.getCantidadTransportada();
+        while(cantidadSolicitada > 0){
+            List<Almacen> almacenesConVehiculosDisponibles = almacenes.stream().filter(almacenS -> almacenS.getCantidadVehiculos() > 0).collect(Collectors.toCollection(ArrayList::new));
+            List<Vehiculo> vehiculosDisponibles = vehiculos.stream().filter(vehiculoS -> vehiculoS.getEstado() == EstadoVehiculo.Disponible).collect(Collectors.toCollection(ArrayList::new));
+            if(almacenesConVehiculosDisponibles.isEmpty() || vehiculosDisponibles.isEmpty()){
+                System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
+                break;
             }
-        //}
-
+            PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculosDisponibles, almacenesConVehiculosDisponibles, cantidadSolicitada);
+            if(planOptimo.getVehiculo() == null){
+                System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
+                break;
+            }
+            else{
+                cantidadSolicitada -= planOptimo.getVehiculo().getCapacidadUtilizada();
+            }
+            planesTransporte.add(planOptimo);
+        }
 
         if(!planesTransporte.isEmpty()){
             pedido.setEstado(EstadoPedido.Registrado);
