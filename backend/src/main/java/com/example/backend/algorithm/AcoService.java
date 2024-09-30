@@ -357,7 +357,7 @@ public class AcoService {
 
         for(int iteracion = 0 ; iteracion < numeroIteraciones ; iteracion++){
 
-            for(int hormiga = 0; hormiga < numeroHormigas; hormiga++){       
+            for(int hormiga = 0; hormiga < numeroHormigas; hormiga++){
 
                 //System.out.println("-----------------ELECCION DEL MEJOR ALMACEN---------------------------------");
                 Almacen almacenSeleccionado = seleccionarAlmacenOrigen();

@@ -1,15 +1,6 @@
 package com.example.backend.models;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import jakarta.persistence.*;
 
@@ -50,7 +41,6 @@ public class Bloqueo {
     }
 
     public Bloqueo(LocalDateTime fechaInicio, LocalDateTime fechaFin, Tramo tramoAfectado) {
-        this.id_bloqueo = id_bloqueo;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.tramoAfectado = tramoAfectado;
