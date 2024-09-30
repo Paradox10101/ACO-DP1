@@ -52,7 +52,7 @@ public class PedidoService {
             System.out.println("Datos del pedido: ");
             System.out.println("--------------------");
             System.out.println("Datos de la ruta del pedido: ");
-            System.out.println("Almacen"+ pedido.get().getAlmacen().getUbicacion().getProvincia() + "Oficina"+ pedido.get().getOficinaDestino().getUbicacion().getProvincia());
+            //System.out.println("Almacen"+ pedido.get().getAlmacen().getUbicacion().getProvincia() + "Oficina"+ pedido.get().getOficinaDestino().getUbicacion().getProvincia());
             System.out.println("--------------------");
             System.out.println("Cantidad de paquetes: " + pedido.get().getCantidadPaquetes());
             System.out.println("--------FECHAS RELACION:------------");            

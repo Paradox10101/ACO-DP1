@@ -55,8 +55,11 @@ public class Tramo {
     private int cantidadPaquetes;
 
     @OneToOne
-    @JoinColumn(name = "fid_vehiculo", nullable = false)
+    @JoinColumn(name = "fid_vehiculo")
     private Vehiculo vehiculo;
+
+    @Column(name = "duracion")
+    private float duracion;
 
 
 
@@ -161,5 +164,13 @@ public class Tramo {
 
     public void setVehiculo(Vehiculo vehiculo) {
         this.vehiculo = vehiculo;
+    }
+
+    public float getDuracion() {
+        return duracion;
+    }
+
+    public void setDuracion(float duracion) {
+        this.duracion = duracion;
     }
 }

@@ -11,6 +11,7 @@ import com.example.backend.algorithm.Aco;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +63,7 @@ public class PlanTransporteService {
         //List<Tramo> tramos = new ArrayList<>();
         //List<Tramo> rutas = new ArrayList<>();
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
-        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes);
+        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes, pedido.getCantidadPaquetes());
 
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);
@@ -87,22 +88,33 @@ public class PlanTransporteService {
     }
 
 
-    public PlanTransporte definirPlanTransporte(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos,
+    public ArrayList<PlanTransporte> definirPlanesTransporte(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos,
                                                 List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos){
+        ArrayList<PlanTransporte> planesTransporte = new ArrayList<>();
+        int cantidadSolicitada = pedido.getCantidadPaquetes();
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
+
+
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
+        //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
+        //while(cantidadSolicitada > 0){
+            PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes, cantidadSolicitada);
+            if(planOptimo != null){
+                planesTransporte.add(planOptimo);
+                cantidadSolicitada -= planOptimo.getCantidadTransportada();
+            }
+        //}
 
-        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes);
 
-        if(planOptimo != null){
+        if(!planesTransporte.isEmpty()){
             pedido.setEstado(EstadoPedido.Registrado);
-            planOptimo.setPedido(pedido);
-            planOptimo.setEstado(EstadoPedido.Registrado);
+            planesTransporte.get(0).setPedido(pedido);
+            planesTransporte.get(0).setEstado(EstadoPedido.Registrado);
 
             //Falta hallar tramos por plan de transporte
             //List<Tramo> tramosRuta = planOptimo.getTra();
             //actualizarCambiosEnvio(tramosRuta, pedido, oficinas);
-            return planOptimo; // Retorna el plan de transporte encontrado
+            return planesTransporte; // Retorna el plan de transporte encontrado
             //planViajeRepository.save(rutaOptima);
             //rutas.add(rutaOptima);
         }else{
@@ -113,7 +125,6 @@ public class PlanTransporteService {
             return null;
         }
 
-        //return planOptimo;
     }
 
     public void actualizarCambiosEnvio(List<Tramo> tramosRuta, Pedido pedido, List<Oficina> oficinas) {

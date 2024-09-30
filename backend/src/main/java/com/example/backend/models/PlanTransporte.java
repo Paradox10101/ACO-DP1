@@ -53,6 +53,13 @@ public class PlanTransporte {
     @Enumerated(EnumType.STRING)
     private EstadoPedido estado;
 
+    @Column(name = "cantidad_transportada")
+    private int cantidadTransportada;
+
+    @OneToOne
+    @JoinColumn(name = "fid_vehiculo")
+    private Vehiculo vehiculo;
+
     @Transient
     private Aco aco = new Aco();
 
@@ -111,7 +118,38 @@ public class PlanTransporte {
         this.estado = estado;
     }
 
-    
+    public int getCantidadTransportada() {
+        return cantidadTransportada;
+    }
+
+    public Ubicacion getUbicacionDestino() {
+        return ubicacionDestino;
+    }
+
+    public void setUbicacionDestino(Ubicacion ubicacionDestino) {
+        this.ubicacionDestino = ubicacionDestino;
+    }
+
+    public Ubicacion getUbicacionOrigen() {
+        return ubicacionOrigen;
+    }
+
+    public void setUbicacionOrigen(Ubicacion ubicacionOrigen) {
+        this.ubicacionOrigen = ubicacionOrigen;
+    }
+
+    public void setCantidadTransportada(int cantidadTransportada) {
+        this.cantidadTransportada = cantidadTransportada;
+    }
+
+    public Vehiculo getVehiculo() {
+        return vehiculo;
+    }
+
+    public void setVehiculo(Vehiculo vehiculo) {
+        this.vehiculo = vehiculo;
+    }
+
     private Oficina buscarOficinaPorId(Long idOficina, List<Oficina> oficinas) {
         for (Oficina oficina : oficinas) {
             if (oficina.getId_oficina().equals(idOficina)) {
