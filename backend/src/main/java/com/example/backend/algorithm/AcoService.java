@@ -130,6 +130,31 @@ public class AcoService {
             if(ubigeosAlmacenes.contains(ubicacionActual.getUbigeo())){
                 break;
             }
+            // Verificar si existe un tramo directo desde la ubicación actual a un almacén
+            Optional<Ubicacion> tramoDirecto = caminos.get(ubicacionActual.getUbigeo()).stream()
+                                    .filter(ubicacion -> ubigeosAlmacenes.contains(ubicacion.getUbigeo()))
+                                    .findFirst();
+
+            if (tramoDirecto.isPresent()) {
+                Ubicacion siguienteUbicacion = tramoDirecto.get();
+                double tiempoTranscurrido = tiempos.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo());
+                int horas = (int) tiempoTranscurrido;
+                int minutos = (int) ((tiempoTranscurrido - horas) * 60);
+                fechaFin = fechaInicio.plusHours(horas + 2).plusMinutes(minutos);
+    
+                if (fechaFin.isAfter(fechaLimite)) {
+                    return null; // Retornar null si el tramo directo excede la fecha límite
+                }
+    
+                Tramo tramo = new Tramo(ubicacionActual, siguienteUbicacion);
+                tramo.setVelocidad((float) (1.0 * velocidadesTramos.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo())));
+                tramo.setDistancia((float) calcularDistanciaEntreUbicaciones(ubicacionActual, siguienteUbicacion));
+                tramo.setDuracion((float) tiempoTranscurrido);
+    
+                tramos.add(tramo);
+                break; // Terminar la búsqueda porque ya encontramos un tramo directo al almacén
+            }
+
             Ubicacion siguienteUbicacion = seleccionarSiguienteUbicacion(ubicacionActual, ubicacionesVisitadas);
             if(siguienteUbicacion == null) return null;
             double tiempoTranscurrido = tiempos.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo());
@@ -399,7 +424,6 @@ public class AcoService {
         }
 
         this.tramos.addAll(mejorSolucion);
-
         Vehiculo vehiculoSeleccionado = obtenerVehiculo(cantidadSolicitada, mejorSolucion.get(0).getubicacionOrigen().getUbigeo());
         if(vehiculoSeleccionado==null) {
             return planTransporteFinal;
