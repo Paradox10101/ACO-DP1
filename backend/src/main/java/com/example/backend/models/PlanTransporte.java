@@ -2,6 +2,7 @@
 package com.example.backend.models;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 import jakarta.persistence.Column;
@@ -55,8 +56,6 @@ public class PlanTransporte {
     @JoinColumn(name = "fid_vehiculo")
     private Vehiculo vehiculo;
 
-    @Transient
-    private Aco aco = new Aco();
 
 
     public PlanTransporte() {
