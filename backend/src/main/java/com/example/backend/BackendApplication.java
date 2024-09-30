@@ -62,6 +62,10 @@ public class BackendApplication {
         ArrayList<Pedido> pedidosFuturos = pedidos.stream()
                         .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaSeleccionada))
                         .collect(Collectors.toCollection(ArrayList::new));
+
+        System.out.println("PRIMERA VEZ");
+        ArrayList<PlanTransporte> planes = planTransporte.definirPlanesTransporte(pedidosFuturos.get(0), almacenes, caminos, regiones, ubicaciones, vehiculos);
+
         
 
         for (Pedido pedido : pedidos) {
@@ -76,9 +80,12 @@ public class BackendApplication {
             }
         }
 
-       /*System.out.println("PRIMERA VEZ");
-        PlanTransporte plan = planTransporte.definirPlanTransporte(pedidosFuturos.get(0), almacenes, caminos, regiones, ubicaciones, vehiculos);
+       /*System.out.println("PRIMERA VEZ");*/
+       //PlanTransporte plan = planTransporte.definirPlanTransporte(pedidosFuturos.get(0), almacenes, caminos, regiones, ubicaciones, vehiculos);
 
+
+
+        /*
         System.out.println("SEGUNDA VEZ");
         PlanTransporte plan2 = planTransporte.definirPlanTransporte(pedidosFuturos.get(1), almacenes, caminos, regiones, ubicaciones, vehiculos);
         
@@ -87,9 +94,15 @@ public class BackendApplication {
         
         System.out.println("CUARTA VEZ");
         PlanTransporte plan4 = planTransporte.definirPlanTransporte(pedidosFuturos.get(3), almacenes, caminos, regiones, ubicaciones, vehiculos);
+
+        */
+        System.out.println("-----------------DATOS DEL PEDIDO 3---------------------------------");
+        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(2).getId_pedido());
+
         
         System.out.println("-----------------DATOS DEL PEDIDO 4---------------------------------");
         pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(3).getId_pedido());*/
+
 
         System.out.println("DONE");
 
