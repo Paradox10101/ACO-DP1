@@ -63,7 +63,20 @@ public class BackendApplication {
                         .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaSeleccionada))
                         .collect(Collectors.toCollection(ArrayList::new));
         
-        System.out.println("PRIMERA VEZ");
+
+        for (Pedido pedido : pedidos) {
+            // Crea un nuevo PlanTransporte y ejecuta el ACO para encontrar la ruta óptima
+            PlanTransporte plan= new PlanTransporte();
+            PlanTransporte rutaOptima = planTransporte.definirPlanTransporte(pedido, almacenes, caminos, regiones,ubicaciones, vehiculos);
+
+            if (rutaOptima != null) {
+                System.out.println("Ruta óptima encontrada para el pedido " + pedido.getId_pedido());
+            } else {
+                System.out.println("No se encontró una ruta válida para el pedido " + pedido.getId_pedido());
+            }
+        }
+
+       /*System.out.println("PRIMERA VEZ");
         PlanTransporte plan = planTransporte.definirPlanTransporte(pedidosFuturos.get(0), almacenes, caminos, regiones, ubicaciones, vehiculos);
 
         System.out.println("SEGUNDA VEZ");
@@ -76,7 +89,7 @@ public class BackendApplication {
         PlanTransporte plan4 = planTransporte.definirPlanTransporte(pedidosFuturos.get(3), almacenes, caminos, regiones, ubicaciones, vehiculos);
         
         System.out.println("-----------------DATOS DEL PEDIDO 4---------------------------------");
-        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(3).getId_pedido());
+        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(3).getId_pedido());*/
 
         System.out.println("DONE");
 

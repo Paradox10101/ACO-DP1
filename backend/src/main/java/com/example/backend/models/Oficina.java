@@ -1,13 +1,5 @@
 package com.example.backend.models;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,15 +32,7 @@ public class Oficina {
     // Variable estática para manejar el autoincremento de IDs
 
     //no va tener ni longitud y latitud --> servir como prueba
-    public Oficina(Long id_oficina, Ubicacion ubicacion, int capacidadUtilizada, int capacidadMaxima) {
-        this.ubicacion = ubicacion;
-        this.capacidadUtilizada = capacidadUtilizada;
-        this.capacidadMaxima = capacidadMaxima;
-    }
-
-    public Oficina(Long id_oficina, Ubicacion ubicacion, double latitud, double longitud, int capacidadUtilizada,
-            int capacidadMaxima) {
-
+    public Oficina(Ubicacion ubicacion, int capacidadUtilizada, int capacidadMaxima) {
         this.ubicacion = ubicacion;
         this.capacidadUtilizada = capacidadUtilizada;
         this.capacidadMaxima = capacidadMaxima;
