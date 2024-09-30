@@ -1,13 +1,7 @@
 
 package com.example.backend.models;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import jakarta.persistence.*;
 

@@ -1,8 +1,9 @@
 package com.example.backend.algorithm;
 
-import com.example.backend.Repository.AlmacenRepository;
-import com.example.backend.Repository.OficinaRepository;
-import com.example.backend.Repository.UbicacionRepository;
+//import com.example.backend.Repository.AlmacenRepository;
+//import com.example.backend.Repository.OficinaRepository;
+import com.example.backend.Repository.PedidoRepository;
+//import com.example.backend.Repository.UbicacionRepository;
 import com.example.backend.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.metrics.SystemMetricsAutoConfiguration;
@@ -19,15 +20,17 @@ import java.util.stream.Collectors;
 @Service
 public class AcoService {
 
-    @Autowired
+    /*@Autowired
     private UbicacionRepository ubicacionRepository;
 
     @Autowired
     private OficinaRepository oficinaRepository;
 
     @Autowired
-    private AlmacenRepository almacenRepository;
+    private AlmacenRepository almacenRepository;*/
 
+    @Autowired
+    private PedidoRepository pedidoRepository;
 
     private List<Tramo> tramos = new ArrayList<>();
     private List<Oficina> oficinas;
@@ -110,6 +113,7 @@ public class AcoService {
     }
 
 
+
     public ArrayList<Tramo> generarTramosDestinoAlmacen(Ubicacion ubicacionDestino, LocalDateTime fechaInicioPedido, LocalDateTime fechaLimite) {
             ArrayList<Tramo> tramos = new ArrayList<>();
             ArrayList<String> ubigeosAlmacenes = new ArrayList<>();
@@ -147,9 +151,43 @@ public class AcoService {
                 fechaInicio = fechaFin;
                 tramos.add(tramo);
                 ubicacionesVisitadas.add(ubicacionActual);
+
+    public ArrayList<Tramo> generarTramos(Ubicacion ubicacionOrigen,Ubicacion ubicacionDestino, LocalDateTime fechaInicioPedido, LocalDateTime fechaLimite, Vehiculo vehiculo) {
+        ArrayList<Tramo> tramos = new ArrayList<>();
+        Set<Ubicacion> ubicacionesVisitadas = new HashSet<>();
+        LocalDateTime fechaInicio = fechaInicioPedido;
+        LocalDateTime fechaFin;
+        Ubicacion ubicacionActual = ubicacionOrigen;
+        ubicacionesVisitadas.add(ubicacionActual);
+        while(true) {
+            if(ubicacionActual.getUbigeo().equals(ubicacionDestino.getUbigeo()))break;
+            Ubicacion siguienteUbicacion = seleccionarSiguienteUbicacion(ubicacionActual, ubicacionesVisitadas, vehiculo);
+            if(siguienteUbicacion == null) return null;
+            double tiempoTranscurrido = calcularTiempoEntreUbicaciones(ubicacionActual,ubicacionDestino, vehiculo);
+            /*System.out.println(
+                    "Tiempo entre ubicaciones---------------------------------------***************************: "
+                            + tiempoTranscurrido);*/
+            int horas = (int)tiempoTranscurrido;
+            int minutos = (int)((tiempoTranscurrido - horas)*60);
+            fechaFin = fechaInicio.plusHours(horas+2).plusMinutes(minutos);
+            if(fechaFin.isAfter(fechaLimite)){
+                return null;
+            }
+            Tramo tramo = new Tramo(ubicacionActual, siguienteUbicacion);
+            tramo.setVelocidad((float)obtenerVelocidadEntreUbicaciones(ubicacionActual,ubicacionDestino) + vehiculo.getTipoVehiculo().getVelocidad());
+            tramo.setDistancia(distancias.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo()).floatValue());
+            tramo.setFechaInicio(fechaInicio);
+            tramo.setFechaFin(fechaFin);
+            tramo.setVehiculo(vehiculo);
+            ubicacionActual = siguienteUbicacion;
+            fechaInicio = fechaFin;
+            tramos.add(tramo);
+            ubicacionesVisitadas.add(ubicacionActual);
+
             }
             return tramos;
         }
+
 
     public ArrayList<Tramo> generarTramos(Ubicacion ubicacionOrigen,Ubicacion ubicacionDestino, LocalDateTime fechaInicioPedido, LocalDateTime fechaLimite, Vehiculo vehiculo) {
         ArrayList<Tramo> tramos = new ArrayList<>();
@@ -204,6 +242,19 @@ public class AcoService {
                 double probabilidad = Math.pow(feromonas.get(ubicacionActual.getUbigeo()).get(ubicacionDestino.get().getUbigeo()), alpha) *
                         Math.pow(1.0 / tiempo, beta);
                 probabilidades.put(ubicacionDestino.get().getUbigeo(), probabilidad);
+
+    private Ubicacion seleccionarSiguienteUbicacion(Ubicacion ubicacionActual, Set<Ubicacion> ubicacionesVisitadas, Vehiculo vehiculo){
+        Map<String, Double> posiblesCiudades = distancias.get(ubicacionActual.getUbigeo());
+        double total = 0.0;
+
+        for(Ubicacion destino : caminos.get(ubicacionActual.getUbigeo())) {
+            if(!ubicacionesVisitadas.contains(destino)) {
+                double tiempo = calcularTiempoEntreUbicaciones(ubicacionActual, destino, vehiculo);
+               
+                double probabilidad = Math.pow(feromonas.get(ubicacionActual.getUbigeo()).get(destino.getUbigeo()), alpha)*
+                        Math.pow(tiempo, beta);
+                
+
                 total += probabilidad;
 
             }
@@ -295,8 +346,10 @@ public class AcoService {
 
 
 
+
     private double calcularTiempoEntreUbicaciones(Ubicacion origen, Ubicacion destino){
         double velocidadEntreUbicaciones = obtenerVelocidadEntreUbicaciones(origen, destino);
+
         double distancia = calcularDistanciaEntreUbicaciones(origen, destino);
         if(velocidadEntreUbicaciones==0)
             System.out.println("VELOCIDAD 0");
@@ -358,9 +411,32 @@ public class AcoService {
         return distanciaMinima;
     }
 
+
     public PlanTransporte ejecutar(List<Oficina> oficinas,
             HashMap<String, ArrayList<Ubicacion>> caminos, Pedido pedidoIngresado,
             List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos, List<Almacen> almacenes, int cantidadSolicitada) {
+
+    private void simularTiempo(LocalDateTime fechaInicio, LocalDateTime fechaFin, int escala) {
+        long duracionEnMinutos = java.time.Duration.between(fechaInicio, fechaFin).toMillis();
+
+        // Ajusta la duración según la escala
+        long tiempoEnMilisegundos = (duracionEnMinutos) / escala;
+
+        // Imprime información sobre el tramo actual
+        System.out.println("Simulando tramo de " + fechaInicio + " a " + fechaFin + " con escala x" + escala);
+
+        try {
+            Thread.sleep(tiempoEnMilisegundos);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+
+
+    public PlanTransporte ejecutar(List<Oficina> oficinas,HashMap<String, ArrayList<Ubicacion>> caminos, Pedido pedidoIngresado,
+                        List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos, List<Almacen> almacenes) {
+
         PlanTransporte planTransporteFinal = new PlanTransporte();
         ArrayList<Ubicacion> ubicacionesAlmacenes= new ArrayList<>();
         ArrayList<Tramo> mejorSolucion = new ArrayList<>();
@@ -373,20 +449,58 @@ public class AcoService {
         this.vehiculos = vehiculos;
         this.oficinas = oficinas;
         this.almacenes = almacenes;
+
         inicializarFeromonas();
         inicializarVelocidadesTramos();
         inicializarOficinasVehiculos();
         inicializarTiempos();
+
+
         LocalDateTime fechaMaximaEntrega = pedidoIngresado.getFechaRegistro().plusDays(pedidoIngresado.getOficinaDestino().getUbicacion().getRegion().getDiasLimite());
 
         for(int iteracion = 0 ; iteracion < numeroIteraciones ; iteracion++){
+
             for(int hormiga = 0; hormiga < numeroHormigas; hormiga++){
+
                 ArrayList<Tramo> solucion = generarTramosDestinoAlmacen(pedidoIngresado.getOficinaDestino().getUbicacion(), pedidoIngresado.getFechaRegistro(), fechaMaximaEntrega);
                 if (solucion != null && !solucion.isEmpty()) {
                     double costo = calcularCostoSolucion(solucion);
                     if(costo < mejorCosto){
                         mejorCosto = costo;
                         mejorSolucion = new ArrayList<>(solucion);
+
+
+                //System.out.println("-----------------ELECCION DEL MEJOR ALMACEN---------------------------------");
+                Almacen almacenSeleccionado = seleccionarAlmacenOrigen();
+                pedidoIngresado.setAlmacen(almacenSeleccionado);
+                pedidoRepository.save(pedidoIngresado);
+
+                ArrayList<Vehiculo> vehiculosSeleccionados = obtenerVehiculos(almacenSeleccionado, pedidoIngresado.getCantidadPaquetes());
+
+                if(vehiculosSeleccionados.isEmpty() || vehiculosSeleccionados==null)
+                    continue;
+                
+                for (Vehiculo vehiculo: vehiculosSeleccionados)
+                    mejoresCostosLocal.put(vehiculo, Double.MAX_VALUE);
+                
+                HashMap<Vehiculo, ArrayList<Tramo>> mejoresSolucionesLocal = new HashMap<>();
+
+                for (Vehiculo vehiculo : vehiculosSeleccionados) {
+
+                    ArrayList<Tramo> solucion = generarTramos(almacenSeleccionado.getUbicacion(), pedidoIngresado.getOficinaDestino().getUbicacion(), 
+                                                pedidoIngresado.getFechaRegistro(), fechaMaximaEntrega, vehiculo);
+
+                    if(solucion!=null && !solucion.isEmpty()) {
+
+                        double costo = calcularCostoSolucion(solucion);
+
+                        if (costo < mejoresCostosLocal.get(vehiculo)) {
+                            mejoresCostosLocal.put(vehiculo, costo);
+                            mejoresSolucionesLocal.put(vehiculo, new ArrayList<>(solucion));
+                        }
+
+                        actualizarFeromonasRuta(solucion, costo);
+
                     }
                     actualizarFeromonasRuta(solucion, costo);
                 }
@@ -410,12 +524,31 @@ public class AcoService {
 
     System.out.println("CANTIDAD DE PAQUETES:  " + pedidoIngresado.getCantidadPaquetes());
 
+
         System.out.println("--------------------------------------------------");
         //System.out.println("Pedido gestionado por un vehiculo de tipo " + vehiculo.getTipoVehiculo().getNombre());
         System.out.println("Pedido gestionado por un vehiculo con capacidad maxima " + pedidoIngresado.getCantidadPaquetes());
         System.out.println("Listado de Tramos Registrados:");
         for (Tramo tramo : mejorSolucion) {
             //System.out.println("ID Tramo: " + tramo.getId_tramo());
+
+        for (Tramo tramo : mejoresSolucionesGlobal.get(vehiculo)) {
+            //System.out.println("ID Tramo: " + tramo.getId_tramo());
+            System.out.println("--------------------------------------------------");
+            System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo());
+            System.out.println("Ubicación Destino - ID: " + tramo.getubicacionDestino().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionDestino().getUbigeo());
+            System.out.println("Distancia: " + tramo.getDistancia() + " km");
+            System.out.println("Velocidad: " + tramo.getVelocidad() + " km/h");
+            System.out.println("Fecha Inicio Recorrido: " + tramo.getFechaInicio().getDayOfMonth() + "/" + tramo.getFechaInicio().getMonthValue() + "/" + tramo.getFechaInicio().getYear() + " " + tramo.getFechaInicio().getHour() + "h:" + tramo.getFechaInicio().getMinute() + "m");
+            System.out.println("Fecha Fin Recorrido: " + tramo.getFechaFin().getDayOfMonth() + "/" + tramo.getFechaFin().getMonthValue() + "/" + tramo.getFechaFin().getYear() + " " + tramo.getFechaFin().getHour() + "h:" + tramo.getFechaFin().getMinute() + "m");
+            //System.out.println("--------------------------------------------------");
+            //System.out.println("Bloqueado: " + (tramo.isBloqueado() ? "Sí" : "No"));
+            // Simula el tiempo entre la fecha de inicio y la fecha de fin del tramo
+            simularTiempo(tramo.getFechaInicio(), tramo.getFechaFin(), escala); // Ajusta el valor 1000 para cambiar la escala
+            }
+
             System.out.println("--------------------------------------------------");
             System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
                     + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo());
@@ -444,6 +577,7 @@ public class AcoService {
     ArrayList<Vehiculo> obtenerVehiculos(int cantidadPaquetes){
         ArrayList<Vehiculo> vehiculosSeleccionados = new ArrayList<>();
         final int[] cantidadPorDespachar = {cantidadPaquetes};
+
         while(cantidadPorDespachar[0] > 0){
             Optional<Vehiculo> vehiculoDespacho = vehiculos.stream().filter(vehiculoDS ->  vehiculoDS.getTipoVehiculo().getCapacidadMaxima() >= cantidadPorDespachar[0]).min(Comparator.comparingDouble(Vehiculo::getCapacidadMaxima));
             if(vehiculoDespacho.isPresent()){
@@ -456,8 +590,29 @@ public class AcoService {
                 if(vehiculoMayorCapacidad.isPresent()){
                     vehiculosSeleccionados.add(vehiculoMayorCapacidad.get());
                     cantidadPorDespachar[0]-=vehiculoMayorCapacidad.get().getCapacidadMaxima();
+=======
+
+        ArrayList<Vehiculo> vehiculosOficina = vehiculos.stream().filter(vehiculoS -> vehiculoS.getUbicacionActual().getUbigeo().equals(almacenSeleccionado.getUbicacion().getUbigeo())).collect(Collectors.toCollection(ArrayList::new));
+        
+        if(vehiculosOficina!=null && !vehiculosOficina.isEmpty()){
+
+            while(cantidadPorDespachar[0] > 0){
+                Optional<Vehiculo> vehiculoDespacho = vehiculosOficina.stream().filter(vehiculoDS ->  vehiculoDS.getTipoVehiculo().getCapacidadMaxima() >= cantidadPorDespachar[0]).min(Comparator.comparingDouble(Vehiculo::getCapacidadMaxima));
+                if(vehiculoDespacho.isPresent()){
+                    vehiculosSeleccionados.add(vehiculoDespacho.get());
+                    cantidadPorDespachar[0]-=vehiculoDespacho.get().getCapacidadMaxima();
+                }
+                else{
+                    Optional<Vehiculo> vehiculoMayorCapacidad = vehiculosOficina.stream()
+                            .max(Comparator.comparingDouble(Vehiculo::getCapacidadMaxima));
+                    if(vehiculoMayorCapacidad.isPresent()){
+                        vehiculosSeleccionados.add(vehiculoMayorCapacidad.get());
+                        cantidadPorDespachar[0]-=vehiculoMayorCapacidad.get().getCapacidadMaxima();
+                    }
+
                 }
             }
+
         }
 
         return vehiculosSeleccionados;
@@ -556,34 +711,6 @@ public class AcoService {
         return  velocidad;
     }
 
-
-
-    // Métodos simulados para obtener la oficina y la ubicación (para pruebas):
-    private Oficina obtenerOficinaPorId(Long idOficina, List<Oficina> oficinas) {
-        for (Oficina oficina : oficinas) {
-            if (oficina.getId_oficina().equals(idOficina)) {
-                return oficina;
-            }
-        }
-        return null; // Devuelve null si no encuentra la oficina
-    }
-
-    private Ubicacion obtenerUbicacionPorId(Long idUbicacion) {
-        // Simula la obtención de la ubicación según su ID
-        // Falta obtener region por ID
-        // return new Ubicacion(idUbicacion, "Ubigeo 001", "Ciudad Prueba", 1L); // 1L
-        // es el ID de la región, cambia según tus datos
-        return null;
-    }
-
-    private Region obtenerRegionPorId(Long idRegion, List<Region> regiones) {
-        for (Region region : regiones) {
-            if (region.getIdRegion().equals(idRegion)) {
-                return region;
-            }
-        }
-        return null; // Devuelve null si no encuentra la oficina
-    }
 
     private void actualizarFeromonasRuta(List<Tramo> tramos, double mejorTiempo) {
         double feromonasDeposito = 1.0/mejorTiempo;

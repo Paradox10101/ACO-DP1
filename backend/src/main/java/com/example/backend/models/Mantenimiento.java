@@ -1,20 +1,9 @@
 package com.example.backend.models;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Entity
 @Table(name = "Mantenimiento")
@@ -41,8 +30,7 @@ public class Mantenimiento {
     public Mantenimiento() {
     }
 
-    public Mantenimiento(Long id_mantenimiento, TipoMantenimiento tipo, Date fechaProgramada, Time duracion) {
-        this.id_mantenimiento = id_mantenimiento;
+    public Mantenimiento(TipoMantenimiento tipo, Date fechaProgramada, Time duracion) {
         this.tipo = tipo;
         this.fechaProgramada = fechaProgramada;
         this.duracion = duracion;
