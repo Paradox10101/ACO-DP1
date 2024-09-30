@@ -58,15 +58,29 @@ public class BackendApplication {
         //PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones, ubicaciones);
 
         //LocalDateTime fechaSeleccionada = LocalDateTime.of(2024, 9, 30, 9, 50);//LocalDateTime.now().minusHours(3).minusMinutes(0);
-        LocalDateTime fechaSeleccionada = LocalDateTime.of(2024, 9, 2, 20, 58);
+        LocalDateTime fechaSeleccionada = LocalDateTime.of(2024, 9, 1, 1, 20);
         ArrayList<Pedido> pedidosFuturos = pedidos.stream()
                         .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaSeleccionada))
                         .collect(Collectors.toCollection(ArrayList::new));
 
-        System.out.println("PRIMERA VEZ");
+        
         ArrayList<PlanTransporte> planes = planTransporte.definirPlanesTransporte(pedidosFuturos.get(0), almacenes, caminos, regiones, ubicaciones, vehiculos);
+        System.out.println("-----------------DATOS DEL PEDIDO 1---------------------------------");
+        System.out.println("--------------------------------------------------");
+        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(0).getId_pedido());
+        
         ArrayList<PlanTransporte> planes1 = planTransporte.definirPlanesTransporte(pedidosFuturos.get(1), almacenes, caminos, regiones, ubicaciones, vehiculos);
+        System.out.println("-----------------DATOS DEL PEDIDO 2---------------------------------");
+        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(1).getId_pedido());
+        System.out.println("--------------------------------------------------");
+        
         ArrayList<PlanTransporte> planes2 = planTransporte.definirPlanesTransporte(pedidosFuturos.get(2), almacenes, caminos, regiones, ubicaciones, vehiculos);
+        System.out.println("-----------------DATOS DEL PEDIDO 3---------------------------------");
+        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(2).getId_pedido());
+        System.out.println("--------------------------------------------------");
+
+        System.out.println("DONE");
+
 
         
 /*
@@ -100,15 +114,7 @@ public class BackendApplication {
         PlanTransporte plan4 = planTransporte.definirPlanTransporte(pedidosFuturos.get(3), almacenes, caminos, regiones, ubicaciones, vehiculos);
 
         */
-        System.out.println("-----------------DATOS DEL PEDIDO 3---------------------------------");
-        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(2).getId_pedido());
-
         
-        System.out.println("-----------------DATOS DEL PEDIDO 4---------------------------------");
-        pedidoService.mostrarDatosDelPedido(pedidosFuturos.get(3).getId_pedido());
-
-
-        System.out.println("DONE");
 
         /*
         System.out.println("Listado de Oficinas:");
@@ -194,11 +200,6 @@ public class BackendApplication {
                 System.out.println("No se encontró una ruta válida para el pedido.");
             }
         }*/
-
-
-
-        System.out.println("Fin Pruebas");
-
 	}
     
 	@Bean
