@@ -37,6 +37,7 @@ public class AcoService {
     private List<Ubicacion> ubicaciones;
     private List<Vehiculo> vehiculos;
     private List<Almacen> almacenes;
+    private Map<String, Map<String, ArrayList<Bloqueo>>> bloqueosCaminos;
     private Map<String, ArrayList<Ubicacion>> caminos;
     private Map<String, Map<String, Double>> feromonas;
     private Map<String, Map<String, Double>> velocidadesTramos;
@@ -50,6 +51,7 @@ public class AcoService {
     private double alpha = 1.0;
     private double beta = 2.0;
     private Random random = new Random();
+    private int cantidadErroresBloqueo = 0;
 
     @Autowired
     private SystemMetricsAutoConfiguration systemMetricsAutoConfiguration;
@@ -70,6 +72,9 @@ public class AcoService {
         }
     }
 
+    private void inicializarBloqueos(List<Bloqueo>bloqueos){
+        bloqueosCaminos = bloqueos.stream().collect(Collectors.groupingBy(bloqueoS -> bloqueoS.getUbicacionOrigen().getUbigeo(), Collectors.groupingBy(bloqueoS2 -> bloqueoS2.getUbicacionDestino().getUbigeo(), Collectors.toCollection(ArrayList::new))));
+    }
 
     private void inicializarVelocidadesTramos(){
         velocidadesTramos = new HashMap<>();
@@ -114,7 +119,7 @@ public class AcoService {
 
 
 
-    public ArrayList<Tramo> generarTramosDestinoAlmacen(Ubicacion ubicacionDestino, float cantidadHorasLimite) {
+    public ArrayList<Tramo> generarTramosDestinoAlmacen(LocalDateTime fechaRegistro, Ubicacion ubicacionDestino, float cantidadHorasLimite) {
         ArrayList<Tramo> tramos = new ArrayList<>();
         ArrayList<String> ubigeosAlmacenes = new ArrayList<>();
         for(Almacen almacen: almacenes){
@@ -143,15 +148,21 @@ public class AcoService {
             ubicacionesVisitadas.add(ubicacionActual);
             ubicacionActual = siguienteUbicacion;
         }
-        /*
-        if(tramos.isEmpty()){
-            Tramo tramo = new Tramo(ubicacionActual, ubicacionActual);
-            tramo.setVelocidad((float)(obtenerVelocidadEntreUbicaciones(ubicacionActual, ubicacionActual)));
-            tramo.setDistancia((float)0);
-            tramo.setDuracion(0);
-            tramos.add(tramo);
+        Collections.reverse(tramos);
+        for(Tramo tramo : tramos) {
+            Ubicacion aux = tramo.getubicacionOrigen();
+            tramo.setubicacionOrigen(tramo.getubicacionDestino());
+            tramo.setubicacionDestino(aux);
+
         }
-        */
+        LocalDateTime fechaInicio = fechaRegistro;
+        LocalDateTime fechaFin = null;
+        for (Tramo tramo : tramos) {
+            tramo.setFechaInicio(fechaInicio);
+            fechaFin = tramo.getFechaInicio().plusHours((long)tramo.getDuracion()).plusMinutes((long)((tramo.getDuracion()-(int)tramo.getDuracion())*60));
+            tramo.setFechaFin(fechaFin);
+            fechaInicio = tramo.getFechaInicio().plusHours((long)tramo.getDuracion()+2).plusMinutes((long)((tramo.getDuracion()-(int)tramo.getDuracion())*60));;
+        }
         return tramos;
     }
 
@@ -342,7 +353,7 @@ public class AcoService {
     public PlanTransporte ejecutar (List < Oficina > oficinas,
             HashMap < String, ArrayList < Ubicacion >> caminos, Pedido pedidoIngresado,
             List < Region > regiones, List < Ubicacion > ubicaciones, List < Vehiculo > vehiculos, List < Almacen > almacenes,
-            int cantidadSolicitada){
+            int cantidadSolicitada, List<Bloqueo> bloqueosProgramados){
 
         PlanTransporte planTransporteFinal = new PlanTransporte();
         ArrayList<Ubicacion> ubicacionesAlmacenes = new ArrayList<>();
@@ -361,11 +372,12 @@ public class AcoService {
         inicializarVelocidadesTramos();
         inicializarOficinasVehiculos();
         inicializarTiempos();
+        inicializarBloqueos(bloqueosProgramados);
 
         for (int iteracion = 0; iteracion < numeroIteraciones; iteracion++) {
             for (int hormiga = 0; hormiga < numeroHormigas; hormiga++) {
-                ArrayList<Tramo> solucion = generarTramosDestinoAlmacen(pedidoIngresado.getOficinaDestino().getUbicacion(), pedidoIngresado.getOficinaDestino().getUbicacion().getRegion().getDiasLimite() * 24);
-                if (solucion != null && !solucion.isEmpty()) {
+                ArrayList<Tramo> solucion = generarTramosDestinoAlmacen(pedidoIngresado.getFechaRegistro(), pedidoIngresado.getOficinaDestino().getUbicacion(), pedidoIngresado.getOficinaDestino().getUbicacion().getRegion().getDiasLimite() * 24);
+                if (solucion != null && !solucion.isEmpty() && validarNoCruceConBloqueos(solucion)) {
                     double costo = calcularCostoSolucion(solucion);
                     if (costo < mejorCosto) {
                         mejorCosto = costo;
@@ -378,13 +390,14 @@ public class AcoService {
         }
         if(mejorSolucion==null)
             return null;
+        /*
         Collections.reverse(mejorSolucion);
         for(Tramo tramo : mejorSolucion) {
             Ubicacion aux = tramo.getubicacionOrigen();
             tramo.setubicacionOrigen(tramo.getubicacionDestino());
             tramo.setubicacionDestino(aux);
         }
-
+        */
 
         LocalDateTime fechaInicio = pedidoIngresado.getFechaRegistro();
         LocalDateTime fechaFin = null;
@@ -461,6 +474,7 @@ public class AcoService {
             //System.out.println("Bloqueado: " + (tramo.isBloqueado() ? "Sí" : "No"));
         }
         System.out.println("--------------------------------------------------");
+        System.out.println("LA CANTIDAD DE ERRORES ENCONTRADOS POR BLOQUEOS ES: " + cantidadErroresBloqueo);
         System.out.println();
         System.out.println();
         System.out.println();
@@ -468,6 +482,25 @@ public class AcoService {
         return planTransporteFinal;
     }
 
+    boolean validarNoCruceConBloqueos(ArrayList<Tramo> tramos){
+        if(bloqueosCaminos.isEmpty())
+            return true;
+        for (Tramo tramo : tramos) {
+            if(bloqueosCaminos.get(tramo.getubicacionOrigen().getUbigeo())==null || bloqueosCaminos.get(tramo.getubicacionOrigen().getUbigeo()).get(tramo.getubicacionDestino().getUbigeo())==null)
+                continue;
+            ArrayList<Bloqueo> bloqueosExistentes = bloqueosCaminos.get(tramo.getubicacionOrigen().getUbigeo()).get(tramo.getubicacionDestino().getUbigeo())
+                    .stream().filter(bloqueoS->
+                            (bloqueoS.getFechaInicio().isBefore(tramo.getFechaFin()) && bloqueoS.getFechaFin().isAfter(tramo.getFechaInicio())))
+                    .collect(Collectors.toCollection(ArrayList::new));
+            if(!bloqueosExistentes.isEmpty()){
+                //System.out.println("HAY UN BLOQUEO EN LA RUTA " + tramo.getubicacionOrigen().getUbigeo() + " => " + tramo.getubicacionDestino().getUbigeo());
+                cantidadErroresBloqueo++;
+                return false;
+            }
+
+        }
+        return true;
+    }
 
     Vehiculo obtenerVehiculo(int cantidadPaquetes, String ubigeoAlmacen){
         final int[] cantidadPorDespachar = {cantidadPaquetes};

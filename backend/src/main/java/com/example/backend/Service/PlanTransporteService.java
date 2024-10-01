@@ -47,7 +47,7 @@ public class PlanTransporteService {
 
     // Algo implementado en el service <----
     public PlanTransporte crearRuta(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos, 
-            List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos){
+            List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos, List<Bloqueo> bloqueos){
         
         
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
@@ -59,7 +59,7 @@ public class PlanTransporteService {
         //List<Tramo> tramos = new ArrayList<>();
         //List<Tramo> rutas = new ArrayList<>();
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
-        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes, pedido.getCantidadPaquetes());
+        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes, pedido.getCantidadPaquetes(), bloqueos);
 
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);
@@ -85,18 +85,22 @@ public class PlanTransporteService {
 
 
     public ArrayList<PlanTransporte> definirPlanesTransporte(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos,
-                                                List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos){
+                                                List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos, List<Bloqueo> bloqueos){
         ArrayList<PlanTransporte> planesTransporte = new ArrayList<>();
+        List<Bloqueo> bloqueosProgramados = bloqueos.stream().
+                filter(bloqueoS ->
+                        bloqueoS.getFechaInicio().isBefore(pedido.getFechaRegistro().plusHours(24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()))
+                        && bloqueoS.getFechaFin().isAfter(pedido.getFechaRegistro())).collect(Collectors.toList()); //obtener lista de bloqueos comprendidos en la fechas de planificacion
         int cantidadSolicitada = pedido.getCantidadPaquetes();
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
 
-
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
-        //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
 
+        //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
         while(cantidadSolicitada > 0) {
             List<Almacen> almacenesConVehiculosDisponibles = almacenes.stream().filter(almacenS -> almacenS.getCantidadVehiculos() > 0).collect(Collectors.toCollection(ArrayList::new));
             List<Vehiculo> vehiculosDisponibles = vehiculos.stream().filter(vehiculoS -> vehiculoS.getEstado() == EstadoVehiculo.Disponible).collect(Collectors.toCollection(ArrayList::new));
+
             if (almacenesConVehiculosDisponibles.isEmpty() || vehiculosDisponibles.isEmpty()) {
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
@@ -108,7 +112,7 @@ public class PlanTransporteService {
             }
 
 
-            PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculosDisponibles, almacenesConVehiculosDisponibles, cantidadSolicitada);
+            PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculosDisponibles, almacenesConVehiculosDisponibles, cantidadSolicitada, bloqueosProgramados);
             if(planOptimo.getVehiculo() == null){
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
