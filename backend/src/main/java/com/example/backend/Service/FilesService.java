@@ -42,6 +42,9 @@ public class FilesService {
     private PedidoService pedidoService;
 
     @Autowired
+    private BloqueoService bloqueoService;
+
+    @Autowired
     private UbicacionRepository ubicacionRepository;
 
     @Autowired
@@ -82,8 +85,30 @@ public class FilesService {
         }
 
         return pedidos;
-    }  
-    
+    }
+
+    public ArrayList<Bloqueo> cargarBloqueosDesdeDirectorio(String directorioPath, List<Ubicacion> ubicaciones) {
+
+        ArrayList<Bloqueo> bloqueos = new ArrayList<>();
+
+        File directorio = new File(directorioPath);
+        if (directorio.isDirectory()) {
+            File[] archivos = directorio.listFiles((dir, name) -> name.endsWith(".txt"));
+
+            if (archivos != null) {
+                for (File archivo : archivos) {
+                    System.out.println("Cargando archivo de bloqueos: " + archivo.getName());
+                    ArrayList<Bloqueo> bloqueosCargados = cargarBloqueosDesdeArchivo(archivo.getPath(), ubicaciones);
+                    bloqueos.addAll(bloqueosCargados);
+                }
+            }
+        } else {
+            System.out.println("El path especificado no es un directorio válido.");
+        }
+
+        return bloqueos;
+    }
+
     public ArrayList<Oficina> leerOficinasDesdeArchivo(String rutaArchivo) {
         ArrayList<Oficina> oficinas = new ArrayList<>();
 

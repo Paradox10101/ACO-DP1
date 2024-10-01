@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +47,7 @@ public class PlanTransporteService {
 
     // Algo implementado en el service <----
     public PlanTransporte crearRuta(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos, 
-            List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos){
+            List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos, List<Bloqueo> bloqueos){
         
         
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
@@ -62,7 +59,7 @@ public class PlanTransporteService {
         //List<Tramo> tramos = new ArrayList<>();
         //List<Tramo> rutas = new ArrayList<>();
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
-        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes, pedido.getCantidadPaquetes());
+        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes, pedido.getCantidadPaquetes(), bloqueos);
 
         if(planOptimo != null){
             pedido.setEstado(EstadoPedido.Registrado);
@@ -88,22 +85,34 @@ public class PlanTransporteService {
 
 
     public ArrayList<PlanTransporte> definirPlanesTransporte(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos,
-                                                List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos){
+                                                List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos, List<Bloqueo> bloqueos){
         ArrayList<PlanTransporte> planesTransporte = new ArrayList<>();
+        List<Bloqueo> bloqueosProgramados = bloqueos.stream().
+                filter(bloqueoS ->
+                        bloqueoS.getFechaInicio().isBefore(pedido.getFechaRegistro().plusHours(24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()))
+                        && bloqueoS.getFechaFin().isAfter(pedido.getFechaRegistro())).collect(Collectors.toList()); //obtener lista de bloqueos comprendidos en la fechas de planificacion
         int cantidadSolicitada = pedido.getCantidadPaquetes();
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
 
-
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
+
         //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
-        while(cantidadSolicitada > 0){
+        while(cantidadSolicitada > 0) {
             List<Almacen> almacenesConVehiculosDisponibles = almacenes.stream().filter(almacenS -> almacenS.getCantidadVehiculos() > 0).collect(Collectors.toCollection(ArrayList::new));
             List<Vehiculo> vehiculosDisponibles = vehiculos.stream().filter(vehiculoS -> vehiculoS.getEstado() == EstadoVehiculo.Disponible).collect(Collectors.toCollection(ArrayList::new));
-            if(almacenesConVehiculosDisponibles.isEmpty() || vehiculosDisponibles.isEmpty()){
+
+            if (almacenesConVehiculosDisponibles.isEmpty() || vehiculosDisponibles.isEmpty()) {
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
             }
-            PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculosDisponibles, almacenesConVehiculosDisponibles, cantidadSolicitada);
+
+            if (almacenesConVehiculosDisponibles.stream().anyMatch(almacenSel -> almacenSel.getUbicacion().getUbigeo().equals(pedido.getOficinaDestino().getUbicacion().getUbigeo()))){
+                System.out.println("No se genero plan de transporte porque el producto se solicito en el mismo lugar del almacen");
+                break;
+            }
+
+
+            PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculosDisponibles, almacenesConVehiculosDisponibles, cantidadSolicitada, bloqueosProgramados);
             if(planOptimo.getVehiculo() == null){
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
@@ -125,15 +134,17 @@ public class PlanTransporteService {
             return planesTransporte; // Retorna el plan de transporte encontrado
             //planViajeRepository.save(rutaOptima);
             //rutas.add(rutaOptima);
-        }else{
+        }
+        else{
             PlanTransporte rutaInvalida = new PlanTransporte(); // Crear una nueva instancia de PlanViaje
             rutaInvalida.setPedido(pedido); // Asignar el envío a la nueva instancia
             //rutas.add(rutaInvalida);
             System.out.println("No se encontró una ruta válida para el envío: " + pedido.getId_pedido());
-            return null;
         }
-
+        return null;
     }
+
+
 
     public void actualizarCambiosEnvio(List<Tramo> tramosRuta, Pedido pedido, List<Oficina> oficinas) {
         // Obtener la oficina de destino
@@ -168,5 +179,5 @@ public class PlanTransporteService {
             System.out.println("Error: La entrega no coincide con la oficina destino esperada.");
         }
     }
-
 }
+
