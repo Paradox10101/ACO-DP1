@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -96,13 +93,21 @@ public class PlanTransporteService {
 
         System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
         //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
-        while(cantidadSolicitada > 0){
+
+        while(cantidadSolicitada > 0) {
             List<Almacen> almacenesConVehiculosDisponibles = almacenes.stream().filter(almacenS -> almacenS.getCantidadVehiculos() > 0).collect(Collectors.toCollection(ArrayList::new));
             List<Vehiculo> vehiculosDisponibles = vehiculos.stream().filter(vehiculoS -> vehiculoS.getEstado() == EstadoVehiculo.Disponible).collect(Collectors.toCollection(ArrayList::new));
-            if(almacenesConVehiculosDisponibles.isEmpty() || vehiculosDisponibles.isEmpty()){
+            if (almacenesConVehiculosDisponibles.isEmpty() || vehiculosDisponibles.isEmpty()) {
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
             }
+
+            if (almacenesConVehiculosDisponibles.stream().anyMatch(almacenSel -> almacenSel.getUbicacion().getUbigeo().equals(pedido.getOficinaDestino().getUbicacion().getUbigeo()))){
+                System.out.println("No se genero plan de transporte porque el producto se solicito en el mismo lugar del almacen");
+                break;
+            }
+
+
             PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculosDisponibles, almacenesConVehiculosDisponibles, cantidadSolicitada);
             if(planOptimo.getVehiculo() == null){
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
@@ -125,15 +130,17 @@ public class PlanTransporteService {
             return planesTransporte; // Retorna el plan de transporte encontrado
             //planViajeRepository.save(rutaOptima);
             //rutas.add(rutaOptima);
-        }else{
+        }
+        else{
             PlanTransporte rutaInvalida = new PlanTransporte(); // Crear una nueva instancia de PlanViaje
             rutaInvalida.setPedido(pedido); // Asignar el envío a la nueva instancia
             //rutas.add(rutaInvalida);
             System.out.println("No se encontró una ruta válida para el envío: " + pedido.getId_pedido());
-            return null;
         }
-
+        return null;
     }
+
+
 
     public void actualizarCambiosEnvio(List<Tramo> tramosRuta, Pedido pedido, List<Oficina> oficinas) {
         // Obtener la oficina de destino
@@ -168,5 +175,5 @@ public class PlanTransporteService {
             System.out.println("Error: La entrega no coincide con la oficina destino esperada.");
         }
     }
-
 }
+

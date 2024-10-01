@@ -58,7 +58,11 @@ public class BackendApplication {
         //PlanTransporte plan = planTransporte.crearRuta(pedidos.get(0), almacenes, caminos, regiones, ubicaciones);
 
         //LocalDateTime fechaSeleccionada = LocalDateTime.of(2024, 9, 30, 9, 50);//LocalDateTime.now().minusHours(3).minusMinutes(0);
-        LocalDateTime fechaSeleccionada = LocalDateTime.of(2024, 9, 1, 1, 20);
+
+        LocalDateTime fechaSeleccionada = LocalDateTime.of(2024, 9, 1, 1, 16);
+
+        //LocalDateTime fechaSeleccionada = LocalDateTime.of(2024, 9, 1, 1, 20);
+
         ArrayList<Pedido> pedidosFuturos = pedidos.stream()
                         .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaSeleccionada))
                         .collect(Collectors.toCollection(ArrayList::new));

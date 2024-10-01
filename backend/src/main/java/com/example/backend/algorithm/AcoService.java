@@ -43,11 +43,11 @@ public class AcoService {
     private Map<String, List<Vehiculo>> oficinaVehiculos = new HashMap<>();
     private Map<String, Map<String, Double>> tiempos;
 
-    private int numeroHormigas = 150;
-    private int numeroIteraciones = 150;
+    private int numeroHormigas = 100;
+    private int numeroIteraciones = 100;
     private double tasaEvaporacion = 0.5;
     private double feromonaInicial = 1.0;
-    private double alpha = 1.5;
+    private double alpha = 1.0;
     private double beta = 2.0;
     private Random random = new Random();
 
@@ -114,23 +114,27 @@ public class AcoService {
 
 
 
-    public ArrayList<Tramo> generarTramosDestinoAlmacen(Ubicacion ubicacionDestino, LocalDateTime fechaInicioPedido, LocalDateTime fechaLimite) {
+    public ArrayList<Tramo> generarTramosDestinoAlmacen(Ubicacion ubicacionDestino, float cantidadHorasLimite) {
         ArrayList<Tramo> tramos = new ArrayList<>();
         ArrayList<String> ubigeosAlmacenes = new ArrayList<>();
         for(Almacen almacen: almacenes){
             ubigeosAlmacenes.add(almacen.getUbicacion().getUbigeo());
         }
         Set<Ubicacion> ubicacionesVisitadas = new HashSet<>();
-        LocalDateTime fechaInicio = fechaInicioPedido;
-        LocalDateTime fechaFin;
         Ubicacion ubicacionActual = ubicacionDestino;
         ubicacionesVisitadas.add(ubicacionActual);
-
+        float duracionTramos = 0;
         while(true) {
             if(ubigeosAlmacenes.contains(ubicacionActual.getUbigeo())){
                 break;
             }
+
+            if(duracionTramos - 2 > cantidadHorasLimite){
+                return null;
+            }
+
             // Verificar si existe un tramo directo desde la ubicación actual a un almacén
+            /*
             Optional<Ubicacion> tramoDirecto = caminos.get(ubicacionActual.getUbigeo()).stream()
                                     .filter(ubicacion -> ubigeosAlmacenes.contains(ubicacion.getUbigeo()))
                                     .findFirst();
@@ -154,32 +158,31 @@ public class AcoService {
                 tramos.add(tramo);
                 break; // Terminar la búsqueda porque ya encontramos un tramo directo al almacén
             }
+            */
 
             Ubicacion siguienteUbicacion = seleccionarSiguienteUbicacion(ubicacionActual, ubicacionesVisitadas);
             if(siguienteUbicacion == null) return null;
             double tiempoTranscurrido = tiempos.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo());
-            int horas = (int)tiempoTranscurrido;
-            int minutos = (int)((tiempoTranscurrido - horas)*60);
-            fechaFin = fechaInicio.plusHours(horas).plusMinutes(minutos);
-
-            if(fechaFin.isAfter(fechaLimite)){
-                return null;
-            }
-
+            duracionTramos += (tiempoTranscurrido + 2);
             Tramo tramo = new Tramo(ubicacionActual, siguienteUbicacion);
             tramo.setVelocidad((float)(1.0*velocidadesTramos.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo())));
             tramo.setDistancia((float)calcularDistanciaEntreUbicaciones(ubicacionActual, siguienteUbicacion));
             tramo.setDuracion((float) tiempoTranscurrido);
-            //tramo.setFechaInicio(fechaInicio);
-            //tramo.setFechaFin(fechaFin);
-            ubicacionActual = siguienteUbicacion;
-            fechaInicio = fechaFin.plusHours(2);
             tramos.add(tramo);
             ubicacionesVisitadas.add(ubicacionActual);
+            ubicacionActual = siguienteUbicacion;
         }
+        /*
+        if(tramos.isEmpty()){
+            Tramo tramo = new Tramo(ubicacionActual, ubicacionActual);
+            tramo.setVelocidad((float)(obtenerVelocidadEntreUbicaciones(ubicacionActual, ubicacionActual)));
+            tramo.setDistancia((float)0);
+            tramo.setDuracion(0);
+            tramos.add(tramo);
+        }
+        */
         return tramos;
     }
-
 
 
     private Ubicacion seleccionarSiguienteUbicacion(Ubicacion ubicacionActual, Set<Ubicacion> ubicacionesVisitadas){
@@ -388,11 +391,9 @@ public class AcoService {
         inicializarOficinasVehiculos();
         inicializarTiempos();
 
-        LocalDateTime fechaMaximaEntrega = pedidoIngresado.getFechaRegistro().plusDays(pedidoIngresado.getOficinaDestino().getUbicacion().getRegion().getDiasLimite());
-
         for (int iteracion = 0; iteracion < numeroIteraciones; iteracion++) {
             for (int hormiga = 0; hormiga < numeroHormigas; hormiga++) {
-                ArrayList<Tramo> solucion = generarTramosDestinoAlmacen(pedidoIngresado.getOficinaDestino().getUbicacion(), pedidoIngresado.getFechaRegistro(), fechaMaximaEntrega);
+                ArrayList<Tramo> solucion = generarTramosDestinoAlmacen(pedidoIngresado.getOficinaDestino().getUbicacion(), pedidoIngresado.getOficinaDestino().getUbicacion().getRegion().getDiasLimite() * 24);
                 if (solucion != null && !solucion.isEmpty()) {
                     double costo = calcularCostoSolucion(solucion);
                     if (costo < mejorCosto) {
@@ -404,7 +405,8 @@ public class AcoService {
             }
             evaporarFeromonas();
         }
-
+        if(mejorSolucion==null)
+            return null;
         Collections.reverse(mejorSolucion);
         for(Tramo tramo : mejorSolucion) {
             Ubicacion aux = tramo.getubicacionOrigen();
@@ -417,9 +419,9 @@ public class AcoService {
         LocalDateTime fechaFin = null;
         for (Tramo tramo : mejorSolucion) {
             tramo.setFechaInicio(fechaInicio);
-            fechaFin = fechaInicio.plusHours(2 + (long) tramo.getDuracion()).plusMinutes((long)((tramo.getDuracion() - (int) tramo.getDuracion()) * 60));
+            fechaFin = tramo.getFechaInicio().plusHours((long)tramo.getDuracion()).plusMinutes((long)((tramo.getDuracion()-(int)tramo.getDuracion())*60));
             tramo.setFechaFin(fechaFin);
-            fechaInicio = fechaFin;
+            fechaInicio = tramo.getFechaInicio().plusHours((long)tramo.getDuracion()+2).plusMinutes((long)((tramo.getDuracion()-(int)tramo.getDuracion())*60));;
 
         }
 
@@ -438,6 +440,31 @@ public class AcoService {
 
 
         System.out.println("CANTIDAD DE PAQUETES:  " + pedidoIngresado.getCantidadPaquetes());
+        System.out.println("FECHA DE REGISTRO:  " +
+                pedidoIngresado.getFechaRegistro().getDayOfMonth()+
+                "/"+
+                pedidoIngresado.getFechaRegistro().getMonthValue()+
+                "/"+
+                pedidoIngresado.getFechaRegistro().getYear()+
+                " "+
+                pedidoIngresado.getFechaRegistro().getHour()+
+                "h:"+
+                pedidoIngresado.getFechaRegistro().getMinute()+
+                "m"
+                );
+        System.out.println("FECHA LIMITE DE ENTREGA:  " +
+                pedidoIngresado.getFechaRegistro().plusHours((long)24*pedidoIngresado.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()).getDayOfMonth()+
+                "/"+
+                pedidoIngresado.getFechaRegistro().plusHours((long)24*pedidoIngresado.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()).getMonthValue()+
+                "/"+
+                pedidoIngresado.getFechaRegistro().plusHours((long)24*pedidoIngresado.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()).getYear()+
+                " "+
+                pedidoIngresado.getFechaRegistro().plusHours((long)24*pedidoIngresado.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()).getHour()+
+                "h:"+
+                pedidoIngresado.getFechaRegistro().plusHours((long)24*pedidoIngresado.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()).getMinute()+
+                "m"
+
+        );
         System.out.println("--------------------------------------------------");
         System.out.println("Pedido gestionado por un vehiculo de tipo " + planTransporteFinal.getVehiculo().getTipoVehiculo().getNombre());
         System.out.println("Cantidad de paquetes transportados " + planTransporteFinal.getVehiculo().getCapacidadUtilizada());
@@ -523,7 +550,7 @@ public class AcoService {
         for (Tramo tramo : tramos) {
             costo += tramo.getDuracion() + 2;
         }
-        return costo;
+        return costo - 2;
     }
 
 
