@@ -64,6 +64,8 @@ public class BackendApplication {
                         .collect(Collectors.toCollection(ArrayList::new));
 
         
+
+
         ArrayList<PlanTransporte> planes = planTransporte.definirPlanesTransporte(pedidosFuturos.get(0), almacenes, caminos, regiones, ubicaciones, vehiculos);
         System.out.println("-----------------DATOS DEL PEDIDO 1---------------------------------");
         System.out.println("--------------------------------------------------");

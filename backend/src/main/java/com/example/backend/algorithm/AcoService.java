@@ -444,7 +444,22 @@ public class AcoService {
         System.out.println("Pedido gestionado por un vehiculo con capacidad maxima " + planTransporteFinal.getVehiculo().getCapacidadMaxima());
         System.out.println("Listado de Tramos Registrados:");
         for (Tramo tramo : mejorSolucion) {
-            //System.out.println("ID Tramo: " + tramo.getId_tramo());
+            
+            // Verificar la posibilidad de una avería durante el trayecto del tramo
+            if (Math.random() < 0.9) { // Supongamos una probabilidad del 10% de avería para cada tramo
+                TipoAveria tipoAveria = TipoAveria.values()[new Random().nextInt(TipoAveria.values().length)];
+                vehiculoSeleccionado.registrarAveria(tipoAveria, LocalDateTime.now());
+                System.out.println("Vehículo " + vehiculoSeleccionado.getCodigo() + " ha sufrido una avería de tipo: " + tipoAveria);
+                
+                // Verificar si el vehículo está inoperativo y si debe cambiar el tramo
+                if (!vehiculoSeleccionado.verificarDisponibilidad(tramo.getFechaFin())) {
+                    System.out.println("Vehículo inoperativo. Tramo interrumpido.");
+                    break; // Interrumpir el proceso si el vehículo no puede continuar
+                }
+            }
+            tramo.setVehiculo(vehiculoSeleccionado);
+            tramo.setCantidadPaquetes(cantidadSolicitada);
+
             System.out.println("--------------------------------------------------");
             System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
                     + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo());
@@ -474,9 +489,14 @@ public class AcoService {
         final int[] cantidadPorDespachar = {cantidadPaquetes};
         Optional<Almacen> almacenSeleccionado = almacenes.stream().filter(almacenS -> almacenS.getUbicacion().getUbigeo().equals(ubigeoAlmacen)).findFirst();
         if(!almacenSeleccionado.isPresent())return null;
+        
         Optional<Vehiculo> vehiculoDespacho = vehiculos.stream()
-                .filter(vehiculoDS ->  vehiculoDS.getTipoVehiculo().getCapacidadMaxima() >= cantidadPorDespachar[0] && vehiculoDS.getUbicacionActual().getUbigeo().equals(ubigeoAlmacen))
+                .filter(vehiculoDS ->  vehiculoDS.getTipoVehiculo().getCapacidadMaxima() >= cantidadPorDespachar[0] 
+                && vehiculoDS.getUbicacionActual().getUbigeo().equals(ubigeoAlmacen)
+                && vehiculoDS.isDisponible()
+                    && vehiculoDS.verificarDisponibilidad(LocalDateTime.now())) // Verifica si está disponible y libre de averías)
                 .min(Comparator.comparing(vehiculoDS -> vehiculoDS.getTipoVehiculo().getCapacidadMaxima()));
+        
         if(vehiculoDespacho.isPresent()){
             vehiculoDespacho.get().setEstado(EstadoVehiculo.EnRuta);
             vehiculoDespacho.get().setAlmacen(null);
@@ -486,8 +506,12 @@ public class AcoService {
         }
         else{
             Optional<Vehiculo> vehiculoMayorCapacidad = vehiculos.stream()
-                    .filter(vehiculoDS ->  vehiculoDS.getTipoVehiculo().getCapacidadMaxima() < cantidadPorDespachar[0] && vehiculoDS.getUbicacionActual().getUbigeo().equals(ubigeoAlmacen))
+                    .filter(vehiculoDS ->  vehiculoDS.getTipoVehiculo().getCapacidadMaxima() < cantidadPorDespachar[0] 
+                    && vehiculoDS.getUbicacionActual().getUbigeo().equals(ubigeoAlmacen)
+                    && vehiculoDS.isDisponible()
+                        && vehiculoDS.verificarDisponibilidad(LocalDateTime.now())) //Aqui se verifica si los vehiculos estan disponibles y si es que es para el momento actual
                     .max(Comparator.comparing(vehiculoDS -> vehiculoDS.getTipoVehiculo().getCapacidadMaxima()));
+            
             if(vehiculoMayorCapacidad.isPresent()){
                 vehiculoMayorCapacidad.get().setEstado(EstadoVehiculo.EnRuta);
                 vehiculoMayorCapacidad.get().setAlmacen(null);
