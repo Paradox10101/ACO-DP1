@@ -486,7 +486,7 @@ public class AcoService {
         for (Tramo tramo : mejorSolucion) {
             
             // Verificar la posibilidad de una avería durante el trayecto del tramo
-            if (Math.random() < 0.9) { // Supongamos una probabilidad del 10% de avería para cada tramo
+            if (Math.random() < 0.1) { // Supongamos una probabilidad del 10% de avería para cada tramo
                 TipoAveria tipoAveria = TipoAveria.values()[new Random().nextInt(TipoAveria.values().length)];
                 vehiculoSeleccionado.registrarAveria(tipoAveria, fechaInicio);
 
@@ -501,9 +501,17 @@ public class AcoService {
                         System.out.println("Cargando paquetes al nuevo vehículo " + nuevoVehiculo.getCodigo());
                         nuevoVehiculo.setCapacidadUtilizada(tramo.getCantidadPaquetes());
                         nuevoVehiculo.setEstado(EstadoVehiculo.EnRuta);
-                        tramo.setVehiculo(nuevoVehiculo);
+
+                        // Actualizar todos los tramos restantes con el nuevo vehículo
+                        for (Tramo t : mejorSolucion) {
+                            if (t.getFechaInicio().isAfter(tramo.getFechaInicio())) {
+                                t.setVehiculo(nuevoVehiculo);
+                            }
+                        }
+
                         vehiculoSeleccionado.setEstado(EstadoVehiculo.Averiado); // Marcar el vehículo anterior como
                                                                                  // averiado
+                        vehiculoSeleccionado = nuevoVehiculo; // Actualizar el vehículo seleccionado al nuevo vehículo
                     } else {
                         System.out.println("No hay vehículos disponibles para continuar la ruta.");
                         return null;
