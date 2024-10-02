@@ -205,31 +205,36 @@ public class Vehiculo {
 
         switch (tipoAveria) {
             case T1:
-                // Avería tipo 1: Retardo de unas horas
-                fechaFin = fechaInicio.plusHours(4); // Asume un retardo de 4 horas
+                // Avería moderada: el camión se detiene por 4 horas pero luego puede continuar
+                fechaFin = fechaInicio.plusHours(4);
                 break;
             case T2:
-                // Avería tipo 2: Inoperativo durante un turno (8 horas)
-                fechaFin = fechaInicio.plusHours(8);
-                this.disponible = false; // El vehículo no estará disponible
+                // Avería fuerte: no puede continuar y se replanifica dentro de 24 horas
+                fechaFin = fechaInicio.plusHours(36);
+                this.disponible = false; // El camión no estará disponible por 36 horas
                 break;
             case T3:
-                // Avería tipo 3: Inoperativo durante varios días (2 o 3 días)
-                fechaFin = fechaInicio.plusDays(2); // Ajustar según el tipo de daño
-                this.disponible = false; // El vehículo no estará disponible
+                // Avería siniestro: no puede continuar, reaparece en 36 horas pero operativo en 72
+                fechaFin = fechaInicio.plusHours(72);
+                this.disponible = false; // El camión no estará disponible por 72 horas
                 break;
             default:
                 fechaFin = fechaInicio;
         }
-
         Averia nuevaAveria = new Averia(tipoAveria, fechaInicio, fechaFin, this);
         this.averias.add(nuevaAveria);
+
+        // Iniciar replanificación si es necesario
+        if (tipoAveria == TipoAveria.T2 || tipoAveria == TipoAveria.T3) {
+            this.estado = EstadoVehiculo.Averiado;
+        }
     }
 
     // Método para verificar si el vehículo está disponible
     public boolean verificarDisponibilidad(LocalDateTime fechaActual) {
         for (Averia averia : averias) {
             if (fechaActual.isAfter(averia.getFechaInicio()) && fechaActual.isBefore(averia.getFechaFin())) {
+                this.disponible = false;
                 return false;
             }
         }

@@ -488,13 +488,26 @@ public class AcoService {
             // Verificar la posibilidad de una avería durante el trayecto del tramo
             if (Math.random() < 0.9) { // Supongamos una probabilidad del 10% de avería para cada tramo
                 TipoAveria tipoAveria = TipoAveria.values()[new Random().nextInt(TipoAveria.values().length)];
-                vehiculoSeleccionado.registrarAveria(tipoAveria, LocalDateTime.now());
-                System.out.println("Vehículo " + vehiculoSeleccionado.getCodigo() + " ha sufrido una avería de tipo: " + tipoAveria);
-                
-                // Verificar si el vehículo está inoperativo y si debe cambiar el tramo
-                if (!vehiculoSeleccionado.verificarDisponibilidad(tramo.getFechaFin())) {
-                    System.out.println("Vehículo inoperativo. Tramo interrumpido.");
-                    break; // Interrumpir el proceso si el vehículo no puede continuar
+                vehiculoSeleccionado.registrarAveria(tipoAveria, fechaInicio);
+
+                System.out.println("Vehículo " + vehiculoSeleccionado.getCodigo() + " ha sufrido una avería de tipo: "
+                        + tipoAveria);
+
+                if (tipoAveria == TipoAveria.T2 || tipoAveria == TipoAveria.T3) {
+                    // Replanificar la carga
+                    Vehiculo nuevoVehiculo = obtenerVehiculo(tramo.getCantidadPaquetes(),
+                            vehiculoSeleccionado.getUbicacionActual().getUbigeo());
+                    if (nuevoVehiculo != null) {
+                        System.out.println("Cargando paquetes al nuevo vehículo " + nuevoVehiculo.getCodigo());
+                        nuevoVehiculo.setCapacidadUtilizada(tramo.getCantidadPaquetes());
+                        nuevoVehiculo.setEstado(EstadoVehiculo.EnRuta);
+                        tramo.setVehiculo(nuevoVehiculo);
+                        vehiculoSeleccionado.setEstado(EstadoVehiculo.Averiado); // Marcar el vehículo anterior como
+                                                                                 // averiado
+                    } else {
+                        System.out.println("No hay vehículos disponibles para continuar la ruta.");
+                        return null;
+                    }
                 }
             }
             tramo.setVehiculo(vehiculoSeleccionado);
