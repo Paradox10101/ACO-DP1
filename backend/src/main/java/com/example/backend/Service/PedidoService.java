@@ -48,6 +48,7 @@ public class PedidoService {
     public void mostrarDatosDelPedido(Long id){
         Optional<Pedido> pedido = pedidoRepository.findById(id);
         if(pedido.isPresent()){
+
             System.out.println("Datos del pedido: ");
             System.out.println("--------------------");
             System.out.println("Datos de la ruta del pedido: ");
