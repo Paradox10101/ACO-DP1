@@ -42,6 +42,16 @@ public class Ubicacion {
         return departamento;
     }
 
+    public Ubicacion(Ubicacion ubicacion) {
+        this.id_ubicacion = ubicacion.id_ubicacion;
+        this.ubigeo = ubicacion.ubigeo;
+        this.region = new Region(ubicacion.getRegion());
+        this.latitud = ubicacion.latitud;
+        this.longitud = ubicacion.longitud;
+        this.departamento = ubicacion.departamento;
+        this.provincia = ubicacion.provincia;
+    }
+
     public void setDepartamento(String departamento) {
         this.departamento = departamento;
     }
@@ -58,6 +68,8 @@ public class Ubicacion {
     public Ubicacion(){
 
     }
+
+
 
     public Ubicacion(Long id_ubicacion, String ubigeo, String ciudad, Region region){
 
