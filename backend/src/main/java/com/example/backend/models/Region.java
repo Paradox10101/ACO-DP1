@@ -30,6 +30,13 @@ public class Region {
 
     }
 
+    public Region(Region region) {
+        this.id_region = region.id_region;
+        this.nombre = region.nombre;
+        this.diasLimite = region.diasLimite;
+        this.velocidad = region.velocidad;
+    }
+
     public Region(String nombre, int diasLimite) {
 
         this.nombre = nombre;

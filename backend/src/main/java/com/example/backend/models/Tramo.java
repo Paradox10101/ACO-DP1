@@ -56,7 +56,8 @@ public class Tramo {
     @Column(name = "duracion")
     private float duracion;
 
-
+    public Tramo() {
+    }
 
     public Tramo(Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino) {
         this.ubicacionOrigen = ubicacionOrigen;
