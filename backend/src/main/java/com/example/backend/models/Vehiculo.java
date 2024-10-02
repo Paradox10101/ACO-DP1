@@ -4,7 +4,7 @@ package com.example.backend.models;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-
+import java.util.*;
 @Entity
 @Table(name = "Vehiculo")
 public class Vehiculo {
@@ -49,8 +49,15 @@ public class Vehiculo {
     @Column(name = "capacidad_utilizada")
     private int capacidadUtilizada;
 
-    public Vehiculo() {
+    @OneToMany(mappedBy = "vehiculo")
+    private List<Averia> averias; // Lista para almacenar las averías del vehículo
 
+    @Column(name = "disponible")
+    private boolean disponible;
+
+    public Vehiculo() {
+        this.disponible = true;
+        this.averias = new ArrayList<>();
     }
 
     public Vehiculo(Long id_vehiculo, PlanTransporte planTransporte, Almacen almacen, LocalDateTime fechaSalida,
@@ -189,5 +196,59 @@ public class Vehiculo {
 
     public void setCapacidadUtilizada(int capacidadUtilizada) {
         this.capacidadUtilizada = capacidadUtilizada;
+    }
+
+    // Método para agregar una avería al vehículo
+    public void registrarAveria(TipoAveria tipoAveria, LocalDateTime fechaInicio) {
+        //Averia nuevaAveria = new Averia(tipoAveria, fechaInicio, fechaInicio.plusDays(2), this);
+        LocalDateTime fechaFin;
+
+        switch (tipoAveria) {
+            case T1:
+                // Avería moderada: el camión se detiene por 4 horas pero luego puede continuar
+                fechaFin = fechaInicio.plusHours(4);
+                break;
+            case T2:
+                // Avería fuerte: no puede continuar y se replanifica dentro de 24 horas
+                fechaFin = fechaInicio.plusHours(36);
+                this.disponible = false; // El camión no estará disponible por 36 horas
+                break;
+            case T3:
+                // Avería siniestro: no puede continuar, reaparece en 36 horas pero operativo en 72
+                fechaFin = fechaInicio.plusHours(72);
+                this.disponible = false; // El camión no estará disponible por 72 horas
+                break;
+            default:
+                fechaFin = fechaInicio;
+        }
+        Averia nuevaAveria = new Averia(tipoAveria, fechaInicio, fechaFin, this);
+        this.averias.add(nuevaAveria);
+
+        // Iniciar replanificación si es necesario
+        if (tipoAveria == TipoAveria.T2 || tipoAveria == TipoAveria.T3) {
+            this.estado = EstadoVehiculo.Averiado;
+        }
+    }
+
+    // Método para verificar si el vehículo está disponible
+    public boolean verificarDisponibilidad(LocalDateTime fechaActual) {
+        for (Averia averia : averias) {
+            if (fechaActual.isAfter(averia.getFechaInicio()) && fechaActual.isBefore(averia.getFechaFin())) {
+                this.disponible = false;
+                return false;
+            }
+        }
+
+        // Si no tiene averías activas, se marca como disponible
+        this.disponible = true;
+        return this.disponible;
+    }    
+
+    public boolean isDisponible() {
+        return disponible;
+    }
+
+    public List<Averia> getAverias() {
+        return averias;
     }
 }

@@ -113,7 +113,7 @@ public class PlanTransporteService {
 
 
             PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculosDisponibles, almacenesConVehiculosDisponibles, cantidadSolicitada, bloqueosProgramados);
-            if(planOptimo.getVehiculo() == null){
+            if(planOptimo == null || planOptimo.getVehiculo() == null){
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
             }
