@@ -513,8 +513,7 @@ public class AcoService {
                             }
                         }
 
-                        vehiculoSeleccionado.setEstado(EstadoVehiculo.Averiado); // Marcar el vehículo anterior como
-                                                                                 // averiado
+                        vehiculoSeleccionado.setEstado(EstadoVehiculo.Averiado); // Marcar el vehículo anterior como averiado
                         vehiculoSeleccionado = nuevoVehiculo; // Actualizar el vehículo seleccionado al nuevo vehículo
                     } else {
                         System.out.println("No hay vehículos disponibles para continuar la ruta.");
@@ -535,6 +534,15 @@ public class AcoService {
                     }
 
                 }
+            }
+            
+            // Verificar si la fecha de fin del tramo excede la fecha de entrega estimada
+            if (tramo.getFechaFin().isAfter(pedidoIngresado.getFechaEntregaEstimada())) {
+                System.out.println("¡Colapso logístico! La fecha de entrega ha sido excedida. Fecha límite: "
+                        + pedidoIngresado.getFechaEntregaEstimada() +
+                        ", Fecha fin del tramo: " + tramo.getFechaFin());
+                // Finalizar la ejecución
+                return null;
             }
 
             tramo.setVehiculo(vehiculoSeleccionado);
