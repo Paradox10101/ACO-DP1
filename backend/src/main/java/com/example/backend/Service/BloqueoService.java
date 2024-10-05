@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +20,12 @@ public class BloqueoService {
     public List<Bloqueo> obtenerTodos() {
         return bloqueoRepository.findAll();
     }
+
+    public List<Bloqueo> obtenerBloqueosEntreFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+        List<Bloqueo> bloqueosEncontrados = bloqueoRepository.encontrarBloqueosEntreFechas(fechaInicio, fechaFin);
+        return bloqueosEncontrados;
+    }
+
 
     public Optional<Bloqueo> obtenerPorId(Long id) {
         return bloqueoRepository.findById(id);

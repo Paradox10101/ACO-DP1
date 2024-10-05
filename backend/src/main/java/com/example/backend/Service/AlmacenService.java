@@ -5,8 +5,10 @@ import com.example.backend.Repository.AlmacenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AlmacenService {
@@ -17,6 +19,11 @@ public class AlmacenService {
     public List<Almacen> obtenerTodos() {
         return almacenRepository.findAll();
     }
+
+    public List<Almacen> obtenerAlmacenesConVehiculosDisponibles() {
+        return almacenRepository.findAlmacenesConVehiculosDisponibles();
+    }
+
 
     public Optional<Almacen> obtenerPorId(Long id) {
         return almacenRepository.findById(id);

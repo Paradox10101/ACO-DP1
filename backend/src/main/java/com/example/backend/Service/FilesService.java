@@ -64,6 +64,8 @@ public class FilesService {
     
     @Autowired
     private AlmacenRepository   almacenRepository;
+    @Autowired
+    private MantenimientoService mantenimientoService;
 
     public ArrayList<Pedido> cargarPedidosDesdeDirectorio(String directorioPath, List<Oficina> oficinas, List<Ubicacion> ubicaciones, List<Cliente> clientes, List<Paquete> paquetes) {
         
@@ -317,9 +319,7 @@ public class FilesService {
                         mantenimiento.setFechaProgramada(fecha);
                         mantenimientoRepository.save(mantenimiento);
                         mantenimientos.add(mantenimiento);
-
                     }
-
                 }
             }
 
@@ -330,6 +330,30 @@ public class FilesService {
         }
         return mantenimientos;
     }
+
+    public ArrayList<Mantenimiento> cargarMantenimientosDesdeDirectorio(String directorioPath, List<Vehiculo> vehiculos) {
+
+        ArrayList<Mantenimiento> mantenimientos = new ArrayList<>();
+
+        File directorio = new File(directorioPath);
+        if (directorio.isDirectory()) {
+            File[] archivos = directorio.listFiles((dir, name) -> name.endsWith(".txt"));
+
+            if (archivos != null) {
+                for (File archivo : archivos) {
+                    System.out.println("Cargando archivo de mantenimiento: " + archivo.getName());
+                    ArrayList<Mantenimiento> mantenimientosCargados = cargarMantenimientosDesdeArchivo(archivo.getPath(), vehiculos);
+                    mantenimientos.addAll(mantenimientosCargados);
+                }
+            }
+        } else {
+            System.out.println("El path especificado no es un directorio válido.");
+        }
+
+        return mantenimientos;
+    }
+
+
 
     public HashMap<String, ArrayList<Ubicacion>> cargarCaminosDesdeArchivo(String rutaArchivo,
             ArrayList<Ubicacion> ubicaciones) {

@@ -37,11 +37,11 @@ public class PlanTransporte {
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActalizacion;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fid_ubicacion_origen")
     private Ubicacion ubicacionOrigen;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fid_ubicacion_destino")
     private Ubicacion ubicacionDestino;
 
@@ -52,7 +52,7 @@ public class PlanTransporte {
     @Column(name = "cantidad_transportada")
     private int cantidadTransportada;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fid_vehiculo")
     private Vehiculo vehiculo;
 

@@ -1,6 +1,8 @@
 package com.example.backend.models;
 
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import jakarta.persistence.*;
@@ -23,9 +25,16 @@ public class Mantenimiento {
     @Column(name = "duracion")
     private Time duracion;
 
+    @Column(name = "fechaInicio")
+    private LocalDateTime fechaInicio;
+
+    @Column(name = "fechaFin")
+    private LocalDateTime fechaFin;
+
     @ManyToOne
     @JoinColumn(name = "fid_vehiculo")
     private Vehiculo vehiculo;
+
 
     public Mantenimiento() {
     }
@@ -74,5 +83,22 @@ public class Mantenimiento {
 
     public void setVehiculo(Vehiculo vehiculo) {
         this.vehiculo = vehiculo;
+    }
+
+
+    public LocalDateTime getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(LocalDateTime fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public LocalDateTime getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(LocalDateTime fechaFin) {
+        this.fechaFin = fechaFin;
     }
 }
