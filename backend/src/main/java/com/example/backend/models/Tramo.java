@@ -2,14 +2,7 @@ package com.example.backend.models;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Tramo")
@@ -19,15 +12,15 @@ public class Tramo {
     @Column(name = "id_tramo")
     private Long id_tramo;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fid_ubicacion_origen", nullable = false)
     private Ubicacion ubicacionOrigen;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fid_ubicacion_destino", nullable = false)
     private Ubicacion ubicacionDestino;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fid_plan_transporte", nullable = false)
     private PlanTransporte planTransporte;
 
@@ -49,12 +42,15 @@ public class Tramo {
     @Column(name = "cantidadPaquetes")
     private int cantidadPaquetes;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fid_vehiculo")
     private Vehiculo vehiculo;
 
     @Column(name = "duracion")
     private float duracion;
+
+    @Column(name = "transitado")
+    private boolean transitado;
 
     public Tramo() {
     }
@@ -168,5 +164,37 @@ public class Tramo {
 
     public void setDuracion(float duracion) {
         this.duracion = duracion;
+    }
+
+    public PlanTransporte getPlanTransporte() {
+        return planTransporte;
+    }
+
+    public void setPlanTransporte(PlanTransporte planTransporte) {
+        this.planTransporte = planTransporte;
+    }
+
+    public boolean isTransitado() {
+        return transitado;
+    }
+
+    public void setTransitado(boolean transitado) {
+        this.transitado = transitado;
+    }
+
+    public Ubicacion getUbicacionOrigen() {
+        return ubicacionOrigen;
+    }
+
+    public void setUbicacionOrigen(Ubicacion ubicacionOrigen) {
+        this.ubicacionOrigen = ubicacionOrigen;
+    }
+
+    public Ubicacion getUbicacionDestino() {
+        return ubicacionDestino;
+    }
+
+    public void setUbicacionDestino(Ubicacion ubicacionDestino) {
+        this.ubicacionDestino = ubicacionDestino;
     }
 }

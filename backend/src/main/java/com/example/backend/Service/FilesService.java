@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -64,6 +66,8 @@ public class FilesService {
     
     @Autowired
     private AlmacenRepository   almacenRepository;
+    @Autowired
+    private MantenimientoService mantenimientoService;
 
     public ArrayList<Pedido> cargarPedidosDesdeDirectorio(String directorioPath, List<Oficina> oficinas, List<Ubicacion> ubicaciones, List<Cliente> clientes, List<Paquete> paquetes) {
         
@@ -308,28 +312,51 @@ public class FilesService {
                     String diaString = anhoMesDiaString.substring(6, 8);
                     String fechaString = diaString + "/" + mesString + "/" + anhoString;
 
-                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                    Date fecha = formatter.parse(fechaString);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                    LocalDate fecha = LocalDate.parse(fechaString, formatter);
+                    LocalTime hora = LocalTime.of(23,59);
+                    LocalDateTime fechaParsed = LocalDateTime.of(fecha, hora);
                     Optional<Vehiculo> vehiculoSeleccionado = vehiculos.stream().filter(
                             vehiculoS -> vehiculoS.getCodigo().equals(codigoString)).findFirst();
                     if(vehiculoSeleccionado.isPresent()){
                         mantenimiento.setVehiculo(vehiculoSeleccionado.get());
-                        mantenimiento.setFechaProgramada(fecha);
+                        mantenimiento.setFechaInicio(fechaParsed);
+                        mantenimiento.setFechaFin(fechaParsed.plusHours(24*2));
                         mantenimientoRepository.save(mantenimiento);
                         mantenimientos.add(mantenimiento);
-
                     }
-
                 }
             }
 
         } catch (IOException e) {
             System.out.println("Error al leer el archivo: " + e.getMessage());
-        } catch (ParseException e) {
-            System.out.println("Error al leer formato de fecha: " + e.getMessage());
         }
         return mantenimientos;
     }
+
+    public ArrayList<Mantenimiento> cargarMantenimientosDesdeDirectorio(String directorioPath, List<Vehiculo> vehiculos) {
+
+        ArrayList<Mantenimiento> mantenimientos = new ArrayList<>();
+
+        File directorio = new File(directorioPath);
+        if (directorio.isDirectory()) {
+            File[] archivos = directorio.listFiles((dir, name) -> name.endsWith(".txt"));
+
+            if (archivos != null) {
+                for (File archivo : archivos) {
+                    System.out.println("Cargando archivo de mantenimiento: " + archivo.getName());
+                    ArrayList<Mantenimiento> mantenimientosCargados = cargarMantenimientosDesdeArchivo(archivo.getPath(), vehiculos);
+                    mantenimientos.addAll(mantenimientosCargados);
+                }
+            }
+        } else {
+            System.out.println("El path especificado no es un directorio válido.");
+        }
+
+        return mantenimientos;
+    }
+
+
 
     public HashMap<String, ArrayList<Ubicacion>> cargarCaminosDesdeArchivo(String rutaArchivo,
             ArrayList<Ubicacion> ubicaciones) {

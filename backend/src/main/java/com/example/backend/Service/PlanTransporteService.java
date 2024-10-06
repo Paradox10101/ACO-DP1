@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Array;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,10 +21,32 @@ public class PlanTransporteService {
     private PlanTransporteRepository planTransporteRepository;
 
     @Autowired
+    private AlmacenService almacenService;
+
+    @Autowired
+    private BloqueoService bloqueoService;
+
+    @Autowired
     private OficinaService oficinaService;
 
     @Autowired
+    private RegionService regionService;
+
+    @Autowired
+    private UbicacionService ubicacionService;
+
+    @Autowired
+    private VehiculoService vehiculoService;
+
+    @Autowired
+    private TramoService tramoService;
+
+
+    @Autowired
     private AcoService  acoService;
+    @Autowired
+    private MantenimientoService mantenimientoService;
+
 
     public List<PlanTransporte> obtenerTodosLosPlanes() {
         return planTransporteRepository.findAll();
@@ -45,103 +68,133 @@ public class PlanTransporteService {
         planTransporteRepository.deleteById(id);
     }
 
-    // Algo implementado en el service <----
-    public PlanTransporte crearRuta(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos, 
-            List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos, List<Bloqueo> bloqueos){
-        
-        
-        List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
-        //List<Tramo> tramos = new ArrayList<>();
 
-        //List<Almacen> almacenes = new ArrayList<>();
-
-        //List<Oficina> oficinas = new ArrayList<>();
-        //List<Tramo> tramos = new ArrayList<>();
-        //List<Tramo> rutas = new ArrayList<>();
-        System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
-        PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculos, almacenes, pedido.getCantidadPaquetes(), bloqueos);
-
-        if(planOptimo != null){
-            pedido.setEstado(EstadoPedido.Registrado);
-            planOptimo.setPedido(pedido);
-            planOptimo.setEstado(EstadoPedido.Registrado);
-            
-            //Falta hallar tramos por plan de transporte
-            //List<Tramo> tramosRuta = planOptimo.getTra();
-            //actualizarCambiosEnvio(tramosRuta, pedido, oficinas);
-            return planOptimo; // Retorna el plan de transporte encontrado
-            //planViajeRepository.save(rutaOptima);
-            //rutas.add(rutaOptima);
-        }else{
-            PlanTransporte rutaInvalida = new PlanTransporte(); // Crear una nueva instancia de PlanViaje
-            rutaInvalida.setPedido(pedido); // Asignar el envío a la nueva instancia
-            //rutas.add(rutaInvalida);
-            System.out.println("No se encontró una ruta válida para el envío: " + pedido.getId_pedido());
-            return null;
-        }
-
-        //return planOptimo;
-    }
-
-
-    public ArrayList<PlanTransporte> definirPlanesTransporte(Pedido pedido, List<Almacen> almacenes, HashMap<String, ArrayList<Ubicacion>> caminos,
-                                                List<Region> regiones, List<Ubicacion> ubicaciones, List<Vehiculo> vehiculos, List<Bloqueo> bloqueos){
-        ArrayList<PlanTransporte> planesTransporte = new ArrayList<>();
-        List<Bloqueo> bloqueosProgramados = bloqueos.stream().
-                filter(bloqueoS ->
-                        bloqueoS.getFechaInicio().isBefore(pedido.getFechaRegistro().plusHours(24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()))
-                        && bloqueoS.getFechaFin().isAfter(pedido.getFechaRegistro())).collect(Collectors.toList()); //obtener lista de bloqueos comprendidos en la fechas de planificacion
+    public ArrayList<PlanTransporte> definirPlanesTransporte(LocalDateTime fechaInicio, Pedido pedido,
+                                                             HashMap<String, ArrayList<Ubicacion>> caminos){
+        List<Ubicacion> ubicaciones = ubicacionService.obtenerTodasLasUbicaciones();
+        List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();
+        List<Bloqueo> bloqueosPeriodoEntrega = bloqueoService.obtenerBloqueosEntreFechas(fechaInicio,
+                fechaInicio.plusHours(24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()));
         int cantidadSolicitada = pedido.getCantidadPaquetes();
-        List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();  //obtener oficinas
+        ArrayList<PlanTransporte> planesTransporte = new ArrayList<>();
 
-        System.out.println("-----------------ENTRANDO A EJECUTAR ALGORITMO---------------------------------");
-
+        imprimirDatosPedido(pedido);
         //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
         while(cantidadSolicitada > 0) {
-            List<Almacen> almacenesConVehiculosDisponibles = almacenes.stream().filter(almacenS -> almacenS.getCantidadVehiculos() > 0).collect(Collectors.toCollection(ArrayList::new));
-            List<Vehiculo> vehiculosDisponibles = vehiculos.stream().filter(vehiculoS -> vehiculoS.getEstado() == EstadoVehiculo.Disponible).collect(Collectors.toCollection(ArrayList::new));
+            PlanTransporte planOptimo = new PlanTransporte();
+            List<Almacen> almacenes = almacenService.obtenerAlmacenesConVehiculosDisponibles();
+            List<Vehiculo> vehiculos = vehiculoService.obtenerVehiculosDisponibles();
 
-            if (almacenesConVehiculosDisponibles.isEmpty() || vehiculosDisponibles.isEmpty()) {
-                System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
-                break;
-            }
-
-            if (almacenesConVehiculosDisponibles.stream().anyMatch(almacenSel -> almacenSel.getUbicacion().getUbigeo().equals(pedido.getOficinaDestino().getUbicacion().getUbigeo()))){
+            if (almacenes.stream().anyMatch(almacenSel -> almacenSel.getUbicacion().getUbigeo().equals(pedido.getOficinaDestino().getUbicacion().getUbigeo()))){
                 System.out.println("No se genero plan de transporte porque el producto se solicito en el mismo lugar del almacen");
                 break;
             }
 
+            if (almacenes.isEmpty() || vehiculos.isEmpty()) {
+                System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
+                break;
+            }
 
-            PlanTransporte planOptimo =  acoService.ejecutar(oficinas, caminos, pedido, regiones, ubicaciones, vehiculosDisponibles, almacenesConVehiculosDisponibles, cantidadSolicitada, bloqueosProgramados);
-            if(planOptimo == null || planOptimo.getVehiculo() == null){
+            ArrayList<Tramo> rutaOptima =  acoService.obtenerMejorRutaAtenderOficinaDesdeAlmacen(fechaInicio, pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()*24,oficinas,
+                    caminos, pedido.getOficinaDestino().getUbicacion(), ubicaciones, vehiculos, almacenes, bloqueosPeriodoEntrega);
+
+            Vehiculo vehiculoSeleccionado = vehiculoService.obtenerVehiculo(vehiculos, almacenes, cantidadSolicitada, rutaOptima.get(0).getubicacionOrigen().getUbigeo());
+            if(rutaOptima == null || rutaOptima.isEmpty() || vehiculoSeleccionado==null){
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
             }
             else{
+                vehiculoSeleccionado.setUbicacionActual(rutaOptima.get(0).getubicacionOrigen());
+                planOptimo.setVehiculo(vehiculoSeleccionado);
+                vehiculoService.actualizarVehiculo(vehiculoSeleccionado.getId_vehiculo(), vehiculoSeleccionado);
+                guardar(planOptimo);
+                List<Mantenimiento> mantenimientos = new ArrayList<>();
+                rutaOptima.stream().forEach(tramoS -> {
+                    tramoS.setVehiculo(vehiculoSeleccionado);
+                    tramoS.setPlanTransporte(planOptimo);
+                    tramoS.setTransitado(false);
+                    Mantenimiento mantenimiento = new Mantenimiento();
+                    mantenimiento.setFechaInicio(tramoS.getFechaFin());
+                    mantenimiento.setFechaFin(tramoS.getFechaFin().plusHours(2));
+                    mantenimiento.setTipo(TipoMantenimiento.Recurrente);
+                    mantenimiento.setVehiculo(vehiculoSeleccionado);
+                    mantenimientos.add(mantenimiento);
+                });
+                if(mantenimientos!=null && !mantenimientos.isEmpty()){
+                    mantenimientos.get(mantenimientos.size()-1).setFechaFin(mantenimientos.get(mantenimientos.size()-1).getFechaInicio().plusHours(1));
+                    mantenimientos.get(mantenimientos.size()-1).setTipo(TipoMantenimiento.DepositoAlmacen);
+                    mantenimientoService.guardarMantenimientos(mantenimientos);
+                }
+                if(rutaOptima!=null && !rutaOptima.isEmpty()){
+                    tramoService.guardarTramos(rutaOptima);
+                }
                 cantidadSolicitada -= planOptimo.getVehiculo().getCapacidadUtilizada();
+                imprimirRutasPlanTransporte(planOptimo);
+/*
+                ArrayList<Tramo> rutaRetorno = acoService.obtenerMejorRutaDesdeOficinaAOficina(rutaOptima.get(rutaOptima.size()-1).getFechaFin().plusHours(3), oficinas,
+                    caminos, pedido.getOficinaDestino().getUbicacion(), ubicaciones.get(1), ubicaciones, vehiculos, almacenes, bloqueosPeriodoEntrega);
+*/
+
+
+
+
+                System.out.println("intento");
+
             }
             planesTransporte.add(planOptimo);
         }
 
-        if(!planesTransporte.isEmpty()){
-            pedido.setEstado(EstadoPedido.Registrado);
-            planesTransporte.get(0).setPedido(pedido);
-            planesTransporte.get(0).setEstado(EstadoPedido.Registrado);
-
-            //Falta hallar tramos por plan de transporte
-            //List<Tramo> tramosRuta = planOptimo.getTra();
-            //actualizarCambiosEnvio(tramosRuta, pedido, oficinas);
-            return planesTransporte; // Retorna el plan de transporte encontrado
-            //planViajeRepository.save(rutaOptima);
-            //rutas.add(rutaOptima);
-        }
-        else{
-            PlanTransporte rutaInvalida = new PlanTransporte(); // Crear una nueva instancia de PlanViaje
-            rutaInvalida.setPedido(pedido); // Asignar el envío a la nueva instancia
-            //rutas.add(rutaInvalida);
+        if(planesTransporte.isEmpty() || planesTransporte == null)
             System.out.println("No se encontró una ruta válida para el envío: " + pedido.getId_pedido());
+
+        return planesTransporte;
+    }
+
+    public void imprimirDatosPedido(Pedido pedido){
+        System.out.println("CANTIDAD DE PAQUETES:  " + pedido.getCantidadPaquetes());
+        System.out.println("FECHA DE REGISTRO:  " +
+                pedido.getFechaRegistro().getDayOfMonth()+
+                "/"+
+                pedido.getFechaRegistro().getMonthValue()+
+                "/"+
+                pedido.getFechaRegistro().getYear()+
+                " "+
+                pedido.getFechaRegistro().getHour()+
+                "h:"+
+                pedido.getFechaRegistro().getMinute()+
+                "m"
+        );
+        System.out.println("FECHA LIMITE DE ENTREGA:  " +
+                pedido.getFechaRegistro().plusHours((long)24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()).getDayOfMonth()+
+                "/"+
+                pedido.getFechaRegistro().plusHours((long)24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()).getMonthValue()+
+                "/"+
+                pedido.getFechaRegistro().plusHours((long)24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()).getYear()+
+                " "+
+                pedido.getFechaRegistro().plusHours((long)24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()).getHour()+
+                "h:"+
+                pedido.getFechaRegistro().plusHours((long)24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()).getMinute()+
+                "m"
+        );
+    }
+
+    public void imprimirRutasPlanTransporte(PlanTransporte planTransporte){
+        List<Tramo>tramos = tramoService.obtenerPorPlanTransporte(planTransporte);
+        for (Tramo tramo : tramos){
+            System.out.println("--------------------------------------------------");
+            System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo());
+            System.out.println("Region Origen: " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionOrigen().getRegion().getNombre());
+            System.out.println("Ubicación Destino - ID: " + tramo.getubicacionDestino().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionDestino().getUbigeo());
+            System.out.println("Region Destino: " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionDestino().getRegion().getNombre());
+            System.out.println("Distancia: " + tramo.getDistancia() + " km");
+            System.out.println("Velocidad: " + tramo.getVelocidad() + " km/h");
+            System.out.println("Fecha Inicio Recorrido: " + tramo.getFechaInicio().getDayOfMonth() + "/" + tramo.getFechaInicio().getMonthValue() + "/" + tramo.getFechaInicio().getYear() + " " + tramo.getFechaInicio().getHour() + "h:" + tramo.getFechaInicio().getMinute() + "m");
+            System.out.println("Fecha Fin Recorrido: " + tramo.getFechaFin().getDayOfMonth() + "/" + tramo.getFechaFin().getMonthValue() + "/" + tramo.getFechaFin().getYear() + " " + tramo.getFechaFin().getHour() + "h:" + tramo.getFechaFin().getMinute() + "m");
         }
-        return null;
     }
 
 
@@ -178,6 +231,10 @@ public class PlanTransporteService {
         } else {
             System.out.println("Error: La entrega no coincide con la oficina destino esperada.");
         }
+    }
+
+    public PlanTransporte guardar(PlanTransporte planTransporte) {
+        return planTransporteRepository.save(planTransporte);
     }
 }
 

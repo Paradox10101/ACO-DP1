@@ -4,6 +4,8 @@ package com.example.backend.models;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
+import org.springframework.cglib.core.Local;
+
 import java.util.*;
 @Entity
 @Table(name = "Vehiculo")
@@ -49,15 +51,17 @@ public class Vehiculo {
     @Column(name = "capacidad_utilizada")
     private int capacidadUtilizada;
 
+    /*
     @OneToMany(mappedBy = "vehiculo")
     private List<Averia> averias; // Lista para almacenar las averías del vehículo
+    */
 
     @Column(name = "disponible")
     private boolean disponible;
 
     public Vehiculo() {
         this.disponible = true;
-        this.averias = new ArrayList<>();
+        //this.averias = new ArrayList<>();
     }
 
     public Vehiculo(Long id_vehiculo, PlanTransporte planTransporte, Almacen almacen, LocalDateTime fechaSalida,
@@ -222,7 +226,7 @@ public class Vehiculo {
                 fechaFin = fechaInicio;
         }
         Averia nuevaAveria = new Averia(tipoAveria, fechaInicio, fechaFin, this);
-        this.averias.add(nuevaAveria);
+        //this.averias.add(nuevaAveria);
 
         // Iniciar replanificación si es necesario
         if (tipoAveria == TipoAveria.T2 || tipoAveria == TipoAveria.T3) {
@@ -232,23 +236,26 @@ public class Vehiculo {
 
     // Método para verificar si el vehículo está disponible
     public boolean verificarDisponibilidad(LocalDateTime fechaActual) {
+        /*
         for (Averia averia : averias) {
             if (fechaActual.isAfter(averia.getFechaInicio()) && fechaActual.isBefore(averia.getFechaFin())) {
                 this.disponible = false;
                 return false;
             }
         }
+         */
 
         // Si no tiene averías activas, se marca como disponible
         this.disponible = true;
         return this.disponible;
-    }    
+    }
 
     public boolean isDisponible() {
         return disponible;
     }
 
-    public List<Averia> getAverias() {
-        return averias;
+    public void setDisponible(boolean disponible) {
+        this.disponible = disponible;
     }
+
 }
