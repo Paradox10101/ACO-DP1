@@ -9,6 +9,7 @@ import com.example.backend.Service.*;
 import com.example.backend.models.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cglib.core.Local;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -38,6 +39,9 @@ public class BackendApplication {
         PedidoService pedidoService = context.getBean(PedidoService.class);
         PlanTransporteService planTransporte = context.getBean(PlanTransporteService.class);
         FilesService filesService = context.getBean(FilesService.class);
+        VehiculoService vehiculoService = context.getBean(VehiculoService.class);
+        TramoService tramoService = context.getBean(TramoService.class);
+        MantenimientoService mantenimientoService = context.getBean(MantenimientoService.class);
 
         regionService.guardar(new Region("COSTA", 1));
         regionService.guardar(new Region("SIERRA", 2));
@@ -80,8 +84,10 @@ public class BackendApplication {
         ArrayList<PlanTransporte> planes3 = planTransporte.definirPlanesTransporte(pedidosFuturos.get(3), almacenes, caminos, regiones, ubicaciones, vehiculos, bloqueos);
 
          */
+        tramoService.actualizarEstadoTramos(LocalDateTime.of(2024, 4, 1, 0, 0), LocalDateTime.of(2024, 4, 1, 4, 15) );
+        vehiculoService.actualizarEstadoVehiculos(LocalDateTime.of(2024, 4, 1, 0, 0), LocalDateTime.of(2024, 4, 1, 4, 15) );
 
-        System.out.println("DONE");
+        while(true);
 
 	}
     

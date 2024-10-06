@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,4 +44,33 @@ public class TramoService {
     public void eliminar(Long id) {
         tramoRepository.deleteById(id);
     }
+
+    public void actualizarEstadoTramos(LocalDateTime fechaInicio, LocalDateTime fechaFin){
+        tramoRepository.actualizarTransitados(fechaInicio, fechaFin);
+    }
+
+    public Tramo obtenerTramoActualVehiculoFecha(LocalDateTime fechaActual, Long idVehiculo){
+        Optional<Tramo> tramo = tramoRepository.findTramoByFechaAndVehiculo(fechaActual, idVehiculo);
+        if(tramo.isPresent()){
+            return tramo.get();
+        }
+        else return null;
+    }
+
+    public Tramo obtenerTramoUltimoPedido(Long idVehiculo){
+        Optional<Tramo> tramo = tramoRepository.findLastTramoPedidoByVehiculo(idVehiculo);
+        if(tramo.isPresent()){
+            return tramo.get();
+        }
+        else return null;
+    }
+
+    public Tramo obtenerUltimoTramoVehiculoFecha(LocalDateTime fechaActual, Long idVehiculo){
+        Optional<Tramo> tramo = tramoRepository.findLastTramoByFechaAndVehiculo(fechaActual, idVehiculo);
+        if(tramo.isPresent()){
+            return tramo.get();
+        }
+        else return null;
+    }
+
 }

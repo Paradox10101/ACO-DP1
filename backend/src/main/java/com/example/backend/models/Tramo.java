@@ -49,6 +49,9 @@ public class Tramo {
     @Column(name = "duracion")
     private float duracion;
 
+    @Column(name = "transitado")
+    private boolean transitado;
+
     public Tramo() {
     }
 
@@ -169,5 +172,29 @@ public class Tramo {
 
     public void setPlanTransporte(PlanTransporte planTransporte) {
         this.planTransporte = planTransporte;
+    }
+
+    public boolean isTransitado() {
+        return transitado;
+    }
+
+    public void setTransitado(boolean transitado) {
+        this.transitado = transitado;
+    }
+
+    public Ubicacion getUbicacionOrigen() {
+        return ubicacionOrigen;
+    }
+
+    public void setUbicacionOrigen(Ubicacion ubicacionOrigen) {
+        this.ubicacionOrigen = ubicacionOrigen;
+    }
+
+    public Ubicacion getUbicacionDestino() {
+        return ubicacionDestino;
+    }
+
+    public void setUbicacionDestino(Ubicacion ubicacionDestino) {
+        this.ubicacionDestino = ubicacionDestino;
     }
 }

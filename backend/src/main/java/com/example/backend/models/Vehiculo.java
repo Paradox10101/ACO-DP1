@@ -4,6 +4,8 @@ package com.example.backend.models;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
+import org.springframework.cglib.core.Local;
+
 import java.util.*;
 @Entity
 @Table(name = "Vehiculo")
@@ -246,11 +248,14 @@ public class Vehiculo {
         // Si no tiene averías activas, se marca como disponible
         this.disponible = true;
         return this.disponible;
-    }    
+    }
 
     public boolean isDisponible() {
         return disponible;
     }
 
+    public void setDisponible(boolean disponible) {
+        this.disponible = disponible;
+    }
 
 }

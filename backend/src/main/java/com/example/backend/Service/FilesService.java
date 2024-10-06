@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -310,13 +312,16 @@ public class FilesService {
                     String diaString = anhoMesDiaString.substring(6, 8);
                     String fechaString = diaString + "/" + mesString + "/" + anhoString;
 
-                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                    Date fecha = formatter.parse(fechaString);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                    LocalDate fecha = LocalDate.parse(fechaString, formatter);
+                    LocalTime hora = LocalTime.of(23,59);
+                    LocalDateTime fechaParsed = LocalDateTime.of(fecha, hora);
                     Optional<Vehiculo> vehiculoSeleccionado = vehiculos.stream().filter(
                             vehiculoS -> vehiculoS.getCodigo().equals(codigoString)).findFirst();
                     if(vehiculoSeleccionado.isPresent()){
                         mantenimiento.setVehiculo(vehiculoSeleccionado.get());
-                        mantenimiento.setFechaProgramada(fecha);
+                        mantenimiento.setFechaInicio(fechaParsed);
+                        mantenimiento.setFechaFin(fechaParsed.plusHours(24*2));
                         mantenimientoRepository.save(mantenimiento);
                         mantenimientos.add(mantenimiento);
                     }
@@ -325,8 +330,6 @@ public class FilesService {
 
         } catch (IOException e) {
             System.out.println("Error al leer el archivo: " + e.getMessage());
-        } catch (ParseException e) {
-            System.out.println("Error al leer formato de fecha: " + e.getMessage());
         }
         return mantenimientos;
     }

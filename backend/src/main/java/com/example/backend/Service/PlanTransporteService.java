@@ -104,27 +104,36 @@ public class PlanTransporteService {
                 break;
             }
             else{
+                vehiculoSeleccionado.setUbicacionActual(rutaOptima.get(0).getubicacionOrigen());
                 planOptimo.setVehiculo(vehiculoSeleccionado);
+                vehiculoService.actualizarVehiculo(vehiculoSeleccionado.getId_vehiculo(), vehiculoSeleccionado);
                 guardar(planOptimo);
+                List<Mantenimiento> mantenimientos = new ArrayList<>();
                 rutaOptima.stream().forEach(tramoS -> {
                     tramoS.setVehiculo(vehiculoSeleccionado);
                     tramoS.setPlanTransporte(planOptimo);
+                    tramoS.setTransitado(false);
                     Mantenimiento mantenimiento = new Mantenimiento();
                     mantenimiento.setFechaInicio(tramoS.getFechaFin());
                     mantenimiento.setFechaFin(tramoS.getFechaFin().plusHours(2));
                     mantenimiento.setTipo(TipoMantenimiento.Recurrente);
                     mantenimiento.setVehiculo(vehiculoSeleccionado);
-                    mantenimientoService.guardarMantenimiento(mantenimiento);
+                    mantenimientos.add(mantenimiento);
                 });
-                tramoService.guardarTramos(rutaOptima);
+                if(mantenimientos!=null && !mantenimientos.isEmpty()){
+                    mantenimientos.get(mantenimientos.size()-1).setFechaFin(mantenimientos.get(mantenimientos.size()-1).getFechaInicio().plusHours(1));
+                    mantenimientos.get(mantenimientos.size()-1).setTipo(TipoMantenimiento.DepositoAlmacen);
+                    mantenimientoService.guardarMantenimientos(mantenimientos);
+                }
+                if(rutaOptima!=null && !rutaOptima.isEmpty()){
+                    tramoService.guardarTramos(rutaOptima);
+                }
                 cantidadSolicitada -= planOptimo.getVehiculo().getCapacidadUtilizada();
                 imprimirRutasPlanTransporte(planOptimo);
-
-
-
+/*
                 ArrayList<Tramo> rutaRetorno = acoService.obtenerMejorRutaDesdeOficinaAOficina(rutaOptima.get(rutaOptima.size()-1).getFechaFin().plusHours(3), oficinas,
                     caminos, pedido.getOficinaDestino().getUbicacion(), ubicaciones.get(1), ubicaciones, vehiculos, almacenes, bloqueosPeriodoEntrega);
-
+*/
 
 
 
