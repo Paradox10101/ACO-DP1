@@ -22,4 +22,12 @@ public interface MantenimientoRepository extends JpaRepository<Mantenimiento, Lo
             @Param("fechaActual") LocalDate fechaActual,
             @Param("idVehiculo") Long idVehiculo,
             @Param("tipoMantenimiento") TipoMantenimiento tipoMantenimiento);
-}
+
+    @Query("SELECT m FROM Mantenimiento m WHERE :fechaActual BETWEEN m.fechaInicio AND m.fechaFin AND m.vehiculo.id_vehiculo = :idVehiculo AND m.tipo = :tipoMantenimiento ORDER BY m.fechaFin DESC LIMIT 1")
+    Optional <Mantenimiento> findMantenimientoRecurrenteByFechaAndVehiculoAndTipoMantenimiento(@Param("fechaActual") LocalDateTime fechaActual,
+                                                                                               @Param("idVehiculo") Long idVehiculo,
+                                                                                               @Param("tipoMantenimiento") TipoMantenimiento tipoMantenimiento);
+
+    }
+
+

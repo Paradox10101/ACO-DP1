@@ -2,6 +2,7 @@ package com.example.backend.Service;
 
 import com.example.backend.Repository.AlmacenRepository;
 import com.example.backend.Repository.MantenimientoRepository;
+import com.example.backend.algorithm.AcoService;
 import com.example.backend.models.*;
 import com.example.backend.Repository.VehiculoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,15 @@ public class VehiculoService {
     private AlmacenService almacenService;
     @Autowired
     private MantenimientoRepository mantenimientoRepository;
+
+    @Autowired
+    private AcoService acoService;
+    @Autowired
+    private OficinaService oficinaService;
+    @Autowired
+    private BloqueoService bloqueoService;
+    @Autowired
+    private UbicacionService ubicacionService;
 
     public List<Vehiculo> obtenerTodos() {
         return vehiculoRepository.findAll();
@@ -141,13 +151,13 @@ public class VehiculoService {
     }
 
 
-    public void actualizarEstadoVehiculos(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+    public void actualizarEstadoVehiculos(LocalDateTime fechaInicio, LocalDateTime fechaFin, HashMap<String, ArrayList<Ubicacion>> caminos) {
         List<Almacen> almacenes = almacenService.obtenerTodos();
         List<Vehiculo> vehiculos = vehiculoRepository.findAll();
-        ArrayList<Ubicacion> ubicacionesAlmacenes = almacenes.stream().map(Almacen::getUbicacion).collect(Collectors.toCollection(ArrayList::new));
         for (Vehiculo vehiculo : vehiculos) {
             Tramo tramoActualRecorrido = tramoService.obtenerTramoActualVehiculoFecha(fechaFin, vehiculo.getId_vehiculo());
             Mantenimiento mantenimientoPreventivoActual = mantenimientoService.obtenerMantenimientoPreventivoVehiculoFecha(fechaFin.toLocalDate(), vehiculo.getId_vehiculo());
+            Mantenimiento mantenimientoRecurrenteActual = mantenimientoService.obtenerMantenimientoRecurrenteActual(fechaFin, vehiculo.getId_vehiculo());
             //Actualizar el estado del vehiculo en el tramo que esta recorriendo, tomara la ubicacion de origen
             if (tramoActualRecorrido != null) {
                 vehiculo.setUbicacionActual(tramoActualRecorrido.getUbicacionOrigen());
@@ -161,13 +171,31 @@ public class VehiculoService {
                     vehiculo.setUbicacionActual(ultimoTramoRecorrido.getUbicacionDestino());
             }
             if(mantenimientoPreventivoActual!=null){
-                if(ubicacionesAlmacenes.contains(vehiculo.getUbicacionActual())){
+                if(almacenes.stream()
+                        .anyMatch(almacenS -> almacenS.getUbicacion().getUbigeo().equals(vehiculo.getUbicacionActual().getUbigeo()))){
                     mantenimientoPreventivoActual.setFechaInicio(fechaInicio);
                     mantenimientoPreventivoActual.setFechaFin(
                             fechaInicio.plus(Duration.between(fechaInicio, fechaInicio.toLocalDate().atTime(LocalTime.MAX)).plusDays(2)));
                             vehiculo.setEstado(EstadoVehiculo.EnMantenimiento);
                 }
                 mantenimientoService.actualizarMantenimiento(mantenimientoPreventivoActual.getId_mantenimiento(),mantenimientoPreventivoActual);
+            }
+            if(tramoActualRecorrido==null && mantenimientoRecurrenteActual!=null){
+                vehiculo.setEstado(EstadoVehiculo.EnMantenimiento);
+            }
+            //Asignacion de una nueva ruta de retorno, el vehiculo no tiene ninguna entrega pendiente
+            if(tramoActualRecorrido==null && mantenimientoRecurrenteActual==null && !almacenes.stream()
+                    .anyMatch(almacenS -> almacenS.getUbicacion().getUbigeo().equals(vehiculo.getUbicacionActual().getUbigeo()))){
+
+                ArrayList<Tramo> rutaOptima =  acoService.obtenerMejorRutaDesdeOficinaAAlmacen(fechaFin, oficinaService.obtenerTodasLasOficinas(),
+                        caminos, vehiculo.getUbicacionActual() , ubicacionService.obtenerTodasLasUbicaciones(), obtenerTodos(), almacenService.obtenerTodos(), bloqueoService.obtenerBloqueosEntreFechas(fechaFin, fechaFin.plusHours(24*3)));
+                vehiculo.setEstado(EstadoVehiculo.EnRuta);
+
+            }
+            //Asignacion de una nueva ruta de retorno, el vehiculo no tiene ninguna entrega pendiente
+            if(tramoActualRecorrido==null && mantenimientoRecurrenteActual==null && almacenes.stream()
+                    .anyMatch(almacenS -> almacenS.getUbicacion().equals(vehiculo.getUbicacionActual()))){
+                vehiculo.setEstado(EstadoVehiculo.Disponible);
             }
 
 

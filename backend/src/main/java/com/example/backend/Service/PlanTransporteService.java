@@ -102,8 +102,9 @@ public class PlanTransporteService {
             ArrayList<Tramo> rutaOptima =  acoService.obtenerMejorRutaAtenderOficinaDesdeAlmacen(fechaInicio, pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()*24,oficinas,
                     caminos, pedido.getOficinaDestino().getUbicacion(), ubicaciones, vehiculos, almacenes, bloqueosPeriodoEntrega);
 
-                    
-            Vehiculo vehiculoSeleccionado = vehiculoService.obtenerVehiculo(vehiculos, almacenes, cantidadSolicitada, rutaOptima.get(0).getubicacionOrigen().getUbigeo());
+
+            Vehiculo vehiculoSeleccionado = vehiculoService.obtenerVehiculo(vehiculos, almacenes ,cantidadSolicitada, rutaOptima.get(0).getubicacionOrigen().getUbigeo());
+
             if(rutaOptima == null || rutaOptima.isEmpty() || vehiculoSeleccionado==null){
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
@@ -129,8 +130,6 @@ public class PlanTransporteService {
                 });
 
                 if(mantenimientos!=null && !mantenimientos.isEmpty()){
-                    mantenimientos.get(mantenimientos.size()-1).setFechaFin(mantenimientos.get(mantenimientos.size()-1).getFechaInicio().plusHours(1));
-                    mantenimientos.get(mantenimientos.size()-1).setTipo(TipoMantenimiento.DepositoAlmacen);
                     mantenimientoService.guardarMantenimientos(mantenimientos);
                 }
                 if(rutaOptima!=null && !rutaOptima.isEmpty()){
@@ -138,17 +137,18 @@ public class PlanTransporteService {
                 }
 
                 cantidadSolicitada -= planOptimo.getVehiculo().getCapacidadUtilizada();
+
+                imprimirRutasPlanTransporte(planOptimo);
+
                 planOptimo.setPedido(pedido);
                 imprimirRutasPlanTransporte(planOptimo, rutaOptima);
-/*
-                ArrayList<Tramo> rutaRetorno = acoService.obtenerMejorRutaDesdeOficinaAOficina(rutaOptima.get(rutaOptima.size()-1).getFechaFin().plusHours(3), oficinas,
-                    caminos, pedido.getOficinaDestino().getUbicacion(), ubicaciones.get(1), ubicaciones, vehiculos, almacenes, bloqueosPeriodoEntrega);
-*/
+
 
 
 
 
                 System.out.println("intento");
+
 
             }
             planesTransporte.add(planOptimo);

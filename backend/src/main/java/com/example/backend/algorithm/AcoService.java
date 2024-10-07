@@ -475,8 +475,8 @@ public class AcoService {
 
 
 
-    public ArrayList<Tramo> obtenerMejorRutaDesdeOficinaAOficina (LocalDateTime fechaInicio, List < Oficina > oficinas,
-                                                                  HashMap < String, ArrayList < Ubicacion >> caminos, Ubicacion ubicacionOficinaOrigen, Ubicacion ubicacionOficinaDestino,
+    public ArrayList<Tramo> obtenerMejorRutaDesdeOficinaAAlmacen (LocalDateTime fechaInicio, List < Oficina > oficinas,
+                                                                  HashMap < String, ArrayList < Ubicacion >> caminos, Ubicacion ubicacionOficinaOrigen,
                                                                   List < Ubicacion > ubicaciones, List < Vehiculo > vehiculos, List < Almacen > almacenes,
                                                                   List<Bloqueo> bloqueosProgramados){
         this.caminos = caminos;
@@ -492,9 +492,9 @@ public class AcoService {
 
         //Busqueda desde mejor ruta desde la oficina de destino
         ArrayList<Tramo> mejorSolucion = generarRutaMasOptima(fechaInicio, ubicacionOficinaOrigen,
-                new ArrayList<>(Collections.singletonList(ubicacionOficinaDestino)),
+                almacenes.stream().map(Almacen::getUbicacion).collect(Collectors.toCollection(ArrayList::new)),
                 -1, false,
-                almacenes.stream().map(Almacen::getUbicacion).collect(Collectors.toCollection(ArrayList::new)));
+                null);
 
 
         return mejorSolucion;

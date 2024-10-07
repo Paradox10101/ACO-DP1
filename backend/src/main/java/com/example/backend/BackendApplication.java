@@ -96,10 +96,10 @@ public class BackendApplication {
         ArrayList<PlanTransporte> planes3 = planTransporte.definirPlanesTransporte(pedidosFuturos.get(3), almacenes, caminos, regiones, ubicaciones, vehiculos, bloqueos);
          */
         LocalDateTime fechaInicioSimulacion = LocalDateTime.of(2024, 4, 1, 0, 0);
-        LocalDateTime fechaFinSimulacion = LocalDateTime.of(2024, 4, 1, 12, 40) ;
+        LocalDateTime fechaFinSimulacion = LocalDateTime.of(2024, 4, 6, 12, 40) ;
 
         tramoService.actualizarEstadoTramos(fechaInicioSimulacion, fechaFinSimulacion);
-        vehiculoService.actualizarEstadoVehiculos(fechaInicioSimulacion, fechaFinSimulacion);
+        vehiculoService.actualizarEstadoVehiculos(fechaInicioSimulacion, fechaFinSimulacion, caminos);
 
         while(true);
 
