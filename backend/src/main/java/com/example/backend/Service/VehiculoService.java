@@ -276,15 +276,18 @@ public class VehiculoService {
 
     // Método para replanificar la ruta desde la ubicación intermedia
     private void replanificarRuta(Tramo tramoActual) {
-        System.out
-                .println("Replanificando la ruta desde la ubicación intermedia del tramo " + tramoActual.getId_tramo());
+        System.out.println("Replanificando la ruta desde la ubicación intermedia del tramo " + tramoActual.getId_tramo());
 
-        // Obtener los vehículos disponibles para continuar la ruta
-        List<Vehiculo> vehiculosDisponibles = obtenerVehiculosDisponibles();
+        // Obtener los vehículos disponibles para continuar la ruta, excluyendo el vehículo averiado
+        List<Vehiculo> vehiculosDisponibles = obtenerVehiculosDisponibles().stream()
+            .filter(vehiculo -> !vehiculo.getId_vehiculo().equals(tramoActual.getVehiculo().getId_vehiculo()))
+            .collect(Collectors.toList());
+        
         List<Almacen> almacenesDisponibles = almacenService.obtenerTodos();
+        List<Oficina> oficinasDisponibles = oficinaService.obtenerTodasLasOficinas(); // Buscar también en oficinas
 
         // Replanificar la ruta desde la ubicación donde ocurrió la avería
-        Vehiculo nuevoVehiculo = obtenerVehiculo(vehiculosDisponibles, almacenesDisponibles,
+        Vehiculo nuevoVehiculo = obtenerVehiculoDesdeOficinasOAlmacenes(vehiculosDisponibles, almacenesDisponibles, oficinasDisponibles,
                 tramoActual.getCantidadPaquetes(), tramoActual.getUbicacionOrigen().getUbigeo());
 
         if (nuevoVehiculo != null) {
@@ -293,10 +296,50 @@ public class VehiculoService {
             nuevoVehiculo.setEstado(EstadoVehiculo.EnRuta);
             nuevoVehiculo.setDisponible(false); // Marcar el nuevo vehículo como no disponible temporalmente
         } else {
-            System.out.println("No se pudo reasignar un vehículo para continuar el trayecto. VOLVER A INTENTAR REPLANIFICAR???");
-            // Si no hay vehículos disponibles, la simulación puede seguir intentando
-            // replanificar en ciclos futuros.
+            System.out.println("No se pudo reasignar un vehículo para continuar el trayecto. Intentaremos en próximos ciclos.");
+            // Se puede manejar un reintento en ciclos posteriores para evitar colapso
         }
+    }
+
+    public Vehiculo obtenerVehiculoDesdeOficinasOAlmacenes(List<Vehiculo> vehiculos, List<Almacen> almacenes, List<Oficina> oficinas, int cantidadPaquetes, String ubigeoOrigen) {
+        // Primero buscar en almacenes
+        Optional<Almacen> almacenSeleccionado = almacenes.stream()
+                .filter(almacenS -> almacenS.getUbicacion().getUbigeo().equals(ubigeoOrigen))
+                .findFirst();
+
+        if (almacenSeleccionado.isPresent()) {
+            Optional<Vehiculo> vehiculoDesdeAlmacen = vehiculos.stream()
+                    .filter(vehiculo -> vehiculo.getTipoVehiculo().getCapacidadMaxima() >= cantidadPaquetes
+                            && vehiculo.getUbicacionActual().getUbigeo().equals(ubigeoOrigen)
+                            && vehiculo.isDisponible()
+                            && vehiculo.verificarDisponibilidad(LocalDateTime.now()))
+                    .min(Comparator.comparing(vehiculo -> vehiculo.getTipoVehiculo().getCapacidadMaxima()));
+
+            if (vehiculoDesdeAlmacen.isPresent()) {
+                return vehiculoDesdeAlmacen.get();
+            }
+        }
+
+        // Si no se encuentra en almacenes, buscar en oficinas
+        Optional<Oficina> oficinaSeleccionada = oficinas.stream()
+                .filter(oficina -> oficina.getUbicacion().getUbigeo().equals(ubigeoOrigen))
+                .findFirst();
+
+        if (oficinaSeleccionada.isPresent()) {
+            Optional<Vehiculo> vehiculoDesdeOficina = vehiculos.stream()
+                    .filter(vehiculo -> vehiculo.getTipoVehiculo().getCapacidadMaxima() >= cantidadPaquetes
+                            && vehiculo.getUbicacionActual().getUbigeo().equals(ubigeoOrigen)
+                            && vehiculo.isDisponible()
+                            && vehiculo.verificarDisponibilidad(LocalDateTime.now()))
+                    .min(Comparator.comparing(vehiculo -> vehiculo.getTipoVehiculo().getCapacidadMaxima()));
+
+            if (vehiculoDesdeOficina.isPresent()) {
+                return vehiculoDesdeOficina.get();
+            }
+        }
+
+        // Si no se encuentra ningún vehículo adecuado, se retorna null
+        return null;
     }
 
     // Método para retrasar el tramo en caso de avería moderada

@@ -130,7 +130,7 @@ public class SimulacionService {
                 // Si el vehículo no puede continuar debido a una avería grave, detenemos el
                 // proceso
                 if (vehiculo.getEstado() == EstadoVehiculo.Averiado) {
-                    System.out.println("El vehículo ha quedado averiado y no puede continuar.");
+                    System.out.println("El vehículo" + vehiculo.getCodigo() + "ha quedado averiado y no puede continuar.");
                     break;
                 }
             }

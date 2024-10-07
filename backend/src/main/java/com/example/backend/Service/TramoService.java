@@ -52,11 +52,11 @@ public class TramoService {
     }
 
     public Tramo obtenerTramoActualVehiculoFecha(LocalDateTime fechaActual, Long idVehiculo){
-        Optional<Tramo> tramo = tramoRepository.findTramoByFechaAndVehiculo(fechaActual, idVehiculo);
-        if(tramo.isPresent()){
-            return tramo.get();
+        List<Tramo> tramo = tramoRepository.findTramosByFechaAndVehiculo(fechaActual, idVehiculo);
+        if(tramo.isEmpty()){
+            return null;
         }
-        else return null;
+        else return tramo.get(0);
     }
 
     public Tramo obtenerTramoUltimoPedido(Long idVehiculo){
