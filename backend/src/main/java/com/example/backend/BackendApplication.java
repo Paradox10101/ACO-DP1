@@ -1,123 +1,171 @@
 package com.example.backend;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.stream.Collectors;
+import java.util.List;
 
-import com.example.backend.Service.*;
-import com.example.backend.models.*;
+import com.example.backend.Service.SimulacionService;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtils;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cglib.core.Local;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
+import com.sun.management.OperatingSystemMXBean;
 
 @SpringBootApplication
 public class BackendApplication {
 
-	public static void main(String[] args) {
-        ApplicationContext context = SpringApplication.run(BackendApplication.class, args);
-        SimulacionService simulacionService = context.getBean(SimulacionService.class);
-        /*POR DESCOMENTAR
-        ArrayList<Oficina> oficinas;
-        ArrayList<Pedido> pedidos;
-        ArrayList<Bloqueo> bloqueos;
-        ArrayList<Mantenimiento> mantenimientos;
-        ArrayList<Ubicacion> ubicaciones = new ArrayList<>();
-        ArrayList<Region> regiones = new ArrayList<Region>(); // Es hardcodeado
-        ArrayList<Vehiculo> vehiculos = new ArrayList<Vehiculo>(); // Es hardcodeado
-        ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
-        ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
-        ArrayList<Cliente> clientes = new ArrayList<>();
-        ArrayList<Paquete> paquetes = new ArrayList<>();
-        HashMap<String, ArrayList<Ubicacion>> caminos;
+    @Autowired
+    private SimulacionService simulacionService;
 
-        RegionService regionService = context.getBean(RegionService.class);
-        PedidoService pedidoService = context.getBean(PedidoService.class);
-        PlanTransporteService planTransporte = context.getBean(PlanTransporteService.class);
-        FilesService filesService = context.getBean(FilesService.class);
-        VehiculoService vehiculoService = context.getBean(VehiculoService.class);
-        TramoService tramoService = context.getBean(TramoService.class);
-        MantenimientoService mantenimientoService = context.getBean(MantenimientoService.class);
+    public static void main(String[] args) {
+        SpringApplication.run(BackendApplication.class, args);
+    }
 
-        regionService.guardar(new Region("COSTA", 1));
-        regionService.guardar(new Region("SIERRA", 2));
-        regionService.guardar(new Region("SELVA", 3));
-        regiones = regionService.obtenerTodas();
 
-        oficinas = filesService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, ubicaciones);
-        vehiculos = filesService.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, ubicaciones, tiposVehiculo);
-        caminos = filesService.cargarCaminosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", ubicaciones);
-        //tramos = Tramo.cargarTramosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", caminos);
-        bloqueos = filesService.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.04.txt", ubicaciones);
-        //bloqueos = filesService.cargarBloqueosDesdeDirectorio("dataset/Bloqueos", ubicaciones);
-        pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202404.txt", oficinas, ubicaciones, clientes, paquetes);
-        //pedidos = filesService.cargarPedidosDesdeDirectorio("dataset/Pedidos", oficinas, ubicaciones, clientes, paquetes);
-        //pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202409.txt", oficinas, ubicaciones, clientes, paquetes);
-        mantenimientos = filesService.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
-        //mantenimientos = filesService.cargarMantenimientosDesdeDirectorio("dataset/Mantenimientos", vehiculos);
-
-        System.out.println("-----------------ENTRANDO DESDE MAIN---------------------------------");
-
-        LocalDateTime fechaSeleccionada = LocalDateTime.of(2024, 4, 1, 0, 0);//LocalDateTime.now().minusHours(3).minusMinutes(0);
-        //LocalDateTime fechaSeleccionada = LocalDateTime.of(2024, 9, 9, 7, 27);
-        //LocalDateTime fechaSeleccionada = LocalDateTime.now();
-        ArrayList<Pedido> pedidosFuturos = pedidos.stream()
-                        .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaSeleccionada))
-                        .collect(Collectors.toCollection(ArrayList::new));
-
-        // Ejecutar con diferentes semillas
-        for (int semilla = 1; semilla <= 30; semilla++) {
-            System.out.println("Ejecutando con semilla: " + semilla);
-            
-            System.out.println("-----------------DATOS DEL PEDIDO 1---------------------------------");
-            ArrayList<PlanTransporte> planes0 = planTransporte.definirPlanesTransporte(fechaSeleccionada, pedidosFuturos.get(0),  caminos, semilla);
-
-            System.out.println("-----------------DATOS DEL PEDIDO 2---------------------------------");
-            ArrayList<PlanTransporte> planes1 = planTransporte.definirPlanesTransporte(fechaSeleccionada, pedidosFuturos.get(1),  caminos, semilla);
-
-            System.out.println("Fin de ejecución con semilla: " + semilla);
-        }
-
-        */
-
-        /*
-        System.out.println("-----------------DATOS DEL PEDIDO 3---------------------------------");
-        ArrayList<PlanTransporte> planes2 = planTransporte.definirPlanesTransporte(pedidosFuturos.get(2), almacenes, caminos, regiones, ubicaciones, vehiculos, bloqueos);
-
-        System.out.println("-----------------DATOS DEL PEDIDO 4---------------------------------");
-        ArrayList<PlanTransporte> planes3 = planTransporte.definirPlanesTransporte(pedidosFuturos.get(3), almacenes, caminos, regiones, ubicaciones, vehiculos, bloqueos);
-         */
-
-        /*
-        LocalDateTime fechaInicioSimulacion = LocalDateTime.of(2024, 4, 1, 0, 0);
-        LocalDateTime fechaFinSimulacion = LocalDateTime.of(2024, 4, 6, 12, 40) ;
-
-        tramoService.actualizarEstadoTramos(fechaInicioSimulacion, fechaFinSimulacion);
-        vehiculoService.actualizarEstadoVehiculos(fechaInicioSimulacion, fechaFinSimulacion, caminos);
-
-        while(true);
         */
         //simulacionService.simulacionSemanal(LocalDateTime.of(2024, 4, 4, 1, 0));
         simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024, 4, 4, 1, 0),3);
 	}
     
-	@Bean
+    @Bean
+
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("*") // Replace with the allowed origins
+                        .allowedOrigins("*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE");
             }
         };
     }
-    
 
+    @Bean
+    public ApplicationRunner initializer() {
+        return args -> {
+            // Preparación para el monitoreo de memoria y CPU
+            MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+            OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+
+            List<Long> memoryUsageHistory = new ArrayList<>();
+            List<Double> cpuUsageHistory = new ArrayList<>();
+            List<Long> timestamps = new ArrayList<>();
+
+            // Thread para medir la memoria y CPU cada segundo mientras se ejecuta el código
+            Thread resourceMonitor = new Thread(() -> {
+                while (!Thread.currentThread().isInterrupted()) {
+                    MemoryUsage heapMemoryUsage = memoryBean.getHeapMemoryUsage();
+                    memoryUsageHistory.add(heapMemoryUsage.getUsed());
+
+                    // Obtener el uso de CPU más preciso
+                    double cpuLoad = osBean.getProcessCpuLoad() * 100; // Convertir a porcentaje
+                    cpuUsageHistory.add(cpuLoad);
+
+                    timestamps.add(java.lang.System.currentTimeMillis());
+                    try {
+                        Thread.sleep(1000); // medir cada segundo
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            });
+
+            // Iniciar el monitoreo de memoria y CPU
+            resourceMonitor.start();
+
+            try {
+                // Correr el algoritmo ACO
+                simulacionService.simulacionSemanal(LocalDateTime.of(2024, 4, 4, 1, 0));
+
+            } finally {
+                // Parar el monitoreo de memoria y CPU al finalizar la ejecución
+                resourceMonitor.interrupt();
+            }
+
+            // Graficar el uso de memoria y CPU
+            createMemoryUsageChart(memoryUsageHistory, timestamps);
+            createCpuUsageChart(cpuUsageHistory, timestamps);
+        };
+    }
+
+    private void createMemoryUsageChart(List<Long> memoryUsage, List<Long> timestamps) {
+        XYSeries memorySeries = new XYSeries("Memory Usage (MB)");
+
+        for (int i = 0; i < memoryUsage.size(); i++) {
+            // Convertir timestamps a segundos desde el inicio
+            long timeInSeconds = (timestamps.get(i) - timestamps.get(0)) / 1000;
+
+            // Añadir datos de memoria (convertidos a MB)
+            memorySeries.add(timeInSeconds, memoryUsage.get(i) / (1024 * 1024));
+        }
+
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        dataset.addSeries(memorySeries);
+
+        JFreeChart chart = ChartFactory.createXYLineChart(
+                "Consumo de Memoria",
+                "Tiempo (s)",
+                "Uso de Memoria (MB)",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false);
+
+        // Guardar la gráfica de uso de memoria
+        try {
+            ChartUtils.saveChartAsPNG(new File("memory_usage_chart.png"), chart, 800, 600);
+            System.out.println("Gráfica de memoria guardada como memory_usage_chart.png");
+        } catch (IOException e) {
+            System.err.println("Error al guardar la gráfica de memoria: " + e.getMessage());
+        }
+    }
+
+    private void createCpuUsageChart(List<Double> cpuUsage, List<Long> timestamps) {
+        XYSeries cpuSeries = new XYSeries("CPU Usage (%)");
+
+        for (int i = 0; i < cpuUsage.size(); i++) {
+            // Convertir timestamps a segundos desde el inicio
+            long timeInSeconds = (timestamps.get(i) - timestamps.get(0)) / 1000;
+
+            // Añadir datos de CPU (en porcentaje)
+            cpuSeries.add(timeInSeconds, cpuUsage.get(i));
+        }
+
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        dataset.addSeries(cpuSeries);
+
+        JFreeChart chart = ChartFactory.createXYLineChart(
+                "Consumo de CPU",
+                "Time (s)",
+                "Uso de CPU (%)",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false);
+
+        // Guardar la gráfica de uso de CPU
+        try {
+            ChartUtils.saveChartAsPNG(new File("cpu_usage_chart.png"), chart, 800, 600);
+            System.out.println("Gráfica de CPU guardada como cpu_usage_chart.png");
+        } catch (IOException e) {
+            System.err.println("Error al guardar la gráfica de CPU: " + e.getMessage());
+        }
+    }
 }
-
