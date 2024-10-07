@@ -82,12 +82,18 @@ public class MantenimientoService {
             }
             return mantenimientosPreventivosExistente.get(0);
         }
-
         return null;
-
-
-
     }
+
+    public Mantenimiento obtenerMantenimientoRecurrenteActual(LocalDateTime fechaActual, Long idVehiculo){
+        Optional<Mantenimiento> mantenimientoRecurrente = mantenimientoRepository.findMantenimientoRecurrenteByFechaAndVehiculoAndTipoMantenimiento(fechaActual,idVehiculo, TipoMantenimiento.Recurrente);
+        if(mantenimientoRecurrente.isPresent())
+            return mantenimientoRecurrente.get();
+        else
+            return null;
+    }
+
+
 
 
 }

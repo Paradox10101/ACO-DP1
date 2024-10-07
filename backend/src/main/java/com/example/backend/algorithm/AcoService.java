@@ -390,10 +390,10 @@ public class AcoService {
                 TipoAveria tipoAveria = TipoAveria.values()[new Random().nextInt(TipoAveria.values().length)];
                 vehiculoSeleccionado.registrarAveria(tipoAveria, mejorSolucion.get(0).getFechaInicio());//Asignacion de averia
 
-                System.out.println("Vehículo " + vehiculoSeleccionado.getCodigo() + " ha sufrido una avería de tipo: "
-                        + tipoAveria);
+                
 
                 if (tipoAveria == TipoAveria.T2 || tipoAveria == TipoAveria.T3) {
+                    System.out.println("Vehículo " + vehiculoSeleccionado.getCodigo() + " ha sufrido una avería de tipo: " + tipoAveria);
                     // Replanificar la carga
                     Vehiculo nuevoVehiculo = obtenerVehiculo(tramo.getCantidadPaquetes(),
                             vehiculoSeleccionado.getUbicacionActual().getUbigeo());
@@ -409,15 +409,60 @@ public class AcoService {
                             }
                         }
 
-                        vehiculoSeleccionado.setEstado(EstadoVehiculo.Averiado); // Marcar el vehículo anterior como
-                                                                                 // averiado
+                        vehiculoSeleccionado.setEstado(EstadoVehiculo.Averiado); // Marcar el vehículo anterior como averiado
                         vehiculoSeleccionado = nuevoVehiculo; // Actualizar el vehículo seleccionado al nuevo vehículo
                     } else {
                         System.out.println("No hay vehículos disponibles para continuar la ruta.");
                         return null;
                     }
+                }else{
+                    //si tipo Averia T1 -> se detiene por 4 horas pero luego puede continuar
+                    // Si el tipo de avería es T1 -> retrasar el recorrido por 4 horas
+                    System.out.println("Vehículo " + vehiculoSeleccionado.getCodigo() + " sufre una avería moderada (T1). Se detiene por 4 horas.");
+
+                    // Añadir 4 horas a todos los tramos posteriores
+                    for (Tramo t : mejorSolucion) {
+                        if (t.getFechaInicio().isAfter(tramo.getFechaInicio())) {
+                            // Añadir 4 horas al inicio y fin del tramo
+                            t.setFechaInicio(t.getFechaInicio().plusHours(4));
+                            t.setFechaFin(t.getFechaFin().plusHours(4));
+                        }
+                    }
+
                 }
             }
+
+            
+            // Verificar si la fecha de fin del tramo excede la fecha de entrega estimada
+            if (tramo.getFechaFin().isAfter(pedidoIngresado.getFechaEntregaEstimada())) {
+                System.out.println("¡Colapso logístico! La fecha de entrega ha sido excedida. Fecha límite: "
+                        + pedidoIngresado.getFechaEntregaEstimada() +
+                        ", Fecha fin del tramo: " + tramo.getFechaFin());
+                // Finalizar la ejecución
+                return null;
+            }
+
+            tramo.setVehiculo(vehiculoSeleccionado);
+            tramo.setCantidadPaquetes(cantidadSolicitada);
+
+            System.out.println("--------------------------------------------------");
+            System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo());
+            System.out.println("Region Origen: " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionOrigen().getRegion().getNombre());
+            System.out.println("Ubicación Destino - ID: " + tramo.getubicacionDestino().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionDestino().getUbigeo());
+            System.out.println("Region Destino: " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Ubigeo: " + tramo.getubicacionDestino().getRegion().getNombre());
+            System.out.println("Distancia: " + tramo.getDistancia() + " km");
+            System.out.println("Velocidad: " + tramo.getVelocidad() + " km/h");
+            System.out.println("Fecha Inicio Recorrido: " + tramo.getFechaInicio().getDayOfMonth() + "/" + tramo.getFechaInicio().getMonthValue() + "/" + tramo.getFechaInicio().getYear() + " " + tramo.getFechaInicio().getHour() + "h:" + tramo.getFechaInicio().getMinute() + "m");
+            System.out.println("Fecha Fin Recorrido: " + tramo.getFechaFin().getDayOfMonth() + "/" + tramo.getFechaFin().getMonthValue() + "/" + tramo.getFechaFin().getYear() + " " + tramo.getFechaFin().getHour() + "h:" + tramo.getFechaFin().getMinute() + "m");
+
+            //System.out.println("--------------------------------------------------");
+
+            //System.out.println("Bloqueado: " + (tramo.isBloqueado() ? "Sí" : "No"));
+
         }
         */
         return mejorSolucion;
@@ -425,8 +470,8 @@ public class AcoService {
 
 
 
-    public ArrayList<Tramo> obtenerMejorRutaDesdeOficinaAOficina (LocalDateTime fechaInicio, List < Oficina > oficinas,
-                                                                  HashMap < String, ArrayList < Ubicacion >> caminos, Ubicacion ubicacionOficinaOrigen, Ubicacion ubicacionOficinaDestino,
+    public ArrayList<Tramo> obtenerMejorRutaDesdeOficinaAAlmacen (LocalDateTime fechaInicio, List < Oficina > oficinas,
+                                                                  HashMap < String, ArrayList < Ubicacion >> caminos, Ubicacion ubicacionOficinaOrigen,
                                                                   List < Ubicacion > ubicaciones, List < Vehiculo > vehiculos, List < Almacen > almacenes,
                                                                   List<Bloqueo> bloqueosProgramados){
         this.caminos = caminos;
@@ -442,9 +487,9 @@ public class AcoService {
 
         //Busqueda desde mejor ruta desde la oficina de destino
         ArrayList<Tramo> mejorSolucion = generarRutaMasOptima(fechaInicio, ubicacionOficinaOrigen,
-                new ArrayList<>(Collections.singletonList(ubicacionOficinaDestino)),
+                almacenes.stream().map(Almacen::getUbicacion).collect(Collectors.toCollection(ArrayList::new)),
                 -1, false,
-                almacenes.stream().map(Almacen::getUbicacion).collect(Collectors.toCollection(ArrayList::new)));
+                null);
 
 
         return mejorSolucion;
