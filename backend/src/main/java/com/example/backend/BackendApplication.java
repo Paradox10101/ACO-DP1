@@ -102,7 +102,8 @@ public class BackendApplication {
 
         while(true);
         */
-        simulacionService.simulacionSemanal(LocalDateTime.of(2024, 4, 4, 1, 0));
+        //simulacionService.simulacionSemanal(LocalDateTime.of(2024, 4, 4, 1, 0));
+        simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024, 4, 4, 1, 0),3);
 	}
     
 	@Bean
