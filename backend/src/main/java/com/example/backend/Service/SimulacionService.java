@@ -168,8 +168,8 @@ public class SimulacionService {
             HashMap<Vehiculo, ArrayList<Tramo>>rutasVehiculosDefinidas = new HashMap<>();
             //Lista de pedidos por atender
             if(pedidosPorAtender!=null) {
-                if(pedidosPorAtender.size() > contadorPedido)
-                    pedidosPorAtender = pedidosPorAtender.stream().limit(pedidosPorAtender.size()-contadorPedido).collect(Collectors.toList());
+                if(pedidosPorAtender.size() > numeroPedidos - contadorPedido)
+                    pedidosPorAtender = pedidosPorAtender.stream().limit(numeroPedidos-contadorPedido).collect(Collectors.toList());
                 else
                     pedidosPorAtender = pedidosPorAtender.stream().limit(pedidosPorAtender.size()).collect(Collectors.toList());
                 contadorPedido+=pedidosPorAtender.size();
@@ -209,7 +209,9 @@ public class SimulacionService {
                 System.out.println("Se alcanzo el limite maximo de fecha, el cual es " + fechaFinSimulacion);
                 break;
             }
-
+            System.out.println();
+            System.out.println("Contador de pedidos atendidos: " + contadorPedido);
+            System.out.println();
             if(contadorPedido>=numeroPedidos)break;
         }
         // Medir tiempo de fin

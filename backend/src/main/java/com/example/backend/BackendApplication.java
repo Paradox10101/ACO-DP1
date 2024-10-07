@@ -37,12 +37,13 @@ public class BackendApplication {
     }
 
 
-        
+
         //simulacionService.simulacionSemanal(LocalDateTime.of(2024, 4, 4, 1, 0));
-        //simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024,4,4,1,0),3);
-	
+        //simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024, 4, 4, 1, 0),3);
+
     
     @Bean
+
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
@@ -89,8 +90,7 @@ public class BackendApplication {
 
             try {
                 // Correr el algoritmo ACO
-                //simulacionService.simulacionSemanal(LocalDateTime.of(2024, 4, 4, 1, 0));
-                simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024, 4, 4, 1, 0), 3);
+                simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024, 4, 4, 1, 0), 5);
 
             } finally {
                 // Parar el monitoreo de memoria y CPU al finalizar la ejecución

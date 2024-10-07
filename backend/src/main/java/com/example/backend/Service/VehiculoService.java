@@ -190,6 +190,21 @@ public class VehiculoService {
 
                 ArrayList<Tramo> rutaOptima =  acoService.obtenerMejorRutaDesdeOficinaAAlmacen(fechaFin, oficinaService.obtenerTodasLasOficinas(),
                         caminos, vehiculo.getUbicacionActual() , ubicacionService.obtenerTodasLasUbicaciones(), obtenerTodos(), almacenService.obtenerTodos(), bloqueoService.obtenerBloqueosEntreFechas(fechaFin, fechaFin.plusHours(24*3)));
+                if(rutaOptima!=null){
+                    ArrayList<Mantenimiento> mantenimientos = new ArrayList<>();
+                    rutaOptima.stream().forEach(tramoS -> {
+                        Mantenimiento mantenimiento = new Mantenimiento();
+                        mantenimiento.setFechaInicio(tramoS.getFechaFin());
+                        mantenimiento.setFechaFin(tramoS.getFechaFin().plusHours(2));
+                        mantenimiento.setTipo(TipoMantenimiento.Recurrente);
+                        mantenimiento.setVehiculo(vehiculo);
+                        mantenimiento.setPendiente(true);
+                        mantenimientos.add(mantenimiento);
+                    });
+                    mantenimientoService.guardarMantenimientos(mantenimientos);
+                    tramoService.guardarTramos(rutaOptima);
+                }
+
                 vehiculo.setEstado(EstadoVehiculo.EnRuta);
 
             }
