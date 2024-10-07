@@ -6,5 +6,5 @@
 /OdiparPackRutaModel/build/
 /OdiparPackPedidosModel/dist/
 /OdiparPackPedidosModel/build/
-.jpg
-.png
+*.jpg
+*.png
