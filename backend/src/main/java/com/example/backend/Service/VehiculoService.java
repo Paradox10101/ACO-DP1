@@ -59,43 +59,70 @@ public class VehiculoService {
         vehiculoRepository.deleteById(id);
     }
 
-    public Vehiculo obtenerVehiculo(List<Vehiculo> vehiculos,     List<Almacen>almacenes, int cantidadPaquetes, String ubigeoAlmacen){
+    public Vehiculo obtenerVehiculo(List<Vehiculo> vehiculos, List<Almacen> almacenes, int cantidadPaquetes, String ubigeoAlmacen) {
+        // Se declara una variable de referencia que contendrá la cantidad de paquetes a despachar
         final int[] cantidadPorDespachar = {cantidadPaquetes};
-        Optional<Almacen> almacenSeleccionado = almacenes.stream().filter(almacenS -> almacenS.getUbicacion().getUbigeo().equals(ubigeoAlmacen)).findFirst();
-        if(!almacenSeleccionado.isPresent())return null;
 
+        // Se busca el almacén que coincide con el ubigeo proporcionado
+        Optional<Almacen> almacenSeleccionado = almacenes.stream()
+                .filter(almacenS -> almacenS.getUbicacion().getUbigeo().equals(ubigeoAlmacen))
+                .findFirst();
+
+        // Si no se encuentra ningún almacén con el ubigeo especificado, se retorna null
+        if (!almacenSeleccionado.isPresent()) return null;
+
+        // Se busca el vehículo que tenga suficiente capacidad y esté ubicado en el almacén proporcionado
+        // Además, el vehículo debe estar disponible y libre de averías en el momento actual
         Optional<Vehiculo> vehiculoDespacho = vehiculos.stream()
-                .filter(vehiculoDS ->  vehiculoDS.getTipoVehiculo().getCapacidadMaxima() >= cantidadPorDespachar[0]
-                        && vehiculoDS.getUbicacionActual().getUbigeo().equals(ubigeoAlmacen)
-                        && vehiculoDS.isDisponible()
-                        && vehiculoDS.verificarDisponibilidad(LocalDateTime.now())) // Verifica si está disponible y libre de averías)
-                .min(Comparator.comparing(vehiculoDS -> vehiculoDS.getTipoVehiculo().getCapacidadMaxima()));
+                .filter(vehiculoDS -> vehiculoDS.getTipoVehiculo().getCapacidadMaxima() >= cantidadPorDespachar[0] // Verifica capacidad
+                        && vehiculoDS.getUbicacionActual().getUbigeo().equals(ubigeoAlmacen) // Verifica que esté en el almacén correcto
+                        && vehiculoDS.isDisponible() // Verifica que esté disponible
+                        && vehiculoDS.verificarDisponibilidad(LocalDateTime.now())) // Verifica disponibilidad actual
+                .min(Comparator.comparing(vehiculoDS -> vehiculoDS.getTipoVehiculo().getCapacidadMaxima())); // Selecciona el vehículo con la menor capacidad adecuada
 
-        if(vehiculoDespacho.isPresent()){
+        // Si se encuentra un vehículo adecuado
+        if (vehiculoDespacho.isPresent()) {
+            // Se actualiza el estado del vehículo a "En Ruta" y se desasocia del almacén
             vehiculoDespacho.get().setEstado(EstadoVehiculo.EnRuta);
             vehiculoDespacho.get().setAlmacen(null);
-            vehiculoDespacho.get().setCapacidadUtilizada(cantidadPaquetes);
-            almacenSeleccionado.get().setCantidadVehiculos(almacenSeleccionado.get().getCantidadVehiculos()-1);
-            return vehiculoDespacho.get();
-        }
-        else{
-            Optional<Vehiculo> vehiculoMayorCapacidad = vehiculos.stream()
-                    .filter(vehiculoDS ->  vehiculoDS.getTipoVehiculo().getCapacidadMaxima() < cantidadPorDespachar[0]
-                            && vehiculoDS.getUbicacionActual().getUbigeo().equals(ubigeoAlmacen)
-                            && vehiculoDS.isDisponible()
-                            && vehiculoDS.verificarDisponibilidad(LocalDateTime.now())) //Aqui se verifica si los vehiculos estan disponibles y si es que es para el momento actual
-                    .max(Comparator.comparing(vehiculoDS -> vehiculoDS.getTipoVehiculo().getCapacidadMaxima()));
 
-            if(vehiculoMayorCapacidad.isPresent()){
+            // Se establece la capacidad utilizada en el vehículo
+            vehiculoDespacho.get().setCapacidadUtilizada(cantidadPaquetes);
+
+            // Se reduce en 1 la cantidad de vehículos disponibles en el almacén
+            almacenSeleccionado.get().setCantidadVehiculos(almacenSeleccionado.get().getCantidadVehiculos() - 1);
+
+            // Se retorna el vehículo asignado
+            return vehiculoDespacho.get();
+        } else {
+            // Si no se encuentra un vehículo con suficiente capacidad, se intenta buscar uno con mayor capacidad
+            Optional<Vehiculo> vehiculoMayorCapacidad = vehiculos.stream()
+                    .filter(vehiculoDS -> vehiculoDS.getTipoVehiculo().getCapacidadMaxima() < cantidadPorDespachar[0] // Vehículo con capacidad insuficiente
+                            && vehiculoDS.getUbicacionActual().getUbigeo().equals(ubigeoAlmacen) // Ubicación correcta
+                            && vehiculoDS.isDisponible() // Verifica que esté disponible
+                            && vehiculoDS.verificarDisponibilidad(LocalDateTime.now())) // Verifica disponibilidad actual
+                    .max(Comparator.comparing(vehiculoDS -> vehiculoDS.getTipoVehiculo().getCapacidadMaxima())); // Busca el vehículo con mayor capacidad insuficiente
+
+            // Si se encuentra un vehículo con mayor capacidad
+            if (vehiculoMayorCapacidad.isPresent()) {
+                // Actualiza el estado del vehículo a "En Ruta" y desasocia del almacén
                 vehiculoMayorCapacidad.get().setEstado(EstadoVehiculo.EnRuta);
                 vehiculoMayorCapacidad.get().setAlmacen(null);
+
+                // Se llena la capacidad máxima del vehículo con la carga
                 vehiculoMayorCapacidad.get().setCapacidadUtilizada(vehiculoMayorCapacidad.get().getCapacidadMaxima());
-                almacenSeleccionado.get().setCantidadVehiculos(almacenSeleccionado.get().getCantidadVehiculos()-1);
+
+                // Se reduce en 1 la cantidad de vehículos disponibles en el almacén
+                almacenSeleccionado.get().setCantidadVehiculos(almacenSeleccionado.get().getCantidadVehiculos() - 1);
+
+                // Se retorna el vehículo asignado
                 return vehiculoMayorCapacidad.get();
             }
-        }
-        return null;
     }
+
+    // Si no se encuentra ningún vehículo adecuado, se retorna null
+    return null;
+}
 
 
     public Vehiculo actualizarVehiculo(Long id, Vehiculo vehiculoActualizado) {

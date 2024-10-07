@@ -50,6 +50,11 @@ public class AcoService {
     public AcoService() {
 
     }
+    
+    // Método para configurar la semilla
+    public void setSemilla(int semilla) {
+        this.random = new Random(semilla); // Cambia la semilla del generador de números aleatorios
+    }
 
     private void inicializarFeromonas(){
         feromonas = new HashMap<>();

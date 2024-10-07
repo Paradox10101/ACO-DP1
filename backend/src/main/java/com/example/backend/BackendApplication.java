@@ -69,14 +69,24 @@ public class BackendApplication {
                         .filter(pedidoS -> pedidoS.getFechaRegistro().isAfter(fechaSeleccionada))
                         .collect(Collectors.toCollection(ArrayList::new));
 
-        System.out.println("-----------------DATOS DEL PEDIDO 1---------------------------------");
-        ArrayList<PlanTransporte> planes0 = planTransporte.definirPlanesTransporte(fechaSeleccionada, pedidosFuturos.get(0),  caminos);
+        // Ejecutar con diferentes semillas
+        for (int semilla = 1; semilla <= 30; semilla++) {
+            System.out.println("Ejecutando con semilla: " + semilla);
+            
+            System.out.println("-----------------DATOS DEL PEDIDO 1---------------------------------");
+            ArrayList<PlanTransporte> planes0 = planTransporte.definirPlanesTransporte(fechaSeleccionada, pedidosFuturos.get(0),  caminos, semilla);
+
+            System.out.println("-----------------DATOS DEL PEDIDO 2---------------------------------");
+            ArrayList<PlanTransporte> planes1 = planTransporte.definirPlanesTransporte(fechaSeleccionada, pedidosFuturos.get(1),  caminos, semilla);
+
+            System.out.println("Fin de ejecución con semilla: " + semilla);
+        }
+        
 
 
-        /*
-        System.out.println("-----------------DATOS DEL PEDIDO 2---------------------------------");
-        ArrayList<PlanTransporte> planes1 = planTransporte.definirPlanesTransporte(fechaSeleccionada, pedidosFuturos.get(1),  caminos);
-        */
+        
+        
+        
 
         /*
         System.out.println("-----------------DATOS DEL PEDIDO 3---------------------------------");
