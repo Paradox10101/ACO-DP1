@@ -21,7 +21,7 @@ public class Tramo {
     private Ubicacion ubicacionDestino;
 
     @ManyToOne
-    @JoinColumn(name = "fid_plan_transporte", nullable = false)
+    @JoinColumn(name = "fid_plan_transporte")
     private PlanTransporte planTransporte;
 
     @Column(name = "bloqueado")
