@@ -190,6 +190,8 @@ public class VehiculoService {
 
                 ArrayList<Tramo> rutaOptima =  acoService.obtenerMejorRutaDesdeOficinaAAlmacen(fechaFin, oficinaService.obtenerTodasLasOficinas(),
                         caminos, vehiculo.getUbicacionActual() , ubicacionService.obtenerTodasLasUbicaciones(), obtenerTodos(), almacenService.obtenerTodos(), bloqueoService.obtenerBloqueosEntreFechas(fechaFin, fechaFin.plusHours(24*3)));
+                if(rutaOptima!=null)
+                    tramoService.guardarTramos(rutaOptima);
                 vehiculo.setEstado(EstadoVehiculo.EnRuta);
 
             }
