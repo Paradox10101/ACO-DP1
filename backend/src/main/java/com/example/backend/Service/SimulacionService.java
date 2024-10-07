@@ -67,6 +67,9 @@ public class SimulacionService {
         System.out.println();
         System.out.println();
         System.out.println("=============================================================INICIO DE LA SIMULACION=======================================================================================================");
+        //Desde aqui se empieza el conteno del tiempo
+        // Medir tiempo de inicio
+        long startTime = System.nanoTime();
         while(fechaActualSimulacion.isBefore(fechaFinSimulacion)){
             List<Pedido> pedidosPorAtender = pedidoService.obtenerPedidosEntreFechas(fechaActualSimulacion, fechaActualSimulacion.plusMinutes(minutesIncrement));
             HashMap<Pedido, List<PlanTransporte>> pedidosAtendidos = new HashMap<>();
@@ -102,9 +105,17 @@ public class SimulacionService {
             tramoService.actualizarEstadoTramos(fechaInicioSimulacion, fechaFinSimulacion);
             vehiculoService.actualizarEstadoVehiculos(fechaInicioSimulacion, fechaFinSimulacion, caminos);
         }
+        // Medir tiempo de fin
+        long endTime = System.nanoTime();
+
+        // Calcular el tiempo total de ejecución
+        long durationInNano = endTime - startTime;
+        double durationInSeconds = (double) durationInNano / 1_000_000_000.0;
+
         System.out.println();
         System.out.println();
         System.out.println("=============================================================FIN DE LA SIMULACION==========================================================================================================");
+        System.out.println("El tiempo total de ejecución de la simulación fue: " + durationInSeconds + " segundos");
 
     }
 
@@ -147,6 +158,9 @@ public class SimulacionService {
         System.out.println();
         System.out.println();
         System.out.println("=============================================================INICIO DE LA SIMULACION=======================================================================================================");
+        //Desde aqui se empieza el conteno del tiempo
+        // Medir tiempo de inicio
+        long startTime = System.nanoTime();
         int contadorPedido=0;
         while(true){
             List<Pedido> pedidosPorAtender = pedidoService.obtenerPedidosEntreFechas(fechaActualSimulacion, fechaActualSimulacion.plusMinutes(minutesIncrement));
@@ -175,6 +189,10 @@ public class SimulacionService {
 
             for (Pedido pedido : pedidosAtendidos.keySet()){
                 for(PlanTransporte planTransporte : pedidosAtendidos.get(pedido)){
+                    // Aquí gestionamos averías para cada plan de transporte
+                    gestionarAverias(planTransporte);
+
+                    // Imprimir información de las rutas de cada plan de transporte
                     planTransporteService.imprimirDatosPlanTransporte(planTransporte);
                     planTransporteService.imprimirRutasPlanTransporte(planTransporte);
                 }
@@ -194,9 +212,51 @@ public class SimulacionService {
 
             if(contadorPedido>=numeroPedidos)break;
         }
+        // Medir tiempo de fin
+        long endTime = System.nanoTime();
+
+        // Calcular el tiempo total de ejecución
+        long durationInNano = endTime - startTime;
+        double durationInSeconds = (double) durationInNano / 1_000_000_000.0;
+
         System.out.println();
         System.out.println();
         System.out.println("=============================================================FIN DE LA SIMULACION==========================================================================================================");
+        System.out.println("El tiempo total de ejecución de la simulación fue: " + durationInSeconds + " segundos");
 
     }
+    private void gestionarAverias(PlanTransporte planTransporte) {
+        Vehiculo vehiculo = planTransporte.getVehiculo();
+        List<Tramo> tramos = tramoService.obtenerPorPlanTransporte(planTransporte);
+
+        // Recorremos los tramos y verificamos si ocurre una avería
+        for (Tramo tramo : tramos) {
+            // Probabilidad del 10% de que ocurra una avería en un tramo
+            if (Math.random() < 0.1) {
+                // Generamos el tipo de avería aleatoria
+                TipoAveria tipoAveria = generarAveriaAleatoria();
+                System.out.println(
+                        "El vehículo " + vehiculo.getCodigo() + " ha sufrido una avería de tipo: " + tipoAveria);
+
+                // Gestionamos la avería según su tipo
+                vehiculoService.gestionarAveria(vehiculo, tipoAveria, tramo);
+
+                // Si el vehículo no puede continuar debido a una avería grave, detenemos el
+                // proceso
+                if (vehiculo.getEstado() == EstadoVehiculo.Averiado) {
+                    System.out.println("El vehículo " + vehiculo.getCodigo() + " ha quedado averiado y no puede continuar.");
+                    break;
+                }
+            }
+        }
+    }
+
+    // Método auxiliar para generar un tipo de avería aleatoria
+    private TipoAveria generarAveriaAleatoria() {
+        TipoAveria[] tiposAveria = TipoAveria.values();
+        Random random = new Random();
+        return tiposAveria[random.nextInt(tiposAveria.length)];
+    }
+
+
 }
