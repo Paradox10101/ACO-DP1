@@ -73,9 +73,7 @@ public class SimulacionService {
         while(fechaActualSimulacion.isBefore(fechaFinSimulacion)){
             List<Pedido> pedidosPorAtender = pedidoService.obtenerPedidosEntreFechas(fechaActualSimulacion, fechaActualSimulacion.plusMinutes(minutesIncrement));
             HashMap<Pedido, List<PlanTransporte>> pedidosAtendidos = new HashMap<>();
-
             HashMap<Vehiculo, ArrayList<Tramo>>rutasVehiculosDefinidas = new HashMap<>();
-
             //Lista de pedidos por atender
             if(pedidosPorAtender!=null) {
                 for (Pedido pedido : pedidosPorAtender) {
@@ -83,7 +81,6 @@ public class SimulacionService {
                     int semilla = random.nextInt(8000);
                     ArrayList<PlanTransporte> planes = planTransporteService.definirPlanesTransporte(fechaActualSimulacion, pedido, caminos, semilla, rutasVehiculosDefinidas);
                     pedidosAtendidos.put(pedido, planes);
-
                 }
                 System.out.println("==================================================================================================================================================================================");
                 System.out.println("SIMULACION EJECUTADA EN EL PERIODO:" +
@@ -93,16 +90,15 @@ public class SimulacionService {
                 System.out.println("PLANES DE TRANSPORTE GENERADOS: ");
             }
 
-            // Revisar y gestionar averías para los vehículos que están en cada plan de
-            // transporte
-            for (Pedido pedido : pedidosAtendidos.keySet()) {
-                for (PlanTransporte planTransporte : pedidosAtendidos.get(pedido)) {
-                    // Aquí gestionamos averías para cada plan de transporte
-                    gestionarAverias(planTransporte);
-
-                    // Imprimir información de las rutas de cada plan
+            for (Pedido pedido : pedidosAtendidos.keySet()){
+                for(PlanTransporte planTransporte : pedidosAtendidos.get(pedido)){
+                    planTransporteService.imprimirDatosPlanTransporte(planTransporte);
                     planTransporteService.imprimirRutasPlanTransporte(planTransporte);
                 }
+            }
+            for (Vehiculo vehiculo : rutasVehiculosDefinidas.keySet()){
+                vehiculo.setEstado(EstadoVehiculo.EnRuta);
+                vehiculoService.guardar(vehiculo);
             }
 
             fechaActualSimulacion = fechaActualSimulacion.plusMinutes(minutesIncrement);
@@ -123,6 +119,97 @@ public class SimulacionService {
 
     }
 
+
+    public void atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime fechaInicioSimulacion, int numeroPedidos){
+        //Aumente este valor apra incrementar la frecuencia de actualizaciones y toma de pedidos
+        int minutesIncrement = 60;
+        //Aumente este valor apra establecer una fecha maxima
+        LocalDateTime fechaFinSimulacion = fechaInicioSimulacion.plusDays(7);
+        ArrayList<Oficina> oficinas;
+        ArrayList<Pedido> pedidos;
+        ArrayList<Bloqueo> bloqueos;
+        ArrayList<Mantenimiento> mantenimientos;
+        ArrayList<Ubicacion> ubicaciones = new ArrayList<>();
+        ArrayList<Region> regiones = new ArrayList<Region>(); // Es hardcodeado
+        ArrayList<Vehiculo> vehiculos = new ArrayList<Vehiculo>(); // Es hardcodeado
+        ArrayList<Almacen> almacenes = new ArrayList<Almacen>();
+        ArrayList<TipoVehiculo> tiposVehiculo = new ArrayList<>();
+        ArrayList<Cliente> clientes = new ArrayList<>();
+        ArrayList<Paquete> paquetes = new ArrayList<>();
+        HashMap<String, ArrayList<Ubicacion>> caminos;
+
+        regionService.guardar(new Region("COSTA", 1));
+        regionService.guardar(new Region("SIERRA", 2));
+        regionService.guardar(new Region("SELVA", 3));
+        regiones = regionService.obtenerTodas();
+
+        oficinas = filesService.cargarOficinasDesdeBD("dataset/Oficinas/c.1inf54.24-2.oficinas.v1.0.txt", regiones, ubicaciones);
+        vehiculos = filesService.cargarVehiculosAlmacenesDesdeArchivo("dataset/Vehiculos/vehiculos.txt",almacenes, vehiculos, ubicaciones, tiposVehiculo);
+        caminos = filesService.cargarCaminosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", ubicaciones);
+        //tramos = Tramo.cargarTramosDesdeArchivo("dataset/Tramos/c.1inf54.24-2.tramos.v1.0.txt", caminos);
+        bloqueos = filesService.cargarBloqueosDesdeArchivo("dataset/Bloqueos/c.1inf54.24-2.bloqueo.04.txt", ubicaciones);
+        //bloqueos = filesService.cargarBloqueosDesdeDirectorio("dataset/Bloqueos", ubicaciones);
+        pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202404.txt", oficinas, ubicaciones, clientes, paquetes);
+        //pedidos = filesService.cargarPedidosDesdeDirectorio("dataset/Pedidos", oficinas, ubicaciones, clientes, paquetes);
+        //pedidos = pedidoService.cargarPedidosDesdeArchivo("dataset/Pedidos/c.1inf54.ventas202409.txt", oficinas, ubicaciones, clientes, paquetes);
+        mantenimientos = filesService.cargarMantenimientosDesdeArchivo("dataset/Mantenimientos/c.1inf54.24-2.plan.mant.2024.trim.abr.may.jun.txt", vehiculos);
+        //mantenimientos = filesService.cargarMantenimientosDesdeDirectorio("dataset/Mantenimientos", vehiculos);
+        LocalDateTime fechaActualSimulacion = fechaInicioSimulacion;
+        System.out.println();
+        System.out.println();
+        System.out.println("=============================================================INICIO DE LA SIMULACION=======================================================================================================");
+        int contadorPedido=0;
+        while(true){
+            List<Pedido> pedidosPorAtender = pedidoService.obtenerPedidosEntreFechas(fechaActualSimulacion, fechaActualSimulacion.plusMinutes(minutesIncrement));
+            HashMap<Pedido, List<PlanTransporte>> pedidosAtendidos = new HashMap<>();
+            HashMap<Vehiculo, ArrayList<Tramo>>rutasVehiculosDefinidas = new HashMap<>();
+            //Lista de pedidos por atender
+            if(pedidosPorAtender!=null) {
+                if(pedidosPorAtender.size() > contadorPedido)
+                    pedidosPorAtender = pedidosPorAtender.stream().limit(pedidosPorAtender.size()-contadorPedido).collect(Collectors.toList());
+                else
+                    pedidosPorAtender = pedidosPorAtender.stream().limit(pedidosPorAtender.size()).collect(Collectors.toList());
+                contadorPedido+=pedidosPorAtender.size();
+                for (Pedido pedido : pedidosPorAtender) {
+                    Random random = new Random();
+                    int semilla = random.nextInt(8000);
+                    ArrayList<PlanTransporte> planes = planTransporteService.definirPlanesTransporte(fechaActualSimulacion, pedido, caminos, semilla, rutasVehiculosDefinidas);
+                    pedidosAtendidos.put(pedido, planes);
+                }
+                System.out.println("==================================================================================================================================================================================");
+                System.out.println("SIMULACION EJECUTADA EN EL PERIODO:" +
+                        " " + fechaActualSimulacion.getDayOfMonth() + "/" + fechaActualSimulacion.getMonthValue() + "/" + fechaActualSimulacion.getYear() + " " + fechaActualSimulacion.getHour() + "h:" + fechaActualSimulacion.getMinute() + "m"+
+                        " - " + fechaActualSimulacion.plusMinutes(minutesIncrement).getDayOfMonth() + "/" + fechaActualSimulacion.plusMinutes(minutesIncrement).getMonthValue() + "/" + fechaActualSimulacion.plusMinutes(minutesIncrement).getYear() + " " + fechaActualSimulacion.plusMinutes(minutesIncrement).getHour() + "h:" + fechaActualSimulacion.plusMinutes(minutesIncrement).getMinute() + "m");
+                System.out.println("==================================================================================================================================================================================");
+                System.out.println("PLANES DE TRANSPORTE GENERADOS: ");
+            }
+
+            for (Pedido pedido : pedidosAtendidos.keySet()){
+                for(PlanTransporte planTransporte : pedidosAtendidos.get(pedido)){
+                    planTransporteService.imprimirDatosPlanTransporte(planTransporte);
+                    planTransporteService.imprimirRutasPlanTransporte(planTransporte);
+                }
+            }
+            for (Vehiculo vehiculo : rutasVehiculosDefinidas.keySet()){
+                vehiculo.setEstado(EstadoVehiculo.EnRuta);
+                vehiculoService.guardar(vehiculo);
+            }
+
+            fechaActualSimulacion = fechaActualSimulacion.plusMinutes(minutesIncrement);
+            tramoService.actualizarEstadoTramos(fechaInicioSimulacion, fechaFinSimulacion);
+            vehiculoService.actualizarEstadoVehiculos(fechaInicioSimulacion, fechaFinSimulacion, caminos);
+            if(fechaActualSimulacion.isAfter(fechaFinSimulacion) || fechaActualSimulacion.isEqual(fechaFinSimulacion)){
+                System.out.println("Se alcanzo el limite maximo de fecha, el cual es " + fechaFinSimulacion);
+                break;
+            }
+
+            if(contadorPedido>=numeroPedidos)break;
+        }
+        System.out.println();
+        System.out.println();
+        System.out.println("=============================================================FIN DE LA SIMULACION==========================================================================================================");
+
+    }
     private void gestionarAverias(PlanTransporte planTransporte) {
         Vehiculo vehiculo = planTransporte.getVehiculo();
         List<Tramo> tramos = tramoService.obtenerPorPlanTransporte(planTransporte);

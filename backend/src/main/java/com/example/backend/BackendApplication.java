@@ -36,7 +36,14 @@ public class BackendApplication {
         SpringApplication.run(BackendApplication.class, args);
     }
 
+
+        */
+        //simulacionService.simulacionSemanal(LocalDateTime.of(2024, 4, 4, 1, 0));
+        simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024, 4, 4, 1, 0),3);
+	}
+    
     @Bean
+
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override

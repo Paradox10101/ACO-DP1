@@ -99,6 +99,7 @@ public class PlanTransporteService {
                         if(nuevaRutaDerivada!=null && !nuevaRutaDerivada.isEmpty()){
                             PlanTransporte planTransporte = new PlanTransporte();
                             vehiculo.setCapacidadUtilizada(vehiculo.getCapacidadUtilizada()+nuevaCantidadTransporte);
+                            planTransporte.setPedido(pedido);
                             planTransporte.setVehiculo(vehiculo);
                             planTransporte.setFechaActalizacion(fechaInicio);
                             planTransporte.setFechaCreacion(fechaInicio);
