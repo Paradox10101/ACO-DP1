@@ -70,7 +70,10 @@ public class PlanTransporteService {
 
 
     public ArrayList<PlanTransporte> definirPlanesTransporte(LocalDateTime fechaInicio, Pedido pedido,
-                                                             HashMap<String, ArrayList<Ubicacion>> caminos){
+                                                             HashMap<String, ArrayList<Ubicacion>> caminos, int semilla){
+
+        // Configuramos la semilla en AcoService
+        acoService.setSemilla(semilla);
         List<Ubicacion> ubicaciones = ubicacionService.obtenerTodasLasUbicaciones();
         List<Oficina> oficinas = oficinaService.obtenerTodasLasOficinas();
         List<Bloqueo> bloqueosPeriodoEntrega = bloqueoService.obtenerBloqueosEntreFechas(fechaInicio,
@@ -79,6 +82,7 @@ public class PlanTransporteService {
         ArrayList<PlanTransporte> planesTransporte = new ArrayList<>();
 
         imprimirDatosPedido(pedido);
+
         //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
         while(cantidadSolicitada > 0) {
             PlanTransporte planOptimo = new PlanTransporte();
@@ -98,7 +102,9 @@ public class PlanTransporteService {
             ArrayList<Tramo> rutaOptima =  acoService.obtenerMejorRutaAtenderOficinaDesdeAlmacen(fechaInicio, pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()*24,oficinas,
                     caminos, pedido.getOficinaDestino().getUbicacion(), ubicaciones, vehiculos, almacenes, bloqueosPeriodoEntrega);
 
+
             Vehiculo vehiculoSeleccionado = vehiculoService.obtenerVehiculo(vehiculos, almacenes ,cantidadSolicitada, rutaOptima.get(0).getubicacionOrigen().getUbigeo());
+
             if(rutaOptima == null || rutaOptima.isEmpty() || vehiculoSeleccionado==null){
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
@@ -109,6 +115,7 @@ public class PlanTransporteService {
                 vehiculoService.actualizarVehiculo(vehiculoSeleccionado.getId_vehiculo(), vehiculoSeleccionado);
                 guardar(planOptimo);
                 List<Mantenimiento> mantenimientos = new ArrayList<>();
+
                 rutaOptima.stream().forEach(tramoS -> {
                     tramoS.setVehiculo(vehiculoSeleccionado);
                     tramoS.setPlanTransporte(planOptimo);
@@ -121,14 +128,27 @@ public class PlanTransporteService {
                     mantenimiento.setPendiente(true);
                     mantenimientos.add(mantenimiento);
                 });
+
                 if(mantenimientos!=null && !mantenimientos.isEmpty()){
                     mantenimientoService.guardarMantenimientos(mantenimientos);
                 }
                 if(rutaOptima!=null && !rutaOptima.isEmpty()){
                     tramoService.guardarTramos(rutaOptima);
                 }
+
                 cantidadSolicitada -= planOptimo.getVehiculo().getCapacidadUtilizada();
+
                 imprimirRutasPlanTransporte(planOptimo);
+
+                planOptimo.setPedido(pedido);
+                imprimirRutasPlanTransporte(planOptimo, rutaOptima);
+
+
+
+
+
+                System.out.println("intento");
+
 
             }
             planesTransporte.add(planOptimo);
@@ -168,9 +188,37 @@ public class PlanTransporteService {
         );
     }
 
-    public void imprimirRutasPlanTransporte(PlanTransporte planTransporte){
+    public void imprimirRutasPlanTransporte(PlanTransporte planTransporte, ArrayList<Tramo> mejorSolucion){
         List<Tramo>tramos = tramoService.obtenerPorPlanTransporte(planTransporte);
-        for (Tramo tramo : tramos){
+        Pedido pedidoIngresado = planTransporte.getPedido();
+        Vehiculo vehiculoSeleccionado = planTransporte.getVehiculo();
+        for (int i = 0; i < tramos.size(); i++){
+
+            //Aqui se debe agregar la asignacion de averias
+            Tramo tramo = tramos.get(i);
+            List<Tramo> tramosRestantes = tramos.subList(i + 1, tramos.size());
+            // Verificar la posibilidad de una avería durante el trayecto del tramo
+            if (Math.random() < 0.1) {
+                gestionarAveria(vehiculoSeleccionado, tramo, tramosRestantes);
+                if (vehiculoSeleccionado.getEstado() == EstadoVehiculo.Averiado) {
+                    // Si no se puede reasignar vehículo, finalizar la ejecución
+                    return;
+                }
+            }
+
+            // Verificar si la fecha de fin del tramo excede la fecha de entrega estimada
+            if (tramo.getFechaFin().isAfter(pedidoIngresado.getFechaEntregaEstimada())) {
+                System.out.println("¡Colapso logístico! La fecha de entrega ha sido excedida. Fecha límite: "
+                        + pedidoIngresado.getFechaEntregaEstimada() +
+                        ", Fecha fin del tramo: " + tramo.getFechaFin());
+                // Finalizar la ejecución
+                return;
+            }
+
+            tramo.setVehiculo(vehiculoSeleccionado);
+            //tramo.setCantidadPaquetes(cantidadSolicitada);
+            //Aqui termina el codigo de averias
+
             System.out.println("--------------------------------------------------");
             System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
                     + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo());
@@ -187,7 +235,62 @@ public class PlanTransporteService {
         }
     }
 
+    // Nueva función modular para gestionar averías en PlanTransporteService
+    public void gestionarAveria(Vehiculo vehiculo, Tramo tramoActual, List<Tramo> tramosRestantes) {
+        // Determinamos el tipo de avería con una probabilidad del 10%
+        TipoAveria tipoAveria = TipoAveria.values()[new Random().nextInt(TipoAveria.values().length)];
+        vehiculo.registrarAveria(tipoAveria, tramoActual.getFechaInicio());
 
+        // Imprimimos información sobre el tipo de avería
+        System.out.println("Vehículo " + vehiculo.getCodigo() + " ha sufrido una avería de tipo: " + tipoAveria);
+
+        // Gestionar según el tipo de avería
+        if (tipoAveria == TipoAveria.T2 || tipoAveria == TipoAveria.T3) {
+            // Avería grave: reasignar vehículo
+            reasignarVehiculo(vehiculo, tramoActual, tramosRestantes);
+        } else if (tipoAveria == TipoAveria.T1) {
+            // Avería moderada: retrasar el recorrido por 4 horas
+            retrasarTramos(tramosRestantes, tramoActual.getFechaInicio(), 4);
+        }
+    }
+
+    // Función para reasignar vehículo después de una avería grave
+    private void reasignarVehiculo(Vehiculo vehiculoAveriado, Tramo tramoActual, List<Tramo> tramosRestantes) {
+        List<Vehiculo> vehiculosDisponibles = vehiculoService.obtenerVehiculosDisponibles();
+        List<Almacen> almacenesDisponibles = almacenService.obtenerAlmacenesConVehiculosDisponibles();
+
+        Vehiculo nuevoVehiculo = vehiculoService.obtenerVehiculo(vehiculosDisponibles, almacenesDisponibles,
+                tramoActual.getCantidadPaquetes(), vehiculoAveriado.getUbicacionActual().getUbigeo());
+
+        if (nuevoVehiculo != null) {
+            System.out.println("Cargando paquetes al nuevo vehículo " + nuevoVehiculo.getCodigo());
+            nuevoVehiculo.setCapacidadUtilizada(tramoActual.getCantidadPaquetes());
+            nuevoVehiculo.setEstado(EstadoVehiculo.EnRuta);
+
+            // Actualizar los tramos restantes con el nuevo vehículo
+            for (Tramo tramo : tramosRestantes) {
+                if (tramo.getFechaInicio().isAfter(tramoActual.getFechaInicio())) {
+                    tramo.setVehiculo(nuevoVehiculo);
+                }
+            }
+
+            // Marcar el vehículo anterior como averiado
+            vehiculoAveriado.setEstado(EstadoVehiculo.Averiado);
+        } else {
+            System.out.println("No hay vehículos disponibles para continuar la ruta.");
+        }
+    }
+
+    // Función para retrasar los tramos restantes en caso de avería moderada
+    private void retrasarTramos(List<Tramo> tramosRestantes, LocalDateTime fechaInicioTramo, int horasRetraso) {
+        for (Tramo tramo : tramosRestantes) {
+            if (tramo.getFechaInicio().isAfter(fechaInicioTramo)) {
+                // Añadir el retraso al inicio y fin del tramo
+                tramo.setFechaInicio(tramo.getFechaInicio().plusHours(horasRetraso));
+                tramo.setFechaFin(tramo.getFechaFin().plusHours(horasRetraso));
+            }
+        }
+    }
 
     public void actualizarCambiosEnvio(List<Tramo> tramosRuta, Pedido pedido, List<Oficina> oficinas) {
         // Obtener la oficina de destino
