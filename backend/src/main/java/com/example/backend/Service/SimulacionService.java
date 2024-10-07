@@ -158,6 +158,9 @@ public class SimulacionService {
         System.out.println();
         System.out.println();
         System.out.println("=============================================================INICIO DE LA SIMULACION=======================================================================================================");
+        //Desde aqui se empieza el conteno del tiempo
+        // Medir tiempo de inicio
+        long startTime = System.nanoTime();
         int contadorPedido=0;
         while(true){
             List<Pedido> pedidosPorAtender = pedidoService.obtenerPedidosEntreFechas(fechaActualSimulacion, fechaActualSimulacion.plusMinutes(minutesIncrement));
@@ -186,6 +189,10 @@ public class SimulacionService {
 
             for (Pedido pedido : pedidosAtendidos.keySet()){
                 for(PlanTransporte planTransporte : pedidosAtendidos.get(pedido)){
+                    // Aquí gestionamos averías para cada plan de transporte
+                    gestionarAverias(planTransporte);
+
+                    // Imprimir información de las rutas de cada plan de transporte
                     planTransporteService.imprimirDatosPlanTransporte(planTransporte);
                     planTransporteService.imprimirRutasPlanTransporte(planTransporte);
                 }
@@ -205,9 +212,17 @@ public class SimulacionService {
 
             if(contadorPedido>=numeroPedidos)break;
         }
+        // Medir tiempo de fin
+        long endTime = System.nanoTime();
+
+        // Calcular el tiempo total de ejecución
+        long durationInNano = endTime - startTime;
+        double durationInSeconds = (double) durationInNano / 1_000_000_000.0;
+
         System.out.println();
         System.out.println();
         System.out.println("=============================================================FIN DE LA SIMULACION==========================================================================================================");
+        System.out.println("El tiempo total de ejecución de la simulación fue: " + durationInSeconds + " segundos");
 
     }
     private void gestionarAverias(PlanTransporte planTransporte) {
