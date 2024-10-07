@@ -32,8 +32,8 @@ public class SimulacionService {
 
     public void simulacionSemanal(LocalDateTime fechaInicioSimulacion){
         //LocalDateTime fechaFinSimulacion = fechaInicioSimulacion.plusDays(1);
-        LocalDateTime fechaFinSimulacion = fechaInicioSimulacion.plusHours(4);
-        int minutesIncrement = 48;
+        LocalDateTime fechaFinSimulacion = fechaInicioSimulacion.plusHours(72);
+        int minutesIncrement = 60*24;
         ArrayList<Oficina> oficinas;
         ArrayList<Pedido> pedidos;
         ArrayList<Bloqueo> bloqueos;
@@ -70,14 +70,15 @@ public class SimulacionService {
         while(fechaActualSimulacion.isBefore(fechaFinSimulacion)){
             List<Pedido> pedidosPorAtender = pedidoService.obtenerPedidosEntreFechas(fechaActualSimulacion, fechaActualSimulacion.plusMinutes(minutesIncrement));
             HashMap<Pedido, List<PlanTransporte>> pedidosAtendidos = new HashMap<>();
-            ArrayList<Vehiculo> vehiculosEmpleados = new ArrayList<>();
+
+            HashMap<Vehiculo, ArrayList<Tramo>>rutasVehiculosDefinidas = new HashMap<>();
 
             //Lista de pedidos por atender
             if(pedidosPorAtender!=null) {
                 for (Pedido pedido : pedidosPorAtender) {
                     Random random = new Random();
                     int semilla = random.nextInt(8000);
-                    ArrayList<PlanTransporte> planes = planTransporteService.definirPlanesTransporte(fechaActualSimulacion, pedido, caminos, semilla);
+                    ArrayList<PlanTransporte> planes = planTransporteService.definirPlanesTransporte(fechaActualSimulacion, pedido, caminos, semilla, rutasVehiculosDefinidas);
                     pedidosAtendidos.put(pedido, planes);
 
                 }

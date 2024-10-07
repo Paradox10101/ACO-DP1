@@ -55,6 +55,19 @@ public class Tramo {
     public Tramo() {
     }
 
+    public Tramo( LocalDateTime fechaInicio, LocalDateTime fechaFin, Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino, Vehiculo vehiculo, float duracion, boolean transitado, float velocidad, float distancia, boolean bloqueado) {
+        this.fechaFin = fechaFin;
+        this.fechaInicio = fechaInicio;
+        this.ubicacionOrigen = ubicacionOrigen;
+        this.ubicacionDestino = ubicacionDestino;
+        this.vehiculo = vehiculo;
+        this.duracion = duracion;
+        this.transitado = transitado;
+        this.velocidad = velocidad;
+        this.distancia = distancia;
+        this.bloqueado = bloqueado;
+    }
+
     public Tramo(Ubicacion ubicacionOrigen, Ubicacion ubicacionDestino) {
         this.ubicacionOrigen = ubicacionOrigen;
         this.ubicacionDestino = ubicacionDestino;
