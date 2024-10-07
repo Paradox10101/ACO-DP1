@@ -86,6 +86,16 @@ public class PlanTransporteService {
 
         //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
         while(cantidadSolicitada > 0) {
+            /*
+            List<Vehiculo> vehiculosCapacidadOcupada = vehiculoService.hallarVehiculosConCapacidadDisponible(cantidadSolicitada);
+            if(vehiculosCapacidadOcupada!=null && !vehiculosCapacidadOcupada.isEmpty()) {
+                for(Vehiculo vehiculo : vehiculosCapacidadOcupada) {
+                    List<Tramo> rutaActual = tramoService.hallarRutaVehiculoCapacidadOcupadaParcialConOficina(fechaInicio, pedido.getFechaEntregaEstimada(), vehiculo ,pedido.getOficinaDestino().getUbicacion());
+
+                }
+            }
+
+             */
             PlanTransporte planOptimo = new PlanTransporte();
             List<Almacen> almacenes = almacenService.obtenerAlmacenesConVehiculosDisponibles();
             List<Vehiculo> vehiculos = vehiculoService.obtenerVehiculosDisponibles();
@@ -102,11 +112,15 @@ public class PlanTransporteService {
 
             ArrayList<Tramo> rutaOptima =  acoService.obtenerMejorRutaAtenderOficinaDesdeAlmacen(fechaInicio, pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()*24,oficinas,
                     caminos, pedido.getOficinaDestino().getUbicacion(), ubicaciones, vehiculos, almacenes, bloqueosPeriodoEntrega);
+            if(rutaOptima == null || rutaOptima.isEmpty()){
+                System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
+                break;
+            }
 
 
             Vehiculo vehiculoSeleccionado = vehiculoService.obtenerVehiculo(vehiculos, almacenes ,cantidadSolicitada, rutaOptima.get(0).getubicacionOrigen().getUbigeo());
 
-            if(rutaOptima == null || rutaOptima.isEmpty() || vehiculoSeleccionado==null){
+            if(vehiculoSeleccionado==null){
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
             }
@@ -342,8 +356,8 @@ public class PlanTransporteService {
         System.out.println("Ubicacion destino: " + planTransporte.getUbicacionDestino().getProvincia()
         +" | Ubigeo: " + planTransporte.getUbicacionDestino().getUbigeo());
         System.out.println("Vehiculo trasportador: ID - " + planTransporte.getVehiculo().getId_vehiculo()
-        + "\nCantidad de paquetes transportados: " + planTransporte.getCantidadTransportada()
         + "\nTipo de vehiculo: " + planTransporte.getVehiculo().getTipoVehiculo().getNombre()
+        + "\nCantidad de paquetes transportados: " + planTransporte.getCantidadTransportada()
         + "\nCapacidad maxima: " + planTransporte.getVehiculo().getTipoVehiculo().getCapacidadMaxima());
     }
 }

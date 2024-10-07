@@ -70,13 +70,16 @@ public class SimulacionService {
         while(fechaActualSimulacion.isBefore(fechaFinSimulacion)){
             List<Pedido> pedidosPorAtender = pedidoService.obtenerPedidosEntreFechas(fechaActualSimulacion, fechaActualSimulacion.plusMinutes(minutesIncrement));
             HashMap<Pedido, List<PlanTransporte>> pedidosAtendidos = new HashMap<>();
-            ArrayList<PlanTransporte>planes = new ArrayList<>();
+            ArrayList<Vehiculo>vehiculosEmpleados = new ArrayList<>();
+
+            //Lista de pedidos por atender
             if(pedidosPorAtender!=null) {
                 for (Pedido pedido : pedidosPorAtender) {
                     Random random = new Random();
                     int semilla = random.nextInt(8000);
-                    planes = planTransporteService.definirPlanesTransporte(fechaActualSimulacion, pedido, caminos, semilla);
+                    ArrayList<PlanTransporte> planes = planTransporteService.definirPlanesTransporte(fechaActualSimulacion, pedido, caminos, semilla);
                     pedidosAtendidos.put(pedido, planes);
+
                 }
                 System.out.println("==================================================================================================================================================================================");
                 System.out.println("SIMULACION EJECUTADA EN EL PERIODO:" +

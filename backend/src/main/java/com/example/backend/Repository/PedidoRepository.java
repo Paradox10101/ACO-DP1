@@ -14,6 +14,6 @@ import org.springframework.stereotype.Repository;
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
 
-    @Query("SELECT p FROM Pedido p WHERE p.fechaEntregaEstimada BETWEEN :fechaInicio AND :fechaFin")
+    @Query("SELECT p FROM Pedido p WHERE p.fechaEntregaEstimada BETWEEN :fechaInicio AND :fechaFin ORDER BY p.fechaEntregaEstimada DESC, p.cantidadPaquetes DESC")
     List<Pedido> findPedidoBetweenFechaInicioFechaFin(@Param("fechaInicio") LocalDateTime fechaInicio, @Param("fechaFin") LocalDateTime fechaFin);
 }
