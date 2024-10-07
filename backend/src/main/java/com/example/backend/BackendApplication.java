@@ -73,8 +73,10 @@ public class BackendApplication {
         ArrayList<PlanTransporte> planes0 = planTransporte.definirPlanesTransporte(fechaSeleccionada, pedidosFuturos.get(0),  caminos);
 
 
+        /*
         System.out.println("-----------------DATOS DEL PEDIDO 2---------------------------------");
         ArrayList<PlanTransporte> planes1 = planTransporte.definirPlanesTransporte(fechaSeleccionada, pedidosFuturos.get(1),  caminos);
+        */
 
         /*
         System.out.println("-----------------DATOS DEL PEDIDO 3---------------------------------");
@@ -82,10 +84,12 @@ public class BackendApplication {
 
         System.out.println("-----------------DATOS DEL PEDIDO 4---------------------------------");
         ArrayList<PlanTransporte> planes3 = planTransporte.definirPlanesTransporte(pedidosFuturos.get(3), almacenes, caminos, regiones, ubicaciones, vehiculos, bloqueos);
-
          */
-        tramoService.actualizarEstadoTramos(LocalDateTime.of(2024, 4, 1, 0, 0), LocalDateTime.of(2024, 4, 1, 4, 15) );
-        vehiculoService.actualizarEstadoVehiculos(LocalDateTime.of(2024, 4, 1, 0, 0), LocalDateTime.of(2024, 4, 1, 4, 15) );
+        LocalDateTime fechaInicioSimulacion = LocalDateTime.of(2024, 4, 1, 0, 0);
+        LocalDateTime fechaFinSimulacion = LocalDateTime.of(2024, 4, 1, 12, 40) ;
+
+        tramoService.actualizarEstadoTramos(fechaInicioSimulacion, fechaFinSimulacion);
+        vehiculoService.actualizarEstadoVehiculos(fechaInicioSimulacion, fechaFinSimulacion);
 
         while(true);
 

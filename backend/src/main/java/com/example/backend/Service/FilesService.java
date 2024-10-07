@@ -1,5 +1,6 @@
 package com.example.backend.Service;
 
+import com.example.backend.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,18 +11,6 @@ import com.example.backend.Repository.OficinaRepository;
 import com.example.backend.Repository.TipoVehiculoRepository;
 import com.example.backend.Repository.UbicacionRepository;
 import com.example.backend.Repository.VehiculoRepository;
-import com.example.backend.models.Almacen;
-import com.example.backend.models.Bloqueo;
-import com.example.backend.models.Cliente;
-import com.example.backend.models.EstadoVehiculo;
-import com.example.backend.models.Mantenimiento;
-import com.example.backend.models.Oficina;
-import com.example.backend.models.Paquete;
-import com.example.backend.models.Pedido;
-import com.example.backend.models.Region;
-import com.example.backend.models.TipoVehiculo;
-import com.example.backend.models.Ubicacion;
-import com.example.backend.models.Vehiculo;
 
 import java.io.File;
 import java.io.BufferedReader;
@@ -311,7 +300,6 @@ public class FilesService {
                     String mesString = anhoMesDiaString.substring(4, 6);
                     String diaString = anhoMesDiaString.substring(6, 8);
                     String fechaString = diaString + "/" + mesString + "/" + anhoString;
-
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                     LocalDate fecha = LocalDate.parse(fechaString, formatter);
                     LocalTime hora = LocalTime.of(23,59);
@@ -320,8 +308,9 @@ public class FilesService {
                             vehiculoS -> vehiculoS.getCodigo().equals(codigoString)).findFirst();
                     if(vehiculoSeleccionado.isPresent()){
                         mantenimiento.setVehiculo(vehiculoSeleccionado.get());
-                        mantenimiento.setFechaInicio(fechaParsed);
-                        mantenimiento.setFechaFin(fechaParsed.plusHours(24*2));
+                        mantenimiento.setFechaProgramada(fecha);
+                        mantenimiento.setPendiente(false);
+                        mantenimiento.setTipo(TipoMantenimiento.Preventivo);
                         mantenimientoRepository.save(mantenimiento);
                         mantenimientos.add(mantenimiento);
                     }
