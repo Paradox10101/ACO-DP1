@@ -2,6 +2,7 @@ package com.example.backend.Repository;
 
 import com.example.backend.models.PlanTransporte;
 import com.example.backend.models.Tramo;
+import com.example.backend.models.Vehiculo;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -33,5 +34,11 @@ public interface TramoRepository extends JpaRepository<Tramo, Long> {
     @Query("SELECT t FROM Tramo t WHERE t.vehiculo.id_vehiculo = :idVehiculo ORDER BY t.fechaFin DESC")
     Optional<Tramo> findLastTramoPedidoByVehiculo(@Param("idVehiculo") Long idVehiculo);
 
+
+    @Query("SELECT t FROM Tramo t WHERE t.fechaInicio >= :fechaInicio " + "AND t.fechaFin <= :fechaLimite " + "AND t.vehiculo = :vehiculo")
+    List<Tramo> findTramoBetweenFechasAndVehiculo(
+            @Param("fechaInicio") LocalDateTime fechaInicio,
+            @Param("fechaLimite") LocalDateTime fechaLimite,
+            @Param("vehiculo") Vehiculo vehiculo);
 
 }

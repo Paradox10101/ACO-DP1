@@ -3,6 +3,8 @@ package com.example.backend.Service;
 import com.example.backend.models.PlanTransporte;
 import com.example.backend.models.Tramo;
 import com.example.backend.Repository.TramoRepository;
+import com.example.backend.models.Ubicacion;
+import com.example.backend.models.Vehiculo;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -72,6 +74,20 @@ public class TramoService {
             return tramo.get();
         }
         else return null;
+    }
+
+    List<Tramo> hallarRutaVehiculoCapacidadOcupadaParcialConOficina(LocalDateTime fechaInicio, LocalDateTime fechaLimite, Vehiculo vehiculo , Ubicacion ubicacionDestino){
+        List<Tramo> tramosRecorrido = tramoRepository.findTramoBetweenFechasAndVehiculo(fechaInicio, fechaLimite, vehiculo);
+        if (tramosRecorrido != null && !tramosRecorrido.isEmpty()) {
+            for (Tramo tramo : tramosRecorrido) {
+                if(tramo.getubicacionOrigen().getUbigeo().equals(ubicacionDestino.getUbigeo())){
+                    return tramosRecorrido;
+                }
+            }
+            if(tramosRecorrido.get(tramosRecorrido.size()-1).getubicacionDestino().getUbigeo().equals(ubicacionDestino.getUbigeo()))
+                return tramosRecorrido;
+        }
+        return null;
     }
 
 }

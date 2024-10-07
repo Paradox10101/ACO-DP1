@@ -81,10 +81,21 @@ public class PlanTransporteService {
         int cantidadSolicitada = pedido.getCantidadPaquetes();
         ArrayList<PlanTransporte> planesTransporte = new ArrayList<>();
 
-        imprimirDatosPedido(pedido);
+        //imprimirDatosPedido(pedido);
+        System.out.println("Atendiendo pedido ID: " + pedido.getId_pedido() + " con cantidad de paquetes " + pedido.getCantidadPaquetes() + " a oficina ubicada en " + pedido.getOficinaDestino().getUbicacion().getProvincia() + "("+ pedido.getOficinaDestino().getUbicacion().getUbigeo() + ") ..." );
 
         //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
         while(cantidadSolicitada > 0) {
+            /*
+            List<Vehiculo> vehiculosCapacidadOcupada = vehiculoService.hallarVehiculosConCapacidadDisponible(cantidadSolicitada);
+            if(vehiculosCapacidadOcupada!=null && !vehiculosCapacidadOcupada.isEmpty()) {
+                for(Vehiculo vehiculo : vehiculosCapacidadOcupada) {
+                    List<Tramo> rutaActual = tramoService.hallarRutaVehiculoCapacidadOcupadaParcialConOficina(fechaInicio, pedido.getFechaEntregaEstimada(), vehiculo ,pedido.getOficinaDestino().getUbicacion());
+
+                }
+            }
+
+             */
             PlanTransporte planOptimo = new PlanTransporte();
             List<Almacen> almacenes = almacenService.obtenerAlmacenesConVehiculosDisponibles();
             List<Vehiculo> vehiculos = vehiculoService.obtenerVehiculosDisponibles();
@@ -101,11 +112,15 @@ public class PlanTransporteService {
 
             ArrayList<Tramo> rutaOptima =  acoService.obtenerMejorRutaAtenderOficinaDesdeAlmacen(fechaInicio, pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()*24,oficinas,
                     caminos, pedido.getOficinaDestino().getUbicacion(), ubicaciones, vehiculos, almacenes, bloqueosPeriodoEntrega);
+            if(rutaOptima == null || rutaOptima.isEmpty()){
+                System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
+                break;
+            }
 
 
             Vehiculo vehiculoSeleccionado = vehiculoService.obtenerVehiculo(vehiculos, almacenes ,cantidadSolicitada, rutaOptima.get(0).getubicacionOrigen().getUbigeo());
 
-            if(rutaOptima == null || rutaOptima.isEmpty() || vehiculoSeleccionado==null){
+            if(vehiculoSeleccionado==null){
                 System.out.println("No se pudo planificar la totalidad de entregas para el pedido con id: " + pedido.getId_pedido() + " y cantidad de paquetes " + pedido.getCantidadPaquetes());
                 break;
             }
@@ -120,6 +135,7 @@ public class PlanTransporteService {
                     tramoS.setVehiculo(vehiculoSeleccionado);
                     tramoS.setPlanTransporte(planOptimo);
                     tramoS.setTransitado(false);
+                    tramoS.setCantidadPaquetes(vehiculoSeleccionado.getCapacidadUtilizada());
                     Mantenimiento mantenimiento = new Mantenimiento();
                     mantenimiento.setFechaInicio(tramoS.getFechaFin());
                     mantenimiento.setFechaFin(tramoS.getFechaFin().plusHours(2));
@@ -137,18 +153,12 @@ public class PlanTransporteService {
                 }
 
                 cantidadSolicitada -= planOptimo.getVehiculo().getCapacidadUtilizada();
-
-                imprimirRutasPlanTransporte(planOptimo);
-
+                planOptimo.setCantidadTransportada(rutaOptima.get(0).getCantidadPaquetes());
+                planOptimo.setUbicacionOrigen(rutaOptima.get(0).getUbicacionOrigen());
+                planOptimo.setUbicacionDestino(rutaOptima.get(rutaOptima.size()-1).getUbicacionDestino());
+                planOptimo.setFechaCreacion(fechaInicio);
+                planOptimo.setFechaActalizacion(fechaInicio);
                 planOptimo.setPedido(pedido);
-                imprimirRutasPlanTransporte(planOptimo, rutaOptima);
-
-
-
-
-
-                System.out.println("intento");
-
 
             }
             planesTransporte.add(planOptimo);
@@ -157,10 +167,12 @@ public class PlanTransporteService {
         if(planesTransporte.isEmpty() || planesTransporte == null)
             System.out.println("No se encontró una ruta válida para el envío: " + pedido.getId_pedido());
 
+        guardarTodos(planesTransporte);
         return planesTransporte;
     }
 
     public void imprimirDatosPedido(Pedido pedido){
+        System.out.println("*****************************************************************************************");
         System.out.println("CANTIDAD DE PAQUETES:  " + pedido.getCantidadPaquetes());
         System.out.println("FECHA DE REGISTRO:  " +
                 pedido.getFechaRegistro().getDayOfMonth()+
@@ -188,12 +200,14 @@ public class PlanTransporteService {
         );
     }
 
-    public void imprimirRutasPlanTransporte(PlanTransporte planTransporte, ArrayList<Tramo> mejorSolucion){
+    public void imprimirRutasPlanTransporte(PlanTransporte planTransporte){
         List<Tramo>tramos = tramoService.obtenerPorPlanTransporte(planTransporte);
-        Pedido pedidoIngresado = planTransporte.getPedido();
-        Vehiculo vehiculoSeleccionado = planTransporte.getVehiculo();
-        for (int i = 0; i < tramos.size(); i++){
+        //Pedido pedidoIngresado = planTransporte.getPedido();
+        //Vehiculo vehiculoSeleccionado = planTransporte.getVehiculo();
 
+        //for (int i = 0; i < tramos.size(); i++){
+        for(Tramo tramo : tramos){
+            /*
             //Aqui se debe agregar la asignacion de averias
             Tramo tramo = tramos.get(i);
             List<Tramo> tramosRestantes = tramos.subList(i + 1, tramos.size());
@@ -216,18 +230,19 @@ public class PlanTransporteService {
             }
 
             tramo.setVehiculo(vehiculoSeleccionado);
+            */
             //tramo.setCantidadPaquetes(cantidadSolicitada);
             //Aqui termina el codigo de averias
 
-            System.out.println("--------------------------------------------------");
+            System.out.println("--------------------------------------------------------------------------------------");
             System.out.println("Ubicación Origen - ID: " + tramo.getubicacionOrigen().getId_ubicacion()
-                    + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo());
-            System.out.println("Region Origen: " + tramo.getubicacionOrigen().getId_ubicacion()
-                    + " | Ubigeo: " + tramo.getubicacionOrigen().getRegion().getNombre());
+                    + " | Ubigeo: " + tramo.getubicacionOrigen().getUbigeo() + " - Ciudad: " + tramo.getubicacionOrigen().getProvincia());
+            System.out.println("Region Origen: ID - " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Nombre: " + tramo.getubicacionOrigen().getRegion().getNombre());
             System.out.println("Ubicación Destino - ID: " + tramo.getubicacionDestino().getId_ubicacion()
-                    + " | Ubigeo: " + tramo.getubicacionDestino().getUbigeo());
-            System.out.println("Region Destino: " + tramo.getubicacionOrigen().getId_ubicacion()
-                    + " | Ubigeo: " + tramo.getubicacionDestino().getRegion().getNombre());
+                    + " | Ubigeo: " + tramo.getubicacionDestino().getUbigeo() + " - Ciudad: " + tramo.getubicacionDestino().getProvincia());
+            System.out.println("Region Destino: ID - " + tramo.getubicacionOrigen().getId_ubicacion()
+                    + " | Nombre: " + tramo.getubicacionDestino().getRegion().getNombre());
             System.out.println("Distancia: " + tramo.getDistancia() + " km");
             System.out.println("Velocidad: " + tramo.getVelocidad() + " km/h");
             System.out.println("Fecha Inicio Recorrido: " + tramo.getFechaInicio().getDayOfMonth() + "/" + tramo.getFechaInicio().getMonthValue() + "/" + tramo.getFechaInicio().getYear() + " " + tramo.getFechaInicio().getHour() + "h:" + tramo.getFechaInicio().getMinute() + "m");
@@ -328,6 +343,22 @@ public class PlanTransporteService {
 
     public PlanTransporte guardar(PlanTransporte planTransporte) {
         return planTransporteRepository.save(planTransporte);
+    }
+
+    public List<PlanTransporte> guardarTodos(List<PlanTransporte> planesTransporte) {
+        return planTransporteRepository.saveAll(planesTransporte);
+    }
+
+    public void imprimirDatosPlanTransporte(PlanTransporte planTransporte) {
+        System.out.println("*****************************************************************************************");
+        System.out.println("Ubicacion origen: " + planTransporte.getUbicacionOrigen().getProvincia()
+                +" | Ubigeo: " + planTransporte.getUbicacionOrigen().getUbigeo());
+        System.out.println("Ubicacion destino: " + planTransporte.getUbicacionDestino().getProvincia()
+        +" | Ubigeo: " + planTransporte.getUbicacionDestino().getUbigeo());
+        System.out.println("Vehiculo trasportador: ID - " + planTransporte.getVehiculo().getId_vehiculo()
+        + "\nTipo de vehiculo: " + planTransporte.getVehiculo().getTipoVehiculo().getNombre()
+        + "\nCantidad de paquetes transportados: " + planTransporte.getCantidadTransportada()
+        + "\nCapacidad maxima: " + planTransporte.getVehiculo().getTipoVehiculo().getCapacidadMaxima());
     }
 }
 

@@ -360,10 +360,14 @@ public class FilesService {
                     String[] valores = linea.split(" => ");
                     String ubigeoOrigen = valores[0].trim();
                     String ubigeoDestino = valores[1].trim();
+                    Optional<Ubicacion> ubicacionOrigen = ubicaciones.stream()
+                            .filter(ubicacionSel -> ubicacionSel.getUbigeo().equals(ubigeoOrigen)).findFirst();
                     Optional<Ubicacion> ubicacionDestino = ubicaciones.stream()
                             .filter(ubicacionSel -> ubicacionSel.getUbigeo().equals(ubigeoDestino)).findFirst();
                     // caminos.get(ubigeoOrigen).add(ubicacionDestino.get());
-                    if (ubicacionDestino.isPresent()) {
+                    if (ubicacionOrigen.isPresent()&&ubicacionDestino.isPresent()) {
+                        if(!((ubicacionOrigen.get().getRegion().getNombre().equals("COSTA")&&ubicacionDestino.get().getRegion().getNombre().equals("SELVA"))||
+                            (ubicacionOrigen.get().getRegion().getNombre().equals("SELVA")&&ubicacionDestino.get().getRegion().getNombre().equals("COSTA"))))
                         caminos.get(ubigeoOrigen).add(ubicacionDestino.get());
                     }
                 }

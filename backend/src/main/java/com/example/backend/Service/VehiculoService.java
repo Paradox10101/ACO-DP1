@@ -93,7 +93,7 @@ public class VehiculoService {
         // Si se encuentra un vehículo adecuado
         if (vehiculoDespacho.isPresent()) {
             // Se actualiza el estado del vehículo a "En Ruta" y se desasocia del almacén
-            vehiculoDespacho.get().setEstado(EstadoVehiculo.EnRuta);
+            //vehiculoDespacho.get().setEstado(EstadoVehiculo.EnRuta);
             vehiculoDespacho.get().setAlmacen(null);
 
             // Se establece la capacidad utilizada en el vehículo
@@ -116,8 +116,8 @@ public class VehiculoService {
             // Si se encuentra un vehículo con mayor capacidad
             if (vehiculoMayorCapacidad.isPresent()) {
                 // Actualiza el estado del vehículo a "En Ruta" y desasocia del almacén
-                vehiculoMayorCapacidad.get().setEstado(EstadoVehiculo.EnRuta);
-                vehiculoMayorCapacidad.get().setAlmacen(null);
+                //vehiculoMayorCapacidad.get().setEstado(EstadoVehiculo.EnRuta);
+                //vehiculoMayorCapacidad.get().setAlmacen(null);
 
                 // Se llena la capacidad máxima del vehículo con la carga
                 vehiculoMayorCapacidad.get().setCapacidadUtilizada(vehiculoMayorCapacidad.get().getCapacidadMaxima());
@@ -155,6 +155,7 @@ public class VehiculoService {
         List<Almacen> almacenes = almacenService.obtenerTodos();
         List<Vehiculo> vehiculos = vehiculoRepository.findAll();
         for (Vehiculo vehiculo : vehiculos) {
+
             Tramo tramoActualRecorrido = tramoService.obtenerTramoActualVehiculoFecha(fechaFin, vehiculo.getId_vehiculo());
             Mantenimiento mantenimientoPreventivoActual = mantenimientoService.obtenerMantenimientoPreventivoVehiculoFecha(fechaFin.toLocalDate(), vehiculo.getId_vehiculo());
             Mantenimiento mantenimientoRecurrenteActual = mantenimientoService.obtenerMantenimientoRecurrenteActual(fechaFin, vehiculo.getId_vehiculo());
@@ -223,6 +224,15 @@ public class VehiculoService {
                 }
             }
             */
+
+        List<Vehiculo> hallarVehiculosConCapacidadDisponible(int cantidadSolicitada){
+            List<Vehiculo> vehiculos = vehiculoRepository.findVehiculoDisponibleConCapacidadParcialOcupada(cantidadSolicitada, EstadoVehiculo.Disponible);
+            if(vehiculos!=null && vehiculos.size()>0)
+                return vehiculos;
+            else
+                return null;
+
+        }
 
 
 

@@ -135,7 +135,7 @@ public class AcoService {
             }
 
             Ubicacion siguienteUbicacion = seleccionarSiguienteUbicacion(ubicacionActual, ubicacionesVisitadas);
-            if(siguienteUbicacion == null) return null;
+            if(siguienteUbicacion == null) break;
             double tiempoTranscurrido = tiempos.get(ubicacionActual.getUbigeo()).get(siguienteUbicacion.getUbigeo());
             duracionTramos += (tiempoTranscurrido + 2);
             Tramo tramo = new Tramo(ubicacionActual, siguienteUbicacion);
@@ -279,10 +279,9 @@ public class AcoService {
 
     private double calcularTiempoEntreUbicaciones (Ubicacion origen, Ubicacion destino){
         double velocidadEntreUbicaciones = obtenerVelocidadEntreUbicaciones(origen, destino);
-
         double distancia = calcularDistanciaEntreUbicaciones(origen, destino);
-        if (velocidadEntreUbicaciones == 0)
-            System.out.println("VELOCIDAD 0");
+        if(velocidadEntreUbicaciones == 0)
+            return 0;
 
         return distancia / (velocidadEntreUbicaciones);
     }
@@ -573,9 +572,11 @@ public class AcoService {
                     case "SIERRA":
                         velocidad = 50;
                         break;
+                    /*
                     case "SELVA":
                         velocidad = (50 + 55) / 2;//ES UNA DISTANCIA HARDCODEADA SACADA DE UN PROMEDIO
                         break;
+                     */
                     default:
                         velocidad = 0;
                         break;
@@ -599,9 +600,11 @@ public class AcoService {
                 break;
             case "SELVA":
                 switch (regionDestino.getNombre()) {
+                    /*
                     case "COSTA":
                         velocidad = (50 + 55) / 2;//ES UNA DISTANCIA HARDCODEADA SACADA DE UN PROMEDIO
                         break;
+                     */
                     case "SIERRA":
                         velocidad = 55;
                         break;

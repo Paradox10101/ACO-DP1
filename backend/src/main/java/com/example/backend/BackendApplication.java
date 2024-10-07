@@ -21,7 +21,8 @@ public class BackendApplication {
 
 	public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(BackendApplication.class, args);
-
+        SimulacionService simulacionService = context.getBean(SimulacionService.class);
+        /*POR DESCOMENTAR
         ArrayList<Oficina> oficinas;
         ArrayList<Pedido> pedidos;
         ArrayList<Bloqueo> bloqueos;
@@ -81,12 +82,8 @@ public class BackendApplication {
 
             System.out.println("Fin de ejecución con semilla: " + semilla);
         }
-        
 
-
-        
-        
-        
+        */
 
         /*
         System.out.println("-----------------DATOS DEL PEDIDO 3---------------------------------");
@@ -95,6 +92,8 @@ public class BackendApplication {
         System.out.println("-----------------DATOS DEL PEDIDO 4---------------------------------");
         ArrayList<PlanTransporte> planes3 = planTransporte.definirPlanesTransporte(pedidosFuturos.get(3), almacenes, caminos, regiones, ubicaciones, vehiculos, bloqueos);
          */
+
+        /*
         LocalDateTime fechaInicioSimulacion = LocalDateTime.of(2024, 4, 1, 0, 0);
         LocalDateTime fechaFinSimulacion = LocalDateTime.of(2024, 4, 6, 12, 40) ;
 
@@ -102,7 +101,8 @@ public class BackendApplication {
         vehiculoService.actualizarEstadoVehiculos(fechaInicioSimulacion, fechaFinSimulacion, caminos);
 
         while(true);
-
+        */
+        simulacionService.simulacionSemanal(LocalDateTime.of(2024, 4, 4, 1, 0));
 	}
     
 	@Bean
