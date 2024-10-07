@@ -20,7 +20,7 @@ public class Mantenimiento {
     private TipoMantenimiento tipo;
 
     @Column(name = "fechaProgramada")
-    private Date fechaProgramada;
+    private LocalDate fechaProgramada;
 
     @Column(name = "duracion")
     private Time duracion;
@@ -35,11 +35,13 @@ public class Mantenimiento {
     @JoinColumn(name = "fid_vehiculo")
     private Vehiculo vehiculo;
 
+    @Column(name = "pendiente")
+    private boolean pendiente;
 
     public Mantenimiento() {
     }
 
-    public Mantenimiento(TipoMantenimiento tipo, Date fechaProgramada, Time duracion) {
+    public Mantenimiento(TipoMantenimiento tipo, LocalDate fechaProgramada, Time duracion) {
         this.tipo = tipo;
         this.fechaProgramada = fechaProgramada;
         this.duracion = duracion;
@@ -61,11 +63,11 @@ public class Mantenimiento {
         this.tipo = tipo;
     }
 
-    public Date getFechaProgramada() {
+    public LocalDate getFechaProgramada() {
         return fechaProgramada;
     }
 
-    public void setFechaProgramada(Date fechaProgramada) {
+    public void setFechaProgramada(LocalDate fechaProgramada) {
         this.fechaProgramada = fechaProgramada;
     }
 
@@ -100,5 +102,13 @@ public class Mantenimiento {
 
     public void setFechaFin(LocalDateTime fechaFin) {
         this.fechaFin = fechaFin;
+    }
+
+    public boolean isPendiente() {
+        return pendiente;
+    }
+
+    public void setPendiente(boolean pendiente) {
+        this.pendiente = pendiente;
     }
 }

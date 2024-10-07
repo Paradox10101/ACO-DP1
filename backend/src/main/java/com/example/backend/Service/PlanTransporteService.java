@@ -118,6 +118,7 @@ public class PlanTransporteService {
                     mantenimiento.setFechaFin(tramoS.getFechaFin().plusHours(2));
                     mantenimiento.setTipo(TipoMantenimiento.Recurrente);
                     mantenimiento.setVehiculo(vehiculoSeleccionado);
+                    mantenimiento.setPendiente(true);
                     mantenimientos.add(mantenimiento);
                 });
                 if(mantenimientos!=null && !mantenimientos.isEmpty()){

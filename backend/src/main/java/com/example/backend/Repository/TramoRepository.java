@@ -27,7 +27,7 @@ public interface TramoRepository extends JpaRepository<Tramo, Long> {
     @Query("SELECT t FROM Tramo t WHERE :fechaActual BETWEEN t.fechaInicio AND t.fechaFin AND t.vehiculo.id_vehiculo = :idVehiculo")
     Optional<Tramo> findTramoByFechaAndVehiculo(@Param("fechaActual") LocalDateTime fechaActual, @Param("idVehiculo") Long idVehiculo);
 
-    @Query("SELECT t FROM Tramo t WHERE t.fechaFin <= :fechaActual AND t.vehiculo.id_vehiculo = :idVehiculo ORDER BY t.fechaFin DESC")
+    @Query("SELECT t FROM Tramo t WHERE t.fechaFin <= :fechaActual AND t.vehiculo.id_vehiculo = :idVehiculo ORDER BY t.fechaFin DESC LIMIT 1")
     Optional<Tramo> findLastTramoByFechaAndVehiculo(@Param("fechaActual") LocalDateTime fechaActual, @Param("idVehiculo") Long idVehiculo);
 
     @Query("SELECT t FROM Tramo t WHERE t.vehiculo.id_vehiculo = :idVehiculo ORDER BY t.fechaFin DESC")

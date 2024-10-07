@@ -2,13 +2,16 @@ package com.example.backend.Service;
 
 import com.example.backend.Repository.MantenimientoRepository;
 import com.example.backend.models.Mantenimiento;
+import com.example.backend.models.TipoMantenimiento;
 import com.example.backend.models.Tramo;
 import com.example.backend.models.Vehiculo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,4 +69,25 @@ public class MantenimientoService {
             throw new RuntimeException("Mantenimiento no encontrado");
         }
     }
+
+    public Mantenimiento obtenerMantenimientoPreventivoVehiculoFecha(LocalDate fechaActual, Long idVehiculo){
+
+        List<Mantenimiento> mantenimientosPreventivosExistente = mantenimientoRepository.findMantenimientoProgramadoByFechaAndVehiculoAndTipoMantenimiento(fechaActual,idVehiculo, TipoMantenimiento.Preventivo);
+        if(mantenimientosPreventivosExistente!=null && !mantenimientosPreventivosExistente.isEmpty()){
+            for(Mantenimiento mantenimiento : mantenimientosPreventivosExistente){
+                if(!mantenimiento.isPendiente()){
+                    mantenimiento.setPendiente(true);
+                    actualizarMantenimiento(mantenimiento.getId_mantenimiento(), mantenimiento);
+                }
+            }
+            return mantenimientosPreventivosExistente.get(0);
+        }
+
+        return null;
+
+
+
+    }
+
+
 }

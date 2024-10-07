@@ -1,13 +1,16 @@
 package com.example.backend.Service;
 
 import com.example.backend.Repository.AlmacenRepository;
+import com.example.backend.Repository.MantenimientoRepository;
 import com.example.backend.models.*;
 import com.example.backend.Repository.VehiculoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Array;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,8 @@ public class VehiculoService {
 
     @Autowired
     private AlmacenService almacenService;
+    @Autowired
+    private MantenimientoRepository mantenimientoRepository;
 
     public List<Vehiculo> obtenerTodos() {
         return vehiculoRepository.findAll();
@@ -109,13 +114,39 @@ public class VehiculoService {
     }
 
 
-    public void actualizarEstadoVehiculos(LocalDateTime fechaInicio, LocalDateTime fechaFin){
+    public void actualizarEstadoVehiculos(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
         List<Almacen> almacenes = almacenService.obtenerTodos();
         List<Vehiculo> vehiculos = vehiculoRepository.findAll();
-        vehiculos.stream().forEach(vehiculo -> {
-            Tramo tramoActual = tramoService.obtenerTramoActualVehiculoFecha(fechaFin, vehiculo.getId_vehiculo());
-            if(tramoActual!=null)
-                vehiculo.setUbicacionActual(tramoActual.getUbicacionOrigen());
+        ArrayList<Ubicacion> ubicacionesAlmacenes = almacenes.stream().map(Almacen::getUbicacion).collect(Collectors.toCollection(ArrayList::new));
+        for (Vehiculo vehiculo : vehiculos) {
+            Tramo tramoActualRecorrido = tramoService.obtenerTramoActualVehiculoFecha(fechaFin, vehiculo.getId_vehiculo());
+            Mantenimiento mantenimientoPreventivoActual = mantenimientoService.obtenerMantenimientoPreventivoVehiculoFecha(fechaFin.toLocalDate(), vehiculo.getId_vehiculo());
+            //Actualizar el estado del vehiculo en el tramo que esta recorriendo, tomara la ubicacion de origen
+            if (tramoActualRecorrido != null) {
+                vehiculo.setUbicacionActual(tramoActualRecorrido.getUbicacionOrigen());
+                vehiculo.setEstado(EstadoVehiculo.EnRuta);
+            }
+            //El vehiculo no se encuentra en ruta
+            else {
+                Tramo ultimoTramoRecorrido = tramoService.obtenerUltimoTramoVehiculoFecha(fechaFin, vehiculo.getId_vehiculo());
+                //Si toma un valor nulo es porque el vehiculo todavia no ha iniciado nigngun recorrido
+                if (ultimoTramoRecorrido != null)
+                    vehiculo.setUbicacionActual(ultimoTramoRecorrido.getUbicacionDestino());
+            }
+            if(mantenimientoPreventivoActual!=null){
+                if(ubicacionesAlmacenes.contains(vehiculo.getUbicacionActual())){
+                    mantenimientoPreventivoActual.setFechaInicio(fechaInicio);
+                    mantenimientoPreventivoActual.setFechaFin(
+                            fechaInicio.plus(Duration.between(fechaInicio, fechaInicio.toLocalDate().atTime(LocalTime.MAX)).plusDays(2)));
+                            vehiculo.setEstado(EstadoVehiculo.EnMantenimiento);
+                }
+                mantenimientoService.actualizarMantenimiento(mantenimientoPreventivoActual.getId_mantenimiento(),mantenimientoPreventivoActual);
+            }
+
+
+        }
+        vehiculoRepository.saveAll(vehiculos);
+    }
 
             /*
             Mantenimiento mantenimientoActual = mantenimientoService.obtenerMantenimientoActualVehiculoFecha(fechaFin, vehiculo.getId_vehiculo());
@@ -139,7 +170,7 @@ public class VehiculoService {
             */
 
 
-        });
-        vehiculoRepository.saveAll(vehiculos);
-    }
+
+
+
 }
