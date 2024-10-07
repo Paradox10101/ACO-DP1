@@ -51,10 +51,10 @@ public class Vehiculo {
     @Column(name = "capacidad_utilizada")
     private int capacidadUtilizada;
 
-    /*
-    @OneToMany(mappedBy = "vehiculo")
+    
+    @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Averia> averias; // Lista para almacenar las averías del vehículo
-    */
+    
 
     @Column(name = "disponible")
     private boolean disponible;
@@ -73,6 +73,7 @@ public class Vehiculo {
         this.capacidadMaxima = capacidadMaxima;
         this.estado = estado;
         this.distanciaTotal = distanciaTotal;
+        this.averias = new ArrayList<>();
     }
 
     public Vehiculo(String codigo, Almacen almacen, Ubicacion ubicacionActual, TipoVehiculo tipoVehiculo, int capacidadMaxima, EstadoVehiculo estado, float distanciaTotal) {
@@ -83,6 +84,7 @@ public class Vehiculo {
         this.capacidadMaxima = capacidadMaxima;
         this.estado = estado;
         this.distanciaTotal = distanciaTotal;
+        this.averias = new ArrayList<>();
     }
 
     public Vehiculo(Long id_vehiculo, String codigo, PlanTransporte planTransporte, Almacen almacen, Ubicacion ubicacionActual, TipoVehiculo tipoVehiculo, LocalDateTime fechaSalida, LocalDateTime fechaLlegada, int capacidadMaxima, EstadoVehiculo estado, float distanciaTotal) {
@@ -97,6 +99,7 @@ public class Vehiculo {
         this.capacidadMaxima = capacidadMaxima;
         this.estado = estado;
         this.distanciaTotal = distanciaTotal;
+        this.averias = new ArrayList<>();
     }
 
     public Vehiculo(String codigo, Almacen almacen, Ubicacion ubicacionActual, TipoVehiculo tipoVehiculo, LocalDateTime fechaSalida, LocalDateTime fechaLlegada, int capacidadMaxima, EstadoVehiculo estado, float distanciaTotal, int capacidadUtilizada) {
@@ -110,6 +113,7 @@ public class Vehiculo {
         this.estado = estado;
         this.distanciaTotal = distanciaTotal;
         this.capacidadUtilizada = capacidadUtilizada;
+        this.averias = new ArrayList<>();
     }
 
     public Long getId_vehiculo() {
@@ -200,6 +204,14 @@ public class Vehiculo {
 
     public void setCapacidadUtilizada(int capacidadUtilizada) {
         this.capacidadUtilizada = capacidadUtilizada;
+    }
+
+    public List<Averia> getAverias() {
+        return averias;
+    }
+
+    public void setAverias(List<Averia> averias) {
+        this.averias = averias;
     }
 
     // Método para agregar una avería al vehículo

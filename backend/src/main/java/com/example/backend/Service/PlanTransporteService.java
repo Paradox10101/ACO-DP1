@@ -266,64 +266,58 @@ public class PlanTransporteService {
             System.out.println("Fecha Fin Recorrido: " + tramo.getFechaFin().getDayOfMonth() + "/" + tramo.getFechaFin().getMonthValue() + "/" + tramo.getFechaFin().getYear() + " " + tramo.getFechaFin().getHour() + "h:" + tramo.getFechaFin().getMinute() + "m");
         }
     }
-
+/*
     // Nueva función modular para gestionar averías en PlanTransporteService
-    public void gestionarAveria(Vehiculo vehiculo, Tramo tramoActual, List<Tramo> tramosRestantes) {
-        // Determinamos el tipo de avería con una probabilidad del 10%
-        TipoAveria tipoAveria = TipoAveria.values()[new Random().nextInt(TipoAveria.values().length)];
-        vehiculo.registrarAveria(tipoAveria, tramoActual.getFechaInicio());
+    public void gestionarAveria(Vehiculo vehiculo, Tramo tramoActual, TipoAveria tipoAveria) {
+        LocalDateTime fechaInicioAveria = tramoActual.getFechaInicio();
 
-        // Imprimimos información sobre el tipo de avería
-        System.out.println("Vehículo " + vehiculo.getCodigo() + " ha sufrido una avería de tipo: " + tipoAveria);
+        switch (tipoAveria) {
+            case T1: // Avería moderada: retrasar 4 horas
+                System.out.println(
+                        "Vehículo " + vehiculo.getCodigo() + " sufrió avería moderada (T1). Se retrasa 4 horas.");
+                retrasarTramos(tramoActual, 4); // Método que retrasa el tramo 4 horas
+                break;
 
-        // Gestionar según el tipo de avería
-        if (tipoAveria == TipoAveria.T2 || tipoAveria == TipoAveria.T3) {
-            // Avería grave: reasignar vehículo
-            reasignarVehiculo(vehiculo, tramoActual, tramosRestantes);
-        } else if (tipoAveria == TipoAveria.T1) {
-            // Avería moderada: retrasar el recorrido por 4 horas
-            retrasarTramos(tramosRestantes, tramoActual.getFechaInicio(), 4);
+            case T2: // Avería fuerte: el vehículo no puede continuar
+                System.out.println("Vehículo " + vehiculo.getCodigo() + " sufrió avería fuerte (T2). Se debe detener.");
+                vehiculo.setEstado(EstadoVehiculo.Averiado);
+                reasignarVehiculo(vehiculo, tramoActual); // Método para reasignar vehículo
+                break;
+
+            case T3: // Avería siniestro: el vehículo está fuera de operación por 72 horas
+                System.out.println("Vehículo " + vehiculo.getCodigo()
+                        + " sufrió siniestro (T3). Está fuera de operación por 72 horas.");
+                vehiculo.setEstado(EstadoVehiculo.Averiado);
+                // Aquí puedes actualizar lógica de replanificación o cancelación del transporte
+                break;
+
+            default:
+                break;
         }
     }
 
     // Función para reasignar vehículo después de una avería grave
-    private void reasignarVehiculo(Vehiculo vehiculoAveriado, Tramo tramoActual, List<Tramo> tramosRestantes) {
+    private void reasignarVehiculo(Vehiculo vehiculo, Tramo tramoActual) {
         List<Vehiculo> vehiculosDisponibles = vehiculoService.obtenerVehiculosDisponibles();
-        List<Almacen> almacenesDisponibles = almacenService.obtenerAlmacenesConVehiculosDisponibles();
-
-        Vehiculo nuevoVehiculo = vehiculoService.obtenerVehiculo(vehiculosDisponibles, almacenesDisponibles,
-                tramoActual.getCantidadPaquetes(), vehiculoAveriado.getUbicacionActual().getUbigeo());
-
-        if (nuevoVehiculo != null) {
-            System.out.println("Cargando paquetes al nuevo vehículo " + nuevoVehiculo.getCodigo());
-            nuevoVehiculo.setCapacidadUtilizada(tramoActual.getCantidadPaquetes());
-            nuevoVehiculo.setEstado(EstadoVehiculo.EnRuta);
-
-            // Actualizar los tramos restantes con el nuevo vehículo
-            for (Tramo tramo : tramosRestantes) {
-                if (tramo.getFechaInicio().isAfter(tramoActual.getFechaInicio())) {
-                    tramo.setVehiculo(nuevoVehiculo);
-                }
-            }
-
-            // Marcar el vehículo anterior como averiado
-            vehiculoAveriado.setEstado(EstadoVehiculo.Averiado);
-        } else {
+        if (vehiculosDisponibles.isEmpty()) {
             System.out.println("No hay vehículos disponibles para continuar la ruta.");
+            return;
+        }
+
+        Vehiculo nuevoVehiculo = vehiculoService.obtenerVehiculo(vehiculosDisponibles,
+                tramoActual.getUbicacionOrigen().getUbigeo());
+        if (nuevoVehiculo != null) {
+            System.out.println("Reasignado nuevo vehículo: " + nuevoVehiculo.getCodigo());
+            tramoActual.setVehiculo(nuevoVehiculo);
         }
     }
 
     // Función para retrasar los tramos restantes en caso de avería moderada
-    private void retrasarTramos(List<Tramo> tramosRestantes, LocalDateTime fechaInicioTramo, int horasRetraso) {
-        for (Tramo tramo : tramosRestantes) {
-            if (tramo.getFechaInicio().isAfter(fechaInicioTramo)) {
-                // Añadir el retraso al inicio y fin del tramo
-                tramo.setFechaInicio(tramo.getFechaInicio().plusHours(horasRetraso));
-                tramo.setFechaFin(tramo.getFechaFin().plusHours(horasRetraso));
-            }
-        }
+    private void retrasarTramos(Tramo tramo, int horasRetraso) {
+        tramo.setFechaInicio(tramo.getFechaInicio().plusHours(horasRetraso));
+        tramo.setFechaFin(tramo.getFechaFin().plusHours(horasRetraso));
     }
-
+*/
     public void actualizarCambiosEnvio(List<Tramo> tramosRuta, Pedido pedido, List<Oficina> oficinas) {
         // Obtener la oficina de destino
         Optional<Oficina> oficinaDestino = oficinaService
