@@ -90,4 +90,14 @@ public class TramoService {
         return null;
     }
 
+    List<Tramo> crearRutaTransporteDerivada(List<Tramo>rutaOriginal, Ubicacion ubicacionDestino, int cantidadSolicitada){
+        List<Tramo> rutaDerivada = new ArrayList<>();
+        for(Tramo tramo : rutaOriginal){
+            Tramo nuevoTramo = new Tramo(tramo.getFechaInicio(), tramo.getFechaFin(), tramo.getubicacionOrigen(), tramo.getubicacionDestino(), tramo.getVehiculo(), tramo.getDuracion(), tramo.isTransitado(), tramo.getVelocidad(), tramo.getDistancia(), tramo.isBloqueado());
+            nuevoTramo.setCantidadPaquetes(cantidadSolicitada);
+            rutaDerivada.add(nuevoTramo);
+            if(tramo.getubicacionDestino().getUbigeo().equals(ubicacionDestino.getUbigeo()))break;
+        }
+        return rutaDerivada;
+    }
 }

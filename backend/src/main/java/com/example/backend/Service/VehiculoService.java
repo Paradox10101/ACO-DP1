@@ -196,6 +196,7 @@ public class VehiculoService {
             //Asignacion de una nueva ruta de retorno, el vehiculo no tiene ninguna entrega pendiente
             if(tramoActualRecorrido==null && mantenimientoRecurrenteActual==null && almacenes.stream()
                     .anyMatch(almacenS -> almacenS.getUbicacion().equals(vehiculo.getUbicacionActual()))){
+                vehiculo.setCapacidadUtilizada(0);
                 vehiculo.setEstado(EstadoVehiculo.Disponible);
             }
 

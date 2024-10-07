@@ -70,7 +70,7 @@ public class PlanTransporteService {
 
 
     public ArrayList<PlanTransporte> definirPlanesTransporte(LocalDateTime fechaInicio, Pedido pedido,
-                                                             HashMap<String, ArrayList<Ubicacion>> caminos, int semilla){
+                                                             HashMap<String, ArrayList<Ubicacion>> caminos, int semilla, HashMap<Vehiculo, ArrayList<Tramo>> rutasVehiculosDefinidas){
 
         // Configuramos la semilla en AcoService
         acoService.setSemilla(semilla);
@@ -86,16 +86,31 @@ public class PlanTransporteService {
 
         //En caso de que la cantidad solicitada sea atendida, no se generaran mas planes de transporte
         while(cantidadSolicitada > 0) {
-            /*
-            List<Vehiculo> vehiculosCapacidadOcupada = vehiculoService.hallarVehiculosConCapacidadDisponible(cantidadSolicitada);
-            if(vehiculosCapacidadOcupada!=null && !vehiculosCapacidadOcupada.isEmpty()) {
-                for(Vehiculo vehiculo : vehiculosCapacidadOcupada) {
-                    List<Tramo> rutaActual = tramoService.hallarRutaVehiculoCapacidadOcupadaParcialConOficina(fechaInicio, pedido.getFechaEntregaEstimada(), vehiculo ,pedido.getOficinaDestino().getUbicacion());
-
+            for(Vehiculo vehiculo: rutasVehiculosDefinidas.keySet()){
+                if(vehiculo.getCapacidadUtilizada()>0 && vehiculo.getCapacidadUtilizada()!=vehiculo.getCapacidadMaxima()){
+                    List<Tramo> tramosIncluidos = rutasVehiculosDefinidas.get(vehiculo);
+                    if((tramosIncluidos.stream().anyMatch(tramo -> tramo.getubicacionOrigen().getUbigeo().equals(pedido.getOficinaDestino().getUbicacion().getUbigeo()))) ||
+                            tramosIncluidos.get(tramosIncluidos.size()-1).getubicacionDestino().getUbigeo().equals(pedido.getOficinaDestino().getUbicacion().getUbigeo())
+                            && (tramosIncluidos.get(tramosIncluidos.size()-1).getFechaFin().isAfter(fechaInicio.plusHours(24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite()))
+                            ||tramosIncluidos.get(tramosIncluidos.size()-1).getFechaFin().isEqual(fechaInicio.plusHours(24*pedido.getOficinaDestino().getUbicacion().getRegion().getDiasLimite())))){
+                        int nuevaCantidadTransporte = (cantidadSolicitada>vehiculo.getCapacidadMaxima()-vehiculo.getCapacidadUtilizada())?vehiculo.getCapacidadMaxima()-vehiculo.getCapacidadUtilizada():cantidadSolicitada;
+                        cantidadSolicitada-=nuevaCantidadTransporte;
+                        List<Tramo> nuevaRutaDerivada = tramoService.crearRutaTransporteDerivada(rutasVehiculosDefinidas.get(vehiculo), pedido.getOficinaDestino().getUbicacion(), nuevaCantidadTransporte);
+                        if(nuevaRutaDerivada!=null && !nuevaRutaDerivada.isEmpty()){
+                            PlanTransporte planTransporte = new PlanTransporte();
+                            vehiculo.setCapacidadUtilizada(vehiculo.getCapacidadUtilizada()+nuevaCantidadTransporte);
+                            planTransporte.setVehiculo(vehiculo);
+                            planTransporte.setFechaActalizacion(fechaInicio);
+                            planTransporte.setFechaCreacion(fechaInicio);
+                            planTransporte.setUbicacionOrigen(nuevaRutaDerivada.get(0).getUbicacionOrigen());
+                            planTransporte.setUbicacionDestino(pedido.getOficinaDestino().getUbicacion());
+                            vehiculoService.actualizarVehiculo(vehiculo.getId_vehiculo(), vehiculo);
+                            guardar(planTransporte);
+                            planesTransporte.add(planTransporte);
+                        }
+                    }
                 }
             }
-
-             */
             PlanTransporte planOptimo = new PlanTransporte();
             List<Almacen> almacenes = almacenService.obtenerAlmacenesConVehiculosDisponibles();
             List<Vehiculo> vehiculos = vehiculoService.obtenerVehiculosDisponibles();
@@ -161,6 +176,7 @@ public class PlanTransporteService {
                 planOptimo.setPedido(pedido);
 
             }
+            rutasVehiculosDefinidas.put(vehiculoSeleccionado,rutaOptima);
             planesTransporte.add(planOptimo);
         }
 
