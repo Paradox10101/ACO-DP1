@@ -45,8 +45,6 @@ public class PlanTransporte {
     @JoinColumn(name = "fid_ubicacion_destino")
     private Ubicacion ubicacionDestino;
 
-    @Enumerated(EnumType.STRING)
-    private EstadoPedido estado;
 
 
     @Column(name = "cantidad_transportada")
@@ -105,13 +103,6 @@ public class PlanTransporte {
         this.fechaActalizacion = fechaActalizacion;
     }
 
-    public EstadoPedido getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoPedido estado) {
-        this.estado = estado;
-    }
 
 
     public int getCantidadTransportada() {

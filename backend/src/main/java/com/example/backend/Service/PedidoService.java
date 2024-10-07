@@ -154,4 +154,12 @@ public class PedidoService {
         }
         return pedidos;
     }
+
+    public List<Pedido> obtenerPedidosEntreFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+        List<Pedido> pedidos = pedidoRepository.findPedidoBetweenFechaInicioFechaFin(fechaInicio,fechaFin);
+        if(pedidos!=null && !pedidos.isEmpty())
+            return pedidos;
+        else
+            return null;
+    }
 }
