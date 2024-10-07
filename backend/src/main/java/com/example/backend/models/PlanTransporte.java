@@ -136,17 +136,4 @@ public class PlanTransporte {
     public void setVehiculo(Vehiculo vehiculo) {
         this.vehiculo = vehiculo;
     }
-
-    private Oficina buscarOficinaPorId(Long idOficina, List<Oficina> oficinas) {
-        for (Oficina oficina : oficinas) {
-            if (oficina.getId_oficina().equals(idOficina)) {
-                return oficina;
-            }
-        }
-        return null; // Devuelve null si no encuentra la oficina
-    }
-
-
-
-
 }

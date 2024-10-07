@@ -128,11 +128,11 @@ public class VehiculoService {
                 // Se retorna el vehículo asignado
                 return vehiculoMayorCapacidad.get();
             }
-    }
+        }
 
-    // Si no se encuentra ningún vehículo adecuado, se retorna null
-    return null;
-}
+        // Si no se encuentra ningún vehículo adecuado, se retorna null
+        return null;
+    }
 
 
     public Vehiculo actualizarVehiculo(Long id, Vehiculo vehiculoActualizado) {
@@ -225,14 +225,112 @@ public class VehiculoService {
             }
             */
 
-        List<Vehiculo> hallarVehiculosConCapacidadDisponible(int cantidadSolicitada){
-            List<Vehiculo> vehiculos = vehiculoRepository.findVehiculoDisponibleConCapacidadParcialOcupada(cantidadSolicitada, EstadoVehiculo.Disponible);
-            if(vehiculos!=null && vehiculos.size()>0)
-                return vehiculos;
-            else
-                return null;
+    List<Vehiculo> hallarVehiculosConCapacidadDisponible(int cantidadSolicitada){
+        List<Vehiculo> vehiculos = vehiculoRepository.findVehiculoDisponibleConCapacidadParcialOcupada(cantidadSolicitada, EstadoVehiculo.Disponible);
+        if(vehiculos!=null && vehiculos.size()>0)
+            return vehiculos;
+        else
+            return null;
 
+    }
+
+    public void gestionarAveria(Vehiculo vehiculo, TipoAveria tipoAveria, Tramo tramoActual) {
+        switch (tipoAveria) {
+            case T1:
+                // Avería moderada: retraso de 4 horas
+                System.out.println("El vehículo " + vehiculo.getCodigo()
+                        + " ha sufrido una avería moderada (T1). Retrasando 4 horas.");
+                retrasarTramo(tramoActual, 4);
+                break;
+
+            case T2:
+                // Avería fuerte: el vehículo no puede continuar, intentar reasignar otro
+                // vehículo
+                System.out.println("El vehículo " + vehiculo.getCodigo()
+                        + " ha sufrido una avería fuerte (T2). Deteniendo el vehículo.");
+                vehiculo.setEstado(EstadoVehiculo.Averiado);
+                // Intentar reasignar otro vehículo  --> REPLANIFICAREMOS
+                replanificarRuta(tramoActual);
+                break;
+
+            case T3:
+                // Avería siniestro: el vehículo queda fuera de operación por 72 horas
+                System.out.println("El vehículo " + vehiculo.getCodigo()
+                        + " ha sufrido una avería siniestro (T3). Deteniendo el vehículo.");
+                // El vehículo queda fuera de servicio por 72 horas
+                vehiculo.setEstado(EstadoVehiculo.Averiado);
+                vehiculo.setDisponible(false); // Marcar como no disponible
+
+                // Establecer el tiempo de reparación (72 horas desde el momento actual)
+                LocalDateTime tiempoReparacion = LocalDateTime.now().plusHours(72);
+
+                // Simulamos que el vehículo estará reparado después de 72 horas (esto se puede almacenar si es necesario)
+                System.out.println(
+                        "El vehículo " + vehiculo.getCodigo() + " estará fuera de servicio hasta: " + tiempoReparacion);
+
+                // Intentar reasignar otro vehículo para continuar el trayecto --> REPLANIFICAREMOS
+                replanificarRuta(tramoActual);
+                break;
         }
+    }
+
+    // Método para replanificar la ruta desde la ubicación intermedia
+    private void replanificarRuta(Tramo tramoActual) {
+        System.out
+                .println("Replanificando la ruta desde la ubicación intermedia del tramo " + tramoActual.getId_tramo());
+
+        // Obtener los vehículos disponibles para continuar la ruta
+        List<Vehiculo> vehiculosDisponibles = obtenerVehiculosDisponibles();
+        List<Almacen> almacenesDisponibles = almacenService.obtenerTodos();
+
+        // Replanificar la ruta desde la ubicación donde ocurrió la avería
+        Vehiculo nuevoVehiculo = obtenerVehiculo(vehiculosDisponibles, almacenesDisponibles,
+                tramoActual.getCantidadPaquetes(), tramoActual.getUbicacionOrigen().getUbigeo());
+
+        if (nuevoVehiculo != null) {
+            System.out.println("Se ha reasignado un nuevo vehículo: " + nuevoVehiculo.getCodigo());
+            tramoActual.setVehiculo(nuevoVehiculo);
+            nuevoVehiculo.setEstado(EstadoVehiculo.EnRuta);
+            nuevoVehiculo.setDisponible(false); // Marcar el nuevo vehículo como no disponible temporalmente
+        } else {
+            System.out.println("No se pudo reasignar un vehículo para continuar el trayecto. VOLVER A INTENTAR REPLANIFICAR???");
+            // Si no hay vehículos disponibles, la simulación puede seguir intentando
+            // replanificar en ciclos futuros.
+        }
+    }
+
+    // Método para retrasar el tramo en caso de avería moderada
+    private void retrasarTramo(Tramo tramo, int horas) {
+        tramo.setFechaInicio(tramo.getFechaInicio().plusHours(horas));
+        tramo.setFechaFin(tramo.getFechaFin().plusHours(horas));
+    }
+
+    /*// Método para reasignar otro vehículo en caso de avería grave (T2)
+    private void reasignarVehiculo(Tramo tramoActual) {
+        List<Vehiculo> vehiculosDisponibles = obtenerVehiculosDisponibles(); // Obtenemos los vehículos disponibles
+        List<Almacen> almacenesDisponibles = almacenService.obtenerTodos(); // Obtenemos almacenes disponibles
+
+        // Intentar obtener un nuevo vehículo
+        Vehiculo nuevoVehiculo = obtenerVehiculo(vehiculosDisponibles, almacenesDisponibles,
+                tramoActual.getCantidadPaquetes(), tramoActual.getUbicacionOrigen().getUbigeo());
+
+        if (nuevoVehiculo != null) {
+            System.out.println("Se ha reasignado un nuevo vehículo: " + nuevoVehiculo.getCodigo());
+
+            // Actualizar el tramo con el nuevo vehículo
+            tramoActual.setVehiculo(nuevoVehiculo);
+
+            // Ajustar el estado del nuevo vehículo a "En Ruta"
+            nuevoVehiculo.setEstado(EstadoVehiculo.EnRuta);
+            nuevoVehiculo.setDisponible(false); // Marcar el nuevo vehículo como no disponible en este momento
+
+            // Actualizar la ubicación del nuevo vehículo a la del tramo
+            nuevoVehiculo.setUbicacionActual(tramoActual.getUbicacionOrigen());
+        } else {
+            System.out.println("No se pudo reasignar un vehículo para continuar el trayecto.");
+            // Aquí puedes manejar la replanificación o cancelar la entrega si no es posible reasignar
+        }
+    }*/
 
 
 

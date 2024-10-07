@@ -70,7 +70,7 @@ public class SimulacionService {
         while(fechaActualSimulacion.isBefore(fechaFinSimulacion)){
             List<Pedido> pedidosPorAtender = pedidoService.obtenerPedidosEntreFechas(fechaActualSimulacion, fechaActualSimulacion.plusMinutes(minutesIncrement));
             HashMap<Pedido, List<PlanTransporte>> pedidosAtendidos = new HashMap<>();
-            ArrayList<Vehiculo>vehiculosEmpleados = new ArrayList<>();
+            ArrayList<Vehiculo> vehiculosEmpleados = new ArrayList<>();
 
             //Lista de pedidos por atender
             if(pedidosPorAtender!=null) {
@@ -89,9 +89,14 @@ public class SimulacionService {
                 System.out.println("PLANES DE TRANSPORTE GENERADOS: ");
             }
 
-            for (Pedido pedido : pedidosAtendidos.keySet()){
-                for(PlanTransporte planTransporte : pedidosAtendidos.get(pedido)){
-                    planTransporteService.imprimirDatosPlanTransporte(planTransporte);
+            // Revisar y gestionar averías para los vehículos que están en cada plan de
+            // transporte
+            for (Pedido pedido : pedidosAtendidos.keySet()) {
+                for (PlanTransporte planTransporte : pedidosAtendidos.get(pedido)) {
+                    // Aquí gestionamos averías para cada plan de transporte
+                    gestionarAverias(planTransporte);
+
+                    // Imprimir información de las rutas de cada plan
                     planTransporteService.imprimirRutasPlanTransporte(planTransporte);
                 }
             }
@@ -105,4 +110,39 @@ public class SimulacionService {
         System.out.println("=============================================================FIN DE LA SIMULACION==========================================================================================================");
 
     }
+
+    private void gestionarAverias(PlanTransporte planTransporte) {
+        Vehiculo vehiculo = planTransporte.getVehiculo();
+        List<Tramo> tramos = tramoService.obtenerPorPlanTransporte(planTransporte);
+
+        // Recorremos los tramos y verificamos si ocurre una avería
+        for (Tramo tramo : tramos) {
+            // Probabilidad del 10% de que ocurra una avería en un tramo
+            if (Math.random() < 0.1) {
+                // Generamos el tipo de avería aleatoria
+                TipoAveria tipoAveria = generarAveriaAleatoria();
+                System.out.println(
+                        "El vehículo " + vehiculo.getCodigo() + " ha sufrido una avería de tipo: " + tipoAveria);
+
+                // Gestionamos la avería según su tipo
+                vehiculoService.gestionarAveria(vehiculo, tipoAveria, tramo);
+
+                // Si el vehículo no puede continuar debido a una avería grave, detenemos el
+                // proceso
+                if (vehiculo.getEstado() == EstadoVehiculo.Averiado) {
+                    System.out.println("El vehículo ha quedado averiado y no puede continuar.");
+                    break;
+                }
+            }
+        }
+    }
+
+    // Método auxiliar para generar un tipo de avería aleatoria
+    private TipoAveria generarAveriaAleatoria() {
+        TipoAveria[] tiposAveria = TipoAveria.values();
+        Random random = new Random();
+        return tiposAveria[random.nextInt(tiposAveria.length)];
+    }
+
+
 }
