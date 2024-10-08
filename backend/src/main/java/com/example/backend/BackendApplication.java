@@ -90,7 +90,7 @@ public class BackendApplication {
 
             try {
                 // Correr el algoritmo ACO
-                simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024, 4, 4, 1, 0), 5);
+                simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024, 4, 4, 1, 0), 50);
 
             } finally {
                 // Parar el monitoreo de memoria y CPU al finalizar la ejecución

@@ -35,14 +35,14 @@ public class AcoService {
     private Map<String, List<Vehiculo>> oficinaVehiculos = new HashMap<>();
     private Map<String, Map<String, Double>> tiempos;
 
-    private int numeroHormigas = 60;
-    private int numeroIteraciones = 60;
-    private double tasaEvaporacion = 0.5;
+    private int numeroHormigas = 20;
+    private int numeroIteraciones = 20;
+    private double tasaEvaporacion = 0.3;
     private double feromonaInicial = 1.0;
     private double alpha = 1.0;
     private double beta = 2.0;
     private Random random = new Random();
-    private int cantidadErroresBloqueo = 0;
+
 
     @Autowired
     private SystemMetricsAutoConfiguration systemMetricsAutoConfiguration;
@@ -448,7 +448,6 @@ public class AcoService {
                             (bloqueoS.getFechaInicio().isBefore(tramo.getFechaFin()) && bloqueoS.getFechaFin().isAfter(tramo.getFechaInicio())))
                     .collect(Collectors.toCollection(ArrayList::new));
             if (!bloqueosExistentes.isEmpty()) {
-                cantidadErroresBloqueo++;
                 return false;
             }
 

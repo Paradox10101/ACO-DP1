@@ -122,7 +122,7 @@ public class SimulacionService {
 
     public void atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime fechaInicioSimulacion, int numeroPedidos){
         //Aumente este valor apra incrementar la frecuencia de actualizaciones y toma de pedidos
-        int minutesIncrement = 60;
+        int minutesIncrement = 180;
         //Aumente este valor apra establecer una fecha maxima
         LocalDateTime fechaFinSimulacion = fechaInicioSimulacion.plusDays(7);
         ArrayList<Oficina> oficinas;
