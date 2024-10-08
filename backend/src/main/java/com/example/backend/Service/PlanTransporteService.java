@@ -41,7 +41,6 @@ public class PlanTransporteService {
     @Autowired
     private TramoService tramoService;
 
-
     @Autowired
     private AcoService  acoService;
     @Autowired
@@ -187,6 +186,18 @@ public class PlanTransporteService {
         guardarTodos(planesTransporte);
         return planesTransporte;
     }
+
+    
+    public double obtenerTiempoTotalRecorridosParaTodosPlanTransporte(){
+        List<PlanTransporte> planesTransporte = obtenerTodosLosPlanes();
+        double total = 0;
+        for(PlanTransporte plan: planesTransporte){
+            total += tramoService.obtenerDuracionTotalTramosPorPlanTransporte(plan.getId_planTransporte());
+        }
+        return total;
+    }
+    
+    
 
     public void imprimirDatosPedido(Pedido pedido){
         System.out.println("*****************************************************************************************");

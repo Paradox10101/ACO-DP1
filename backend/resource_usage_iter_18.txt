@@ -1,0 +1,6 @@
+Iteración: 18
+Tiempo de ejecución del programa (ms): 59083
+Tiempo total de entrega (min): 33927
+Consumo de memoria promedio (MB): 201
+Consumo de CPU promedio (%): 1.471552446674592
+--- Estadísticas de la iteración completada ---

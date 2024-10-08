@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.function.Function;
+
 @Service
 public class TramoService {
 
@@ -118,6 +119,13 @@ public class TramoService {
             Function.identity(),  // Mapeamos el Tramo como valor
             (existing, replacement) -> existing  // Resolución de conflicto: mantener el valor existente
         ));
+    }
+
+    public double obtenerDuracionTotalTramosPorPlanTransporte(Long idPlan){
+        Optional<Double> duracion = tramoRepository.findTotalDuracionPerPlanTransporte(idPlan);
+        if(!duracion.isPresent())
+            return 0;
+        return duracion.get();
     }
 
 }

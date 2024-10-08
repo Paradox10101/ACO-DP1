@@ -51,4 +51,6 @@ public interface TramoRepository extends JpaRepository<Tramo, Long> {
     List<Tramo> findTramosPorFechaYVehiculos(@Param("fechaFin") LocalDateTime fechaFin, @Param("vehiculoIds") List<Long> vehiculoIds);
 
 
+    @Query("SELECT SUM(t.duracion) FROM Tramo t WHERE t.planTransporte.id_planTransporte = :idPlan")
+    Optional<Double> findTotalDuracionPerPlanTransporte(@Param("idPlan") Long idPlan);
 }
