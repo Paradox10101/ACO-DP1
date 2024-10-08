@@ -85,6 +85,22 @@ public class MantenimientoService {
         return null;
     }
 
+    public Mantenimiento obtenerMantenimientoPreventivoActual(LocalDateTime fechaActual, Long idVehiculo){
+
+        List<Mantenimiento> mantenimientosPreventivosExistente = mantenimientoRepository.findMantenimientoByFechaAndVehiculoAndMantenimientoPreventivo(fechaActual, idVehiculo, TipoMantenimiento.Preventivo);
+        if(mantenimientosPreventivosExistente!=null && !mantenimientosPreventivosExistente.isEmpty()){
+            for(Mantenimiento mantenimiento : mantenimientosPreventivosExistente){
+                if(!mantenimiento.isPendiente()){
+                    mantenimiento.setPendiente(true);
+                    actualizarMantenimiento(mantenimiento.getId_mantenimiento(), mantenimiento);
+                }
+            }
+            return mantenimientosPreventivosExistente.get(0);
+        }
+        return null;
+    }
+
+
     public Mantenimiento obtenerMantenimientoRecurrenteActual(LocalDateTime fechaActual, Long idVehiculo){
         Optional<Mantenimiento> mantenimientoRecurrente = mantenimientoRepository.findMantenimientoRecurrenteByFechaAndVehiculoAndTipoMantenimiento(fechaActual,idVehiculo, TipoMantenimiento.Recurrente);
         if(mantenimientoRecurrente.isPresent())
