@@ -6,15 +6,15 @@ import com.example.backend.Repository.TramoRepository;
 import com.example.backend.models.Ubicacion;
 import com.example.backend.models.Vehiculo;
 import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.function.Function;
 @Service
 public class TramoService {
 
@@ -100,4 +100,24 @@ public class TramoService {
         }
         return rutaDerivada;
     }
+
+    public Map<Long, Tramo> obtenerTramosPorFechaYVehiculo(LocalDateTime fechaFin, List<Vehiculo> vehiculos) {
+        List<Long> vehiculoIds = vehiculos.stream().map(Vehiculo::getId_vehiculo).collect(Collectors.toList());
+        List<Tramo> tramos = tramoRepository.findTramosPorFechaYVehiculos(fechaFin, vehiculoIds);
+
+        return tramos.stream().collect(Collectors.toMap(tramo -> tramo.getVehiculo().getId_vehiculo(), Function.identity()));
+    }
+
+    public Map<Long, Tramo> obtenerUltimosTramosPorVehiculo(LocalDateTime fechaFin, List<Vehiculo> vehiculos) {
+        List<Long> vehiculoIds = vehiculos.stream().map(Vehiculo::getId_vehiculo).collect(Collectors.toList());
+        List<Tramo> ultimosTramos = tramoRepository.findUltimosTramosPorVehiculos(fechaFin, vehiculoIds);
+
+        return ultimosTramos.stream()
+        .collect(Collectors.toMap(
+            tramo -> tramo.getVehiculo().getId_vehiculo(),  // Usamos el ID del vehiculo como clave
+            Function.identity(),  // Mapeamos el Tramo como valor
+            (existing, replacement) -> existing  // Resolución de conflicto: mantener el valor existente
+        ));
+    }
+
 }

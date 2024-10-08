@@ -90,11 +90,12 @@ public class BackendApplication {
 
             try {
                 // Correr el algoritmo ACO
-                simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024, 4, 4, 1, 0), 5);
+                simulacionService.atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime.of(2024, 4, 4, 1, 0), 100);
 
             } finally {
                 // Parar el monitoreo de memoria y CPU al finalizar la ejecución
                 resourceMonitor.interrupt();
+                resourceMonitor.join(); // Esperar a que el hilo termine antes de continuar
             }
 
             // Graficar el uso de memoria y CPU
@@ -106,7 +107,9 @@ public class BackendApplication {
     private void createMemoryUsageChart(List<Long> memoryUsage, List<Long> timestamps) {
         XYSeries memorySeries = new XYSeries("Memory Usage (MB)");
 
-        for (int i = 0; i < memoryUsage.size(); i++) {
+        int minSize = Math.min(memoryUsage.size(), timestamps.size()); // Asegúrate de usar el tamaño mínimo para evitar index out of bounds
+
+        for (int i = 0; i < minSize; i++) {
             // Convertir timestamps a segundos desde el inicio
             long timeInSeconds = (timestamps.get(i) - timestamps.get(0)) / 1000;
 
@@ -139,7 +142,9 @@ public class BackendApplication {
     private void createCpuUsageChart(List<Double> cpuUsage, List<Long> timestamps) {
         XYSeries cpuSeries = new XYSeries("CPU Usage (%)");
 
-        for (int i = 0; i < cpuUsage.size(); i++) {
+        int minSize = Math.min(cpuUsage.size(), timestamps.size()); // Asegúrate de usar el tamaño mínimo para evitar index out of bounds
+
+        for (int i = 0; i < minSize; i++) {
             // Convertir timestamps a segundos desde el inicio
             long timeInSeconds = (timestamps.get(i) - timestamps.get(0)) / 1000;
 
@@ -152,7 +157,7 @@ public class BackendApplication {
 
         JFreeChart chart = ChartFactory.createXYLineChart(
                 "Consumo de CPU",
-                "Time (s)",
+                "Tiempo (s)",
                 "Uso de CPU (%)",
                 dataset,
                 PlotOrientation.VERTICAL,

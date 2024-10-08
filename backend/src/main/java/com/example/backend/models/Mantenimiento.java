@@ -16,6 +16,7 @@ public class Mantenimiento {
     @Column(name = "id_mantenimiento")
     private Long id_mantenimiento;
     
+    @Enumerated(EnumType.STRING) // O EnumType.ORDINAL para almacenar como entero
     @Column(name = "tipo")
     private TipoMantenimiento tipo;
 

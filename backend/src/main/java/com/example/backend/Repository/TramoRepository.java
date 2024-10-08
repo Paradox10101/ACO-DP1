@@ -44,4 +44,11 @@ public interface TramoRepository extends JpaRepository<Tramo, Long> {
             @Param("fechaLimite") LocalDateTime fechaLimite,
             @Param("vehiculo") Vehiculo vehiculo);
 
+    @Query("SELECT t FROM Tramo t WHERE t.vehiculo.id_vehiculo IN :vehiculoIds AND t.fechaFin <= :fechaFin ORDER BY t.fechaFin DESC")
+    List<Tramo> findUltimosTramosPorVehiculos(@Param("fechaFin") LocalDateTime fechaFin,@Param("vehiculoIds") List<Long> vehiculoIds);
+
+    @Query("SELECT t FROM Tramo t WHERE :fechaFin BETWEEN t.fechaInicio AND t.fechaFin AND t.vehiculo.id_vehiculo IN :vehiculoIds")
+    List<Tramo> findTramosPorFechaYVehiculos(@Param("fechaFin") LocalDateTime fechaFin, @Param("vehiculoIds") List<Long> vehiculoIds);
+
+
 }

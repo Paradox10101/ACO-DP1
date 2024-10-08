@@ -151,7 +151,7 @@ public class VehiculoService {
     }
 
 
-    public void actualizarEstadoVehiculos(LocalDateTime fechaInicio, LocalDateTime fechaFin, HashMap<String, ArrayList<Ubicacion>> caminos) {
+    /*public void actualizarEstadoVehiculos(LocalDateTime fechaInicio, LocalDateTime fechaFin, HashMap<String, ArrayList<Ubicacion>> caminos) {
         List<Almacen> almacenes = almacenService.obtenerTodos();
         List<Vehiculo> vehiculos = vehiculoRepository.findAll();
         for (Vehiculo vehiculo : vehiculos) {
@@ -218,7 +218,7 @@ public class VehiculoService {
 
         }
         vehiculoRepository.saveAll(vehiculos);
-    }
+    }*/
 
             /*
             Mantenimiento mantenimientoActual = mantenimientoService.obtenerMantenimientoActualVehiculoFecha(fechaFin, vehiculo.getId_vehiculo());
@@ -240,6 +240,102 @@ public class VehiculoService {
                 }
             }
             */
+
+    public void actualizarEstadoVehiculos(LocalDateTime fechaInicio, LocalDateTime fechaFin, HashMap<String, ArrayList<Ubicacion>> caminos) {
+        List<Almacen> almacenes = almacenService.obtenerTodos();
+        List<Vehiculo> vehiculos = vehiculoRepository.findAll();
+
+        // Pre-cargar tramos y mantenimientos para reducir consultas repetidas
+        Map<Long, Tramo> tramosActuales = tramoService.obtenerTramosPorFechaYVehiculo(fechaFin, vehiculos);
+        Map<Long, Tramo> ultimosTramos = tramoService.obtenerUltimosTramosPorVehiculo(fechaFin, vehiculos);
+        Map<Long, Mantenimiento> mantenimientosPreventivos = mantenimientoService.obtenerMantenimientosPreventivos(fechaFin, vehiculos);
+        Map<Long, Mantenimiento> mantenimientosRecurrentes = mantenimientoService.obtenerMantenimientosRecurrentes(fechaFin, vehiculos);
+
+        // Procesar vehículos en paralelo
+        vehiculos.parallelStream().forEach(vehiculo -> {
+            boolean estadoCambiado = false;
+            Tramo tramoActualRecorrido = tramosActuales.get(vehiculo.getId_vehiculo());
+            Mantenimiento mantenimientoPreventivo = mantenimientosPreventivos.get(vehiculo.getId_vehiculo());
+            Mantenimiento mantenimientoRecurrente = mantenimientosRecurrentes.get(vehiculo.getId_vehiculo());
+
+            // Actualizar el estado del vehículo si está en un tramo
+            if (tramoActualRecorrido != null) {
+                vehiculo.setUbicacionActual(tramoActualRecorrido.getUbicacionOrigen());
+                vehiculo.setEstado(EstadoVehiculo.EnRuta);
+                estadoCambiado = true;
+            } else {
+                // Si el vehículo no está en ruta, verificar el último tramo
+                Tramo ultimoTramoRecorrido = ultimosTramos.get(vehiculo.getId_vehiculo());
+                if (ultimoTramoRecorrido != null) {
+                    vehiculo.setUbicacionActual(ultimoTramoRecorrido.getUbicacionDestino());
+                }
+
+                // Verificar si debe entrar en mantenimiento preventivo
+                if (mantenimientoPreventivo != null && ubicacionCoincideConAlmacen(vehiculo, almacenes)) {
+                    actualizarMantenimientoPreventivo(vehiculo, mantenimientoPreventivo, fechaInicio);
+                    estadoCambiado = true;
+                }
+
+                // Verificar si debe estar en mantenimiento recurrente
+                if (tramoActualRecorrido == null && mantenimientoRecurrente != null) {
+                    vehiculo.setEstado(EstadoVehiculo.EnMantenimiento);
+                    estadoCambiado = true;
+                }
+
+                // Asignar una nueva ruta si no tiene entregas pendientes y no está en mantenimiento
+                if (tramoActualRecorrido == null && mantenimientoRecurrente == null && !ubicacionCoincideConAlmacen(vehiculo, almacenes)) {
+                    ArrayList<Tramo> rutaOptima = acoService.obtenerMejorRutaDesdeOficinaAAlmacen(fechaFin, oficinaService.obtenerTodasLasOficinas(),
+                            caminos, vehiculo.getUbicacionActual(), ubicacionService.obtenerTodasLasUbicaciones(), obtenerTodos(),
+                            almacenService.obtenerTodos(), bloqueoService.obtenerBloqueosEntreFechas(fechaFin, fechaFin.plusHours(24 * 3)));
+
+                    if (rutaOptima != null) {
+                        vehiculo.setEstado(EstadoVehiculo.EnRuta);
+                        estadoCambiado = true;
+                        gestionarTramosYRecurrentes(vehiculo, rutaOptima);
+                    }
+                }
+
+                // Marcar vehículo como disponible si ya está en el almacén
+                if (tramoActualRecorrido == null && mantenimientoRecurrente == null && ubicacionCoincideConAlmacen(vehiculo, almacenes)) {
+                    vehiculo.setCapacidadUtilizada(0);
+                    vehiculo.setEstado(EstadoVehiculo.Disponible);
+                    estadoCambiado = true;
+                }
+            }
+
+            // Solo guardar cambios si ha habido una modificación de estado
+            if (estadoCambiado) {
+                vehiculoRepository.save(vehiculo);
+            }
+        });
+    }
+
+    private boolean ubicacionCoincideConAlmacen(Vehiculo vehiculo, List<Almacen> almacenes) {
+        return almacenes.stream().anyMatch(almacen -> almacen.getUbicacion().getUbigeo().equals(vehiculo.getUbicacionActual().getUbigeo()));
+    }
+
+    private void actualizarMantenimientoPreventivo(Vehiculo vehiculo, Mantenimiento mantenimiento, LocalDateTime fechaInicio) {
+        mantenimiento.setFechaInicio(fechaInicio);
+        mantenimiento.setFechaFin(fechaInicio.plus(Duration.between(fechaInicio, fechaInicio.toLocalDate().atTime(LocalTime.MAX)).plusDays(2)));
+        vehiculo.setEstado(EstadoVehiculo.EnMantenimiento);
+        mantenimientoService.actualizarMantenimiento(mantenimiento.getId_mantenimiento(), mantenimiento);
+    }
+
+    private void gestionarTramosYRecurrentes(Vehiculo vehiculo, ArrayList<Tramo> rutaOptima) {
+        ArrayList<Mantenimiento> mantenimientos = new ArrayList<>();
+        rutaOptima.forEach(tramoS -> {
+            Mantenimiento mantenimiento = new Mantenimiento();
+            mantenimiento.setFechaInicio(tramoS.getFechaFin());
+            mantenimiento.setFechaFin(tramoS.getFechaFin().plusHours(2));
+            mantenimiento.setTipo(TipoMantenimiento.Recurrente);
+            mantenimiento.setVehiculo(vehiculo);
+            mantenimiento.setPendiente(true);
+            mantenimientos.add(mantenimiento);
+        });
+        mantenimientoService.guardarMantenimientos(mantenimientos);
+        tramoService.guardarTramos(rutaOptima);
+    }
+
 
     List<Vehiculo> hallarVehiculosConCapacidadDisponible(int cantidadSolicitada){
         List<Vehiculo> vehiculos = vehiculoRepository.findVehiculoDisponibleConCapacidadParcialOcupada(cantidadSolicitada, EstadoVehiculo.Disponible);
