@@ -35,9 +35,9 @@ public class AcoService {
     private Map<String, List<Vehiculo>> oficinaVehiculos = new HashMap<>();
     private Map<String, Map<String, Double>> tiempos;
 
-    private int numeroHormigas = 20;
-    private int numeroIteraciones = 20;
-    private double tasaEvaporacion = 0.3;
+    private int numeroHormigas = 120;
+    private int numeroIteraciones = 50;
+    private double tasaEvaporacion = 0.5;
     private double feromonaInicial = 1.0;
     private double alpha = 1.0;
     private double beta = 2.0;

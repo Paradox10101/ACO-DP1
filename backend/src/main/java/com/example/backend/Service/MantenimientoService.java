@@ -5,15 +5,13 @@ import com.example.backend.models.Mantenimiento;
 import com.example.backend.models.TipoMantenimiento;
 import com.example.backend.models.Tramo;
 import com.example.backend.models.Vehiculo;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-
+import java.util.*;
+import java.util.function.Function;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MantenimientoService {
@@ -109,7 +107,27 @@ public class MantenimientoService {
             return null;
     }
 
+    public Map<Long, Mantenimiento> obtenerMantenimientosRecurrentes(LocalDateTime fechaFin, List<Vehiculo> vehiculos) {
+        List<Long> vehiculoIds = vehiculos.stream().map(Vehiculo::getId_vehiculo).collect(Collectors.toList());
+        List<Mantenimiento> mantenimientos = mantenimientoRepository.findMantenimientosRecurrentesPorVehiculos(fechaFin, vehiculoIds);
 
+        return mantenimientos.stream()
+                .collect(Collectors.toMap(
+                        mantenimiento -> mantenimiento.getVehiculo().getId_vehiculo(), // Usamos el ID del vehículo como
+                                                                                       // clave
+                        Function.identity(), // Mapeamos el mantenimiento como valor
+                        (existing, replacement) -> existing.getFechaInicio().isAfter(replacement.getFechaInicio())
+                                ? existing
+                                : replacement // Mantener el más reciente
+                ));
+    }
+
+    public Map<Long, Mantenimiento> obtenerMantenimientosPreventivos(LocalDateTime fechaFin, List<Vehiculo> vehiculos) {
+        List<Long> vehiculoIds = vehiculos.stream().map(Vehiculo::getId_vehiculo).collect(Collectors.toList());
+        List<Mantenimiento> mantenimientos = mantenimientoRepository.findMantenimientosPreventivosPorVehiculos(fechaFin, vehiculoIds);
+
+        return mantenimientos.stream().collect(Collectors.toMap(mantenimiento -> mantenimiento.getVehiculo().getId_vehiculo(), Function.identity()));
+    }
 
 
 }
