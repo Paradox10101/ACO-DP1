@@ -1,0 +1,4 @@
+Tiempo de ejecución del programa (ms): 938187
+Consumo de memoria promedio (MB): 167
+Consumo de CPU promedio (%): 1.5578239100043432
+--- Estadísticas del experimento completadas ---
