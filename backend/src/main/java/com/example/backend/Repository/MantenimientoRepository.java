@@ -34,6 +34,12 @@ public interface MantenimientoRepository extends JpaRepository<Mantenimiento, Lo
         @Query("SELECT m FROM Mantenimiento m WHERE m.tipo = 'Preventivo' AND m.vehiculo.id_vehiculo IN :vehiculoIds AND m.fechaInicio <= :fechaFin")
         List<Mantenimiento> findMantenimientosPreventivosPorVehiculos(@Param("fechaFin") LocalDateTime fechaFin, @Param("vehiculoIds") List<Long> vehiculoIds);
 
+    @Query("SELECT m FROM Mantenimiento m WHERE :fechaActual BETWEEN m.fechaInicio AND m.fechaFin AND m.vehiculo.id_vehiculo = :idVehiculo AND m.tipo = :tipoMantenimiento ORDER BY m.fechaFin desc ")
+    List<Mantenimiento> findMantenimientoByFechaAndVehiculoAndMantenimientoPreventivo(@Param("fechaActual") LocalDateTime fechaActual,
+                                                                                          @Param("idVehiculo") Long idVehiculo,
+                                                                                          @Param("tipoMantenimiento") TipoMantenimiento tipoMantenimiento);
+
+
     }
 
 

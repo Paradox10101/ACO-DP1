@@ -42,7 +42,7 @@ public class AcoService {
     private double alpha = 1.0;
     private double beta = 2.0;
     private Random random = new Random();
-    private int cantidadErroresBloqueo = 0;
+
 
     @Autowired
     private SystemMetricsAutoConfiguration systemMetricsAutoConfiguration;
@@ -448,7 +448,6 @@ public class AcoService {
                             (bloqueoS.getFechaInicio().isBefore(tramo.getFechaFin()) && bloqueoS.getFechaFin().isAfter(tramo.getFechaInicio())))
                     .collect(Collectors.toCollection(ArrayList::new));
             if (!bloqueosExistentes.isEmpty()) {
-                cantidadErroresBloqueo++;
                 return false;
             }
 

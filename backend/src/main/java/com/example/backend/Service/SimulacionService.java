@@ -137,7 +137,7 @@ public class SimulacionService {
 
 
     public void atenderCantidadEspecificaPedidosDesdeFecha(LocalDateTime fechaInicioSimulacion, int numeroPedidos) {
-        int minutesIncrement = 60;
+        int minutesIncrement = 60; /// PORQUE TENIA  180????
         int totalIteraciones = 30; // Siempre 30 iteraciones
         LocalDateTime fechaFinSimulacion = fechaInicioSimulacion.plusDays(7);
 

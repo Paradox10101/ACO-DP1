@@ -156,9 +156,23 @@ public class VehiculoService {
         List<Vehiculo> vehiculos = vehiculoRepository.findAll();
         for (Vehiculo vehiculo : vehiculos) {
 
-            Tramo tramoActualRecorrido = tramoService.obtenerTramoActualVehiculoFecha(fechaFin, vehiculo.getId_vehiculo());
-            Mantenimiento mantenimientoPreventivoActual = mantenimientoService.obtenerMantenimientoPreventivoVehiculoFecha(fechaFin.toLocalDate(), vehiculo.getId_vehiculo());
-            Mantenimiento mantenimientoRecurrenteActual = mantenimientoService.obtenerMantenimientoRecurrenteActual(fechaFin, vehiculo.getId_vehiculo());
+            Tramo tramoActualRecorrido = tramoService.obtenerTramoActualVehiculoFecha(fechaActual, vehiculo.getId_vehiculo());
+            Mantenimiento mantenimientoPreventivoAProgramar = mantenimientoService.obtenerMantenimientoPreventivoVehiculoFecha(fechaActual.toLocalDate(), vehiculo.getId_vehiculo());
+            Mantenimiento mantenimientoPreventivoActual = mantenimientoService.obtenerMantenimientoPreventivoActual(fechaActual, vehiculo.getId_vehiculo());
+            Mantenimiento mantenimientoRecurrenteActual = mantenimientoService.obtenerMantenimientoRecurrenteActual(fechaActual, vehiculo.getId_vehiculo());
+
+            //Funcion que solo se encarga de actualizar el mantenimiento preventivo para que tenga una hora de inicio y una hora de fin
+            if(mantenimientoPreventivoAProgramar!=null){
+                if(almacenes.stream()
+                        .anyMatch(almacenS -> almacenS.getUbicacion().getUbigeo().equals(vehiculo.getUbicacionActual().getUbigeo()))){
+                    mantenimientoPreventivoAProgramar.setFechaInicio(fechaInicio);
+                    mantenimientoPreventivoAProgramar.setFechaFin(
+                            fechaInicio.plus(Duration.between(fechaInicio, fechaInicio.toLocalDate().atTime(LocalTime.MAX)).plusDays(2)));
+                    vehiculo.setEstado(EstadoVehiculo.EnMantenimiento);
+                }
+                mantenimientoService.actualizarMantenimiento(mantenimientoPreventivoAProgramar.getId_mantenimiento(),mantenimientoPreventivoAProgramar);
+            }
+
             //Actualizar el estado del vehiculo en el tramo que esta recorriendo, tomara la ubicacion de origen
             if (tramoActualRecorrido != null) {
                 vehiculo.setUbicacionActual(tramoActualRecorrido.getUbicacionOrigen());
@@ -166,54 +180,39 @@ public class VehiculoService {
             }
             //El vehiculo no se encuentra en ruta
             else {
-                Tramo ultimoTramoRecorrido = tramoService.obtenerUltimoTramoVehiculoFecha(fechaFin, vehiculo.getId_vehiculo());
+                Tramo ultimoTramoRecorrido = tramoService.obtenerUltimoTramoVehiculoFecha(fechaActual, vehiculo.getId_vehiculo());
                 //Si toma un valor nulo es porque el vehiculo todavia no ha iniciado nigngun recorrido
                 if (ultimoTramoRecorrido != null)
                     vehiculo.setUbicacionActual(ultimoTramoRecorrido.getUbicacionDestino());
-            }
-            if(mantenimientoPreventivoActual!=null){
-                if(almacenes.stream()
+
+                if(mantenimientoRecurrenteActual!=null||mantenimientoPreventivoActual!=null)
+                    vehiculo.setEstado(EstadoVehiculo.EnMantenimiento);
+                else if(!almacenes.stream()
                         .anyMatch(almacenS -> almacenS.getUbicacion().getUbigeo().equals(vehiculo.getUbicacionActual().getUbigeo()))){
-                    mantenimientoPreventivoActual.setFechaInicio(fechaInicio);
-                    mantenimientoPreventivoActual.setFechaFin(
-                            fechaInicio.plus(Duration.between(fechaInicio, fechaInicio.toLocalDate().atTime(LocalTime.MAX)).plusDays(2)));
-                            vehiculo.setEstado(EstadoVehiculo.EnMantenimiento);
+                    ArrayList<Tramo> rutaOptima =  acoService.obtenerMejorRutaDesdeOficinaAAlmacen(fechaActual, oficinaService.obtenerTodasLasOficinas(),
+                            caminos, vehiculo.getUbicacionActual() , ubicacionService.obtenerTodasLasUbicaciones(), obtenerTodos(), almacenService.obtenerTodos(), bloqueoService.obtenerBloqueosEntreFechas(fechaActual, fechaActual.plusHours(24*3)));
+                    if(rutaOptima!=null){
+                        ArrayList<Mantenimiento> mantenimientos = new ArrayList<>();
+                        rutaOptima.stream().forEach(tramoS -> {
+                            Mantenimiento mantenimiento = new Mantenimiento();
+                            mantenimiento.setFechaInicio(tramoS.getFechaFin());
+                            mantenimiento.setFechaFin(tramoS.getFechaFin().plusHours(2));
+                            mantenimiento.setTipo(TipoMantenimiento.Recurrente);
+                            mantenimiento.setVehiculo(vehiculo);
+                            mantenimiento.setPendiente(true);
+                            mantenimientos.add(mantenimiento);
+                        });
+                        mantenimientoService.guardarMantenimientos(mantenimientos);
+                        tramoService.guardarTramos(rutaOptima);
+                    }
                 }
-                mantenimientoService.actualizarMantenimiento(mantenimientoPreventivoActual.getId_mantenimiento(),mantenimientoPreventivoActual);
-            }
-            if(tramoActualRecorrido==null && mantenimientoRecurrenteActual!=null){
-                vehiculo.setEstado(EstadoVehiculo.EnMantenimiento);
-            }
-            //Asignacion de una nueva ruta de retorno, el vehiculo no tiene ninguna entrega pendiente
-            if(tramoActualRecorrido==null && mantenimientoRecurrenteActual==null && !almacenes.stream()
-                    .anyMatch(almacenS -> almacenS.getUbicacion().getUbigeo().equals(vehiculo.getUbicacionActual().getUbigeo()))){
-
-                ArrayList<Tramo> rutaOptima =  acoService.obtenerMejorRutaDesdeOficinaAAlmacen(fechaFin, oficinaService.obtenerTodasLasOficinas(),
-                        caminos, vehiculo.getUbicacionActual() , ubicacionService.obtenerTodasLasUbicaciones(), obtenerTodos(), almacenService.obtenerTodos(), bloqueoService.obtenerBloqueosEntreFechas(fechaFin, fechaFin.plusHours(24*3)));
-                if(rutaOptima!=null){
-                    ArrayList<Mantenimiento> mantenimientos = new ArrayList<>();
-                    rutaOptima.stream().forEach(tramoS -> {
-                        Mantenimiento mantenimiento = new Mantenimiento();
-                        mantenimiento.setFechaInicio(tramoS.getFechaFin());
-                        mantenimiento.setFechaFin(tramoS.getFechaFin().plusHours(2));
-                        mantenimiento.setTipo(TipoMantenimiento.Recurrente);
-                        mantenimiento.setVehiculo(vehiculo);
-                        mantenimiento.setPendiente(true);
-                        mantenimientos.add(mantenimiento);
-                    });
-                    mantenimientoService.guardarMantenimientos(mantenimientos);
-                    tramoService.guardarTramos(rutaOptima);
+                else{
+                    vehiculo.setCapacidadUtilizada(0);
+                    vehiculo.setEstado(EstadoVehiculo.Disponible);
                 }
 
-                vehiculo.setEstado(EstadoVehiculo.EnRuta);
-
             }
-            //Asignacion de una nueva ruta de retorno, el vehiculo no tiene ninguna entrega pendiente
-            if(tramoActualRecorrido==null && mantenimientoRecurrenteActual==null && almacenes.stream()
-                    .anyMatch(almacenS -> almacenS.getUbicacion().equals(vehiculo.getUbicacionActual()))){
-                vehiculo.setCapacidadUtilizada(0);
-                vehiculo.setEstado(EstadoVehiculo.Disponible);
-            }
+            vehiculoRepository.saveAll(vehiculos);
 
 
         }
@@ -394,7 +393,7 @@ public class VehiculoService {
         List<Vehiculo> vehiculosDisponibles = obtenerVehiculosDisponibles().stream()
             .filter(vehiculo -> !vehiculo.getId_vehiculo().equals(tramoActual.getVehiculo().getId_vehiculo()))
             .collect(Collectors.toList());
-        
+
         List<Almacen> almacenesDisponibles = almacenService.obtenerTodos();
         List<Oficina> oficinasDisponibles = oficinaService.obtenerTodasLasOficinas(); // Buscar también en oficinas
 
